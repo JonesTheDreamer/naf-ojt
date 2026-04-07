@@ -74,6 +74,20 @@ namespace NAFServer.src.API.Controllers
             }
         }
 
+        [HttpPost("{nafId:guid}/resources/basic")]
+        public async Task<IActionResult> AddBasicResources(Guid nafId, [FromBody] AddBasicResourcesDTO request)
+        {
+            try
+            {
+                var results = await _nafService.AddBasicResourcesToNAFAsync(nafId, request.ResourceIds);
+                return Ok(results);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         // DELETE api/<NAFsController>/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeactivateNAF(Guid id)

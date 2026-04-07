@@ -142,5 +142,37 @@ namespace NAFServer.src.Application.Services
             return nafs;
         }
 
+        public async Task<List<AddBasicResourceResultDTO>> AddBasicResourcesToNAFAsync(Guid nafId, List<int> resourceIds)
+        {
+            var results = new List<AddBasicResourceResultDTO>();
+
+            foreach (var resourceId in resourceIds.Distinct())
+            {
+                try
+                {
+                    bool alreadyExists = await _context.ResourceRequests
+                        .AnyAsync(rr => rr.NAFId == nafId && rr.ResourceId == resourceId);
+
+                    if (alreadyExists)
+                    {
+                        results.Add(new AddBasicResourceResultDTO(
+                            resourceId, false, "Resource already exists in this NAF", null));
+                        continue;
+                    }
+
+                    var rr = await _resourceRequestService.CreateBasicAsync(
+                        new CreateResourceRequestDTO(nafId, resourceId, "Basic resource needed", null));
+
+                    results.Add(new AddBasicResourceResultDTO(resourceId, true, null, rr));
+                }
+                catch (Exception ex)
+                {
+                    results.Add(new AddBasicResourceResultDTO(resourceId, false, ex.Message, null));
+                }
+            }
+
+            return results;
+        }
+
     }
 }
