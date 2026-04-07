@@ -53,6 +53,13 @@ builder.Services.AddScoped<IResourceRepository, ResourceRepository>();
 builder.Services.AddScoped<IInternetResourceRepository, InternetResourceRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IResourceService, ResourceService>();
+builder.Services.AddScoped<IInternetPurposeRepository, InternetPurposeRepository>();
+builder.Services.AddScoped<IGroupEmailRepository, GroupEmailRepository>();
+builder.Services.AddScoped<ISharedFolderRepository, SharedFolderRepository>();
+builder.Services.AddScoped<IInternetPurposeService, InternetPurposeService>();
+builder.Services.AddScoped<IInternetResourceService, InternetResourceService>();
+builder.Services.AddScoped<IGroupEmailService, GroupEmailService>();
+builder.Services.AddScoped<ISharedFolderService, SharedFolderService>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
 builder.Services.AddScoped<IResourceRequestHandlerRegistry, ResourceRequestHandlerRegistry>();
