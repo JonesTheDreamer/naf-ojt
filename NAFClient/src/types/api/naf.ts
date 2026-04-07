@@ -69,24 +69,29 @@ export type AdditionalInfo =
   | GroupEmailInfo;
 
 interface BaseAdditionalInfo {
-  type: number; // discriminator
+  type: number;
 }
 
 export interface InternetRequestInfo extends BaseAdditionalInfo {
   type: 0;
+  internetResourceId: number;
   purpose: string;
   resource: string;
 }
 
 export interface SharedFolderInfo extends BaseAdditionalInfo {
   type: 1;
+  sharedFolderId: number;
   name: string;
   departmentId: string;
+  remarks: string;
 }
 
 export interface GroupEmailInfo extends BaseAdditionalInfo {
   type: 2;
+  groupEmailId: number;
   email: string;
+  departmentId: string;
 }
 
 export function handleAdditionalInfoStructured(info: AdditionalInfo) {
@@ -125,15 +130,51 @@ export function handleAdditionalInfoStructured(info: AdditionalInfo) {
 }
 
 export enum ProgressStatus {
-  "Open" = 0, // NO APPROVERS YET
-  "In Progress" = 1, // AN APPROVER APPROVED THE REQUEST AND NOW WAITING FOR THE NEXT APPROVER/S
-  "Rejected" = 2, // AN APPROVER REJECTED THE REQUEST
-  "For Screening" = 3, // ALL APPROVERS APPROVED THE REQUEST AND THE TECHNICAL TEAM WILL PROCEED WITH THE PREPARATION
-  "Accomplished" = 4, // ALL APPROVERS APPROVED THE REQUEST AND THE TECHNICAL TEAM DELIVERED THE REQUEST
-  "Not Accomplished" = 5, // THE REQUEST IS REJECTED AND THE REQUESTOR CLOSED THE REQUEST
+  "Open" = 0,
+  "In Progress" = 1,
+  "Rejected" = 2,
+  "For Screening" = 3,
+  "Accomplished" = 4,
+  "Not Accomplished" = 5,
 }
 
 export type PurposeProps = {
   purpose: string;
   resourceRequestApprovalStepHistoryId?: string;
 };
+
+// ── Lookup types (used by Add Resource modal) ─────────────────────────────────
+
+export interface InternetPurposeItem {
+  id: number;
+  name: string;
+  description: string;
+}
+
+export interface InternetResourceItem {
+  id: number;
+  name: string;
+  url: string;
+  description?: string;
+  purposeId: number;
+}
+
+export interface GroupEmailItem {
+  id: number;
+  email: string;
+  departmentId: string;
+}
+
+export interface SharedFolderItem {
+  id: number;
+  name: string;
+  remarks: string;
+  departmentId: string;
+}
+
+export interface AddBasicResourceResult {
+  resourceId: number;
+  success: boolean;
+  error?: string;
+  data?: ResourceRequest;
+}
