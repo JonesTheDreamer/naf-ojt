@@ -12,19 +12,24 @@ namespace NAFServer.src.Mapper.Helper
             {
                 InternetRequestInfo internet =>
                     new InternetInfoDTO(
+                        internet.InternetResourceId,
                         internet.InternetResource.Purpose.Name,
                         internet.InternetResource.Name
                     ),
 
                 SharedFolderRequestInfo folder =>
                     new SharedFolderInfoDTO(
+                        folder.SharedFolderId,
                         folder.SharedFolder.Name,
-                        folder.SharedFolder.DepartmentId
+                        folder.SharedFolder.DepartmentId,
+                        folder.SharedFolder.Remarks
                     ),
 
                 GroupEmailRequestInfo email =>
                     new GroupEmailInfoDTO(
-                        email.GroupEmail.Email
+                        email.GroupEmailId,
+                        email.GroupEmail.Email,
+                        email.GroupEmail.DepartmentId
                     ),
 
                 _ => throw new Exception("Unknown AdditionalInfo type")
