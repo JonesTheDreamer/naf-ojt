@@ -53,7 +53,13 @@ namespace NAFServer.src.Application.Services
             var handler = _resourceRequestHandlerRegistry.GetHandler(request.resourceId);
 
             var additionalInfo = await handler.CreateAdditionalInfo(element);
-            additionalInfo.Id = Guid.NewGuid(); // ensure unique PK
+            additionalInfo.Id = Guid.NewGuid();
+
+            // Validate for duplicates before opening any transaction
+            bool isValid = await handler.Validate(additionalInfo, request.nafId);
+            if (!isValid)
+                throw new ApplicationException(
+                    $"Duplicate resource request: this resource is already requested in this NAF.");
 
             var resource = await _resourceRepository.GetResourceByIdAsync(request.resourceId);
             if (!resource.IsSpecial)
@@ -64,7 +70,6 @@ namespace NAFServer.src.Application.Services
 
             try
             {
-
                 var naf = await _nafRepository.GetByIdAsync(request.nafId);
 
                 _context.Resources.Attach(resource);
@@ -75,7 +80,6 @@ namespace NAFServer.src.Application.Services
 
                 var rr = new ResourceRequest(request.nafId, request.resourceId, workflowId, additionalInfo, Progress.OPEN)
                 {
-                    //Resource = resource,
                     NAF = naf,
                     AdditionalInfo = additionalInfo
                 };
