@@ -134,9 +134,13 @@ function InternetEntryCard({
   onChange: (patch: Partial<InternetEntry>) => void;
   onRemove: () => void;
 }) {
-  // Purposes that actually have at least one resource
+  // Purposes that still have at least one non-used resource available
   const availablePurposeIds = Array.from(
-    new Set(allInternetResources.map((r) => r.purposeId)),
+    new Set(
+      allInternetResources
+        .filter((r) => !usedInternetResourceIds.includes(r.id))
+        .map((r) => r.purposeId),
+    ),
   );
 
   const resourcesForPurpose = allInternetResources.filter(

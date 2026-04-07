@@ -60,12 +60,10 @@ builder.Services.AddScoped<IInternetPurposeService, InternetPurposeService>();
 builder.Services.AddScoped<IInternetResourceService, InternetResourceService>();
 builder.Services.AddScoped<IGroupEmailService, GroupEmailService>();
 builder.Services.AddScoped<ISharedFolderService, SharedFolderService>();
-builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 
 builder.Services.AddScoped<IResourceRequestHandlerRegistry, ResourceRequestHandlerRegistry>();
 builder.Services.AddScoped<IImplementationRepository, ImplementationRepository>();
 builder.Services.AddScoped<IImplementationService, ImplementationService>();
-builder.Services.AddScoped<IResourceRequestHandlerRegistry, ResourceRequestHandlerRegistry>();
 
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheService>();
