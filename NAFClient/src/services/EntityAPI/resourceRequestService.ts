@@ -2,6 +2,15 @@ import type { NAF, PurposeProps, ResourceRequest } from "@/types/api/naf";
 import type { PagedResult } from "@/types/common/pagedResult";
 import { api } from "../api";
 
+export const createResourceRequest = async (payload: {
+  nafId: string;
+  resourceId: number;
+  purpose: string;
+  additionalInfo: Record<string, unknown>;
+}): Promise<ResourceRequest> => {
+  return (await api.post("/Requests", payload)).data;
+};
+
 export const editResourceRequestPurpose = async (
   resourceRequest: string,
   purpose: PurposeProps,
