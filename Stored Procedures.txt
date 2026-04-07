@@ -1,0 +1,261 @@
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE sp_GetDepartmentDetails
+	@DepartmentCode NVarchar(20)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	SELECT DISTINCT TOP (1)
+	D.DepartmentCode as Id,
+	D.DepartmentDesc,
+	E.EmployeeNumber AS DepartmentHeadId,
+	D.DepartmentACode
+    FROM [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] D
+    INNER JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] E
+        ON E.FullName = D.DepartmentHead
+    WHERE D.DepartmentCode = @DepartmentCode
+      AND D.DepartmentHead IS NOT NULL
+	  ORDER BY D.DepartmentACode;
+
+END
+GO
+
+
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE sp_GetEmployeeDetails
+	-- Add the parameters for the stored procedure here
+	@EmployeeNumber int
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	SELECT TOP 1
+         E.EmployeeNumber AS Id,
+        E.FirstName,
+        E.MiddleName,
+        E.LastName,
+        E.Status,
+        E.Company,
+		E.HiredDate,
+		E.RegularizedDate,
+		E.SeparatedDate,
+		E.DepartmentDesc,
+	E.DepartmentCode as DepartmentId,
+	E.PositionDesc as Position,
+	E.LocationDesc as Location,
+	S.EmployeeNumber AS SupervisorId,
+	D.EmployeeNumber AS DepartmentHeadId
+   	FROM [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] E
+    	INNER JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] S
+        	ON S.FullName = E.SupervisorName
+	INNER JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] D
+        	ON D.FullName = E.DepartmentHead
+	WHERE E.EmployeeNumber = @EmployeeNumber;
+END
+GO
+
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE sp_GetSubordinates 
+	-- Add the parameters for the stored procedure here
+	@EmployeeNumber int
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	SELECT
+         E.EmployeeNumber AS Id,
+        E.FirstName,
+        E.MiddleName,
+        E.LastName,
+        E.Status,
+        E.Company,
+		E.HiredDate,
+		E.RegularizedDate,
+		E.SeparatedDate,
+		E.DepartmentDesc,
+        E.DepartmentCode AS DepartmentId,
+        E.PositionDesc AS Position,
+        E.LocationDesc AS Location,
+        V.EmployeeNumber AS SupervisorId,
+        DH.EmployeeNumber AS DepartmentHeadId
+    FROM [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] V
+    INNER JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] E
+        ON E.SupervisorId= V.EmployeeNumber
+        OR E.DepartmentHead = V.FullName
+	LEFT JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] DH
+    ON DH.FullName = E.DepartmentHead
+    WHERE V.EmployeeNumber = @EmployeeNumber
+END
+GO
+
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE sp_GetSubordinateIds 
+	-- Add the parameters for the stored procedure here
+	@EmployeeNumber int
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	SELECT
+        E.EmployeeNumber AS Id
+    FROM [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] V
+    INNER JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] E
+        ON E.SupervisorId= V.EmployeeNumber
+        OR E.DepartmentHead = V.FullName
+	LEFT JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] DH
+    ON DH.FullName = E.DepartmentHead
+    WHERE V.EmployeeNumber = @EmployeeNumber
+END
+GO
+
+-- ================================================
+-- Template generated from Template Explorer using:
+-- Create Procedure (New Menu).SQL
+--
+-- Use the Specify Values for Template Parameters 
+-- command (Ctrl-Shift-M) to fill in the parameter 
+-- values below.
+--
+-- This block of comments will not be included in
+-- the definition of the procedure.
+-- ================================================
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+CREATE PROCEDURE SearchEmployee 
+	-- Add the parameters for the stored procedure here
+	@SearchTerm NVARCHAR(100)
+AS
+BEGIN
+	-- SET NOCOUNT ON added to prevent extra result sets from
+	-- interfering with SELECT statements.
+	SET NOCOUNT ON;
+
+    -- Insert statements for procedure here
+	SELECT 
+	 E.EmployeeNumber AS Id,
+        E.FirstName,
+        E.MiddleName,
+        E.LastName,
+        E.Status,
+        E.Company,
+		E.HiredDate,
+		E.RegularizedDate,
+		E.SeparatedDate,
+		E.DepartmentDesc,
+	E.DepartmentCode as DepartmentId,
+	E.PositionDesc as Position,
+	E.LocationDesc as Location,
+	S.EmployeeNumber AS SupervisorId,
+	D.EmployeeNumber AS DepartmentHeadId
+   	FROM [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] E
+    	INNER JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] S
+        	ON S.FullName = E.SupervisorName
+	INNER JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] D
+        	ON D.FullName = E.DepartmentHead
+	WHERE E.Status= 1
+      AND (
+            E.EmployeeNumber LIKE '%' + @SearchTerm + '%'
+         OR E.LastName LIKE '%' + @SearchTerm + '%'
+         OR E.FirstName LIKE '%' + @SearchTerm + '%'
+         OR E.MiddleName LIKE '%' + @SearchTerm + '%'
+         OR E.LocationDesc LIKE '%' + @SearchTerm + '%'
+         OR E.DepartmentCode LIKE '%' + @SearchTerm + '%'
+      )
+	  ORDER BY E.EmployeeNumber
+END
+GO

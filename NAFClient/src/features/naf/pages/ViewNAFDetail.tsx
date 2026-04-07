@@ -1,0 +1,435 @@
+/**
+ * NAFDetailPage
+ * Route: /NAF/:nafId
+ *
+ * Clean Architecture: Presentation -> Pages -> NAFDetailPage
+ */
+
+import { useParams } from "react-router-dom";
+import { Accordion } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { X } from "lucide-react";
+import type { NAF, ResourceRequest, PurposeProps } from "@/types/api/naf";
+import { ProgressStatus } from "@/types/api/naf";
+import Layout from "@/components/layout/Layout";
+import { ProgressBadge } from "@/features/naf/components/progressBadge";
+import { ResourceRequestAccordionItem } from "@/features/naf/components/resourceRequestAccordion";
+import { useNAF } from "../hooks/useNAF";
+import { useResourceRequest } from "../hooks/useResourceRequest";
+
+// ─── Utils ────────────────────────────────────────────────────────────────────
+
+function formatDateTime(dateStr?: string | null) {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
+function nafProgressLabel(progress: number): string {
+  return ProgressStatus[progress as ProgressStatus] ?? String(progress);
+}
+
+function nafProgressColor(progress: number): string {
+  switch (progress as ProgressStatus) {
+    case ProgressStatus["In Progress"]:
+      return "text-blue-600";
+    case ProgressStatus.Accomplished:
+      return "text-emerald-600";
+    case ProgressStatus.Rejected:
+      return "text-red-500";
+    case ProgressStatus["For Screening"]:
+      return "text-teal-600";
+    default:
+      return "text-amber-500";
+  }
+}
+
+// ─── Detail field ─────────────────────────────────────────────────────────────
+
+function DetailField({
+  label,
+  value,
+  placeholder = "—",
+}: {
+  label: string;
+  value?: string | null;
+  placeholder?: string;
+}) {
+  return (
+    <div>
+      <p className="text-xs text-muted-foreground mb-0.5">{label}</p>
+      {value ? (
+        <p className="text-sm font-medium">{value}</p>
+      ) : (
+        <p className="text-sm text-muted-foreground italic">{placeholder}</p>
+      )}
+    </div>
+  );
+}
+
+// ─── Employee Details Card ────────────────────────────────────────────────────
+
+function EmployeeDetailsCard({
+  naf,
+  onDeactivate,
+}: {
+  naf: NAF;
+  onDeactivate: () => void;
+}) {
+  const employee = naf?.employee;
+
+  if (!employee) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-lg font-bold">Employee Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground italic">
+            Employee details unavailable.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const fullName = [employee.lastName, employee.firstName, employee.middleName]
+    .filter(Boolean)
+    .join(", ");
+
+  return (
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between pb-3 gap-4 flex-wrap">
+        <CardTitle className="text-lg font-bold">Employee Details</CardTitle>
+        <Button
+          size="sm"
+          className="bg-red-400 hover:bg-red-500 text-white gap-1.5 shrink-0"
+          onClick={onDeactivate}
+        >
+          Deactivate Access
+          <X className="h-3.5 w-3.5" />
+        </Button>
+      </CardHeader>
+
+      <CardContent>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4">
+          <div className="space-y-4">
+            <DetailField label="Employee Name" value={fullName} />
+            <DetailField label="Company" value={employee.company} />
+            <DetailField label="Location" value={employee.location} />
+          </div>
+          <div className="space-y-4">
+            <DetailField
+              label="Department"
+              value={employee.departmentDesc ?? employee.departmentId}
+            />
+            <DetailField label="Position" value={employee.position} />
+            <DetailField
+              label="Domain"
+              value={null}
+              placeholder="No Domain Yet"
+            />
+            <DetailField
+              label="Username"
+              value={null}
+              placeholder="No Username Yet"
+            />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
+// ─── Per-request wrapper ──────────────────────────────────────────────────────
+//
+// Each ResourceRequest gets its OWN wrapper component so that
+// useResourceRequest(req.id, req.nafId) is called at the TOP LEVEL of a
+// component — satisfying the Rules of Hooks.
+//
+// Never call hooks conditionally or inside callbacks/handlers.
+
+interface RequestItemWrapperProps {
+  naf: NAF;
+  request: ResourceRequest;
+  currentUserId: string;
+  onRemind: (id: string) => void;
+  onDeactivate: (id: string) => void;
+  onResubmit: (id: string) => void;
+}
+
+function RequestItemWrapper({
+  naf,
+  request,
+  currentUserId,
+  onRemind,
+  onDeactivate,
+  onResubmit,
+}: RequestItemWrapperProps) {
+  // Hook is called at the TOP LEVEL of this component — always, unconditionally
+  const {
+    updateResourceRequestAsync,
+    deleteResourceRequestAsync,
+    approveRequestAsync,
+    rejectRequestAsync,
+  } = useResourceRequest(request.id, request.nafId);
+
+  const handleEdit = async (
+    _requestId: string,
+    _nafId: string,
+    purpose: PurposeProps,
+  ) => {
+    try {
+      await updateResourceRequestAsync(purpose);
+    } catch (error) {
+      console.error("Failed to update resource request:", error);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteResourceRequestAsync(id);
+    } catch (error) {
+      console.error("Failed to delete resource request:", error);
+    }
+  };
+
+  // Determine if the current user is the approver for the active step
+  const activeStep = request.steps.find(
+    (s) => s.stepOrder === request.currentStep,
+  );
+  const isCurrentApprover = activeStep?.approverId === currentUserId;
+  const isApproverForThisRequest = request.steps.some(
+    (s) => s.approverId === currentUserId,
+  );
+  const isRequestor = naf.requestorId === currentUserId;
+
+  const handleApprove = async (_id: string, comment: string) => {
+    if (!isApproverForThisRequest) {
+      alert("Can't approve yet");
+      return;
+    }
+    if (!activeStep) {
+      alert("No active step found");
+      return;
+    }
+
+    try {
+      await approveRequestAsync({ stepId: activeStep.id, comment: comment });
+    } catch (error) {
+      console.error("Failed to approve resource request:", error);
+    }
+  };
+
+  const handleReject = async (_id: string, reason: string) => {
+    if (!isApproverForThisRequest) {
+      alert("Can't approve yet");
+      return;
+    }
+    if (!activeStep) {
+      alert("No active step found");
+      return;
+    }
+    try {
+      await rejectRequestAsync({
+        stepId: activeStep.id,
+        reasonForRejection: reason,
+      });
+    } catch (error) {
+      console.error("Failed to reject resource request:", error);
+    }
+  };
+
+  return (
+    <ResourceRequestAccordionItem
+      isRequestor={isRequestor}
+      request={request}
+      isApprover={isApproverForThisRequest}
+      isCurrentApprover={isCurrentApprover}
+      onEdit={handleEdit}
+      onDelete={handleDelete}
+      onRemind={onRemind}
+      onDeactivate={onDeactivate}
+      onResubmit={onResubmit}
+      onApprove={handleApprove}
+      onReject={handleReject}
+    />
+  );
+}
+
+// ─── Requests Section ─────────────────────────────────────────────────────────
+
+function RequestsSection({
+  naf,
+  currentUserId,
+}: {
+  naf: NAF;
+  currentUserId: string;
+}) {
+  const pendingCount = (naf?.resourceRequests ?? []).filter((r) => {
+    const p = r.progress as unknown as ProgressStatus;
+    return (
+      p !== ProgressStatus.Accomplished &&
+      p !== ProgressStatus["Not Accomplished"]
+    );
+  }).length;
+
+  // approve/reject are wired inside RequestItemWrapper via useResourceRequest
+  const handleRemind = (id: string) => console.log("TODO remind", id);
+  const handleDeactivate = (id: string) =>
+    console.log("TODO deactivate resource request", id);
+  const handleResubmit = (id: string) => console.log("TODO resubmit", id);
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+        <h2 className="text-lg font-bold">Requests</h2>
+        <div className="flex items-center gap-3">
+          {pendingCount > 0 && (
+            <span className="text-sm font-semibold text-amber-500">
+              {pendingCount} pending
+            </span>
+          )}
+          <Button
+            size="sm"
+            className="bg-amber-500 hover:bg-amber-600 text-white font-semibold"
+            onClick={() => console.log("TODO: add resources")}
+          >
+            + Add Resources
+          </Button>
+        </div>
+      </div>
+
+      <Accordion type="multiple" className="space-y-2">
+        {(naf?.resourceRequests ?? []).map((req) => (
+          // Each req gets its own wrapper so useResourceRequest is called
+          // at a stable component top-level, never inside a handler.
+          <RequestItemWrapper
+            naf={naf}
+            key={req.id}
+            request={req}
+            currentUserId={currentUserId}
+            onRemind={handleRemind}
+            onDeactivate={handleDeactivate}
+            onResubmit={handleResubmit}
+          />
+        ))}
+      </Accordion>
+    </div>
+  );
+}
+
+// ─── Skeleton ─────────────────────────────────────────────────────────────────
+
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-5 animate-pulse">
+      <div className="flex justify-between">
+        <div className="space-y-2">
+          <div className="h-5 w-64 bg-muted rounded" />
+          <div className="h-3 w-40 bg-muted rounded" />
+        </div>
+        <div className="h-5 w-24 bg-muted rounded" />
+      </div>
+      <div className="h-px bg-muted" />
+      <div className="h-48 bg-muted rounded-lg" />
+      <div className="h-6 w-32 bg-muted rounded" />
+      {[1, 2, 3].map((i) => (
+        <div key={i} className="h-14 bg-muted rounded-lg" />
+      ))}
+    </div>
+  );
+}
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
+
+export default function NAFDetailPage() {
+  const { nafId, employeeId } = useParams<{
+    nafId: string;
+    employeeId: string;
+  }>();
+  const {
+    nafQuery: naf,
+    isLoading,
+    isError,
+    deactivateNAFAsync,
+  } = useNAF({ nafId });
+
+  const handleDeactivateNAF = async () => {
+    if (!nafId) return;
+    try {
+      await deactivateNAFAsync(nafId);
+    } catch (error) {
+      console.error("Failed to deactivate NAF:", error);
+    }
+  };
+
+  return (
+    <Layout>
+      <div className="max-w-4xl mx-auto w-full space-y-6 pb-12 px-4 sm:px-6">
+        {isLoading && <LoadingSkeleton />}
+
+        {isError && (
+          <div className="text-center py-16 text-muted-foreground text-sm">
+            Failed to load NAF details. Please try again.
+          </div>
+        )}
+
+        {!isLoading && !isError && !naf?.data && (
+          <div className="text-center py-16 text-muted-foreground text-sm">
+            NAF not found.
+          </div>
+        )}
+
+        {naf?.data && (
+          <>
+            {/* Header */}
+            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+              <div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-base font-semibold text-foreground">
+                    Reference:
+                  </span>
+                  <span className="text-base font-bold text-amber-500">
+                    {naf.data.reference}
+                  </span>
+                </div>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Last Update: {formatDateTime(naf.data.updatedAt)}
+                </p>
+              </div>
+
+              <div className="flex flex-col items-start sm:items-end gap-0.5 shrink-0">
+                <span className="text-xs text-muted-foreground">Status</span>
+                <span
+                  className={`text-sm font-bold ${nafProgressColor(naf.data.progress as unknown as number)}`}
+                >
+                  {nafProgressLabel(naf.data.progress as unknown as number)}
+                </span>
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Employee Details */}
+            <EmployeeDetailsCard
+              naf={naf.data}
+              onDeactivate={handleDeactivateNAF}
+            />
+
+            {/* Resource Requests */}
+            <RequestsSection naf={naf.data} currentUserId={employeeId ?? ""} />
+          </>
+        )}
+      </div>
+    </Layout>
+  );
+}

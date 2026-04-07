@@ -1,0 +1,51 @@
+#######################################
+# .NET / ASP.NET Core
+#######################################
+
+bin/
+obj/
+out/
+publish/
+
+*.dll
+*.exe
+*.pdb
+*.cache
+*.log
+
+#######################################
+# Visual Studio / Rider / VS Code
+#######################################
+
+.vs/
+.vscode/
+.idea/
+
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+#######################################
+# NuGet
+#######################################
+
+*.nupkg
+packages/
+.nuget/packages/
+
+#######################################
+# Logs
+#######################################
+
+logs/
+*.log
+
+#######################################
+# Environment / Secrets
+#######################################
+
+.env
+.env.*
+appsettings.Development.json
+appsettings.Local.json
