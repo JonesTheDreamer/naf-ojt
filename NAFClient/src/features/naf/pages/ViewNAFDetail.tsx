@@ -18,6 +18,8 @@ import { ProgressBadge } from "@/features/naf/components/progressBadge";
 import { ResourceRequestAccordionItem } from "@/features/naf/components/resourceRequestAccordion";
 import { useNAF } from "../hooks/useNAF";
 import { useResourceRequest } from "../hooks/useResourceRequest";
+import { useState } from "react";
+import { AddResourceDialog } from "@/features/naf/components/addResourceDialog";
 
 // ─── Utils ────────────────────────────────────────────────────────────────────
 
@@ -274,6 +276,8 @@ function RequestsSection({
   naf: NAF;
   currentUserId: string;
 }) {
+  const [addResourceOpen, setAddResourceOpen] = useState(false);
+
   const pendingCount = (naf?.resourceRequests ?? []).filter((r) => {
     const p = r.progress as unknown as ProgressStatus;
     return (
@@ -282,7 +286,6 @@ function RequestsSection({
     );
   }).length;
 
-  // approve/reject are wired inside RequestItemWrapper via useResourceRequest
   const handleRemind = (id: string) => console.log("TODO remind", id);
   const handleDeactivate = (id: string) =>
     console.log("TODO deactivate resource request", id);
@@ -301,17 +304,21 @@ function RequestsSection({
           <Button
             size="sm"
             className="bg-amber-500 hover:bg-amber-600 text-white font-semibold"
-            onClick={() => console.log("TODO: add resources")}
+            onClick={() => setAddResourceOpen(true)}
           >
             + Add Resources
           </Button>
         </div>
       </div>
 
+      <AddResourceDialog
+        naf={naf}
+        open={addResourceOpen}
+        onOpenChange={setAddResourceOpen}
+      />
+
       <Accordion type="multiple" className="space-y-2">
         {(naf?.resourceRequests ?? []).map((req) => (
-          // Each req gets its own wrapper so useResourceRequest is called
-          // at a stable component top-level, never inside a handler.
           <RequestItemWrapper
             naf={naf}
             key={req.id}
