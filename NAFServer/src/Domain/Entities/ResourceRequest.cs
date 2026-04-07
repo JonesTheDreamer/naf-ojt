@@ -25,15 +25,16 @@ namespace NAFServer.src.Domain.Entities
             Guid NAFId,
             int ResourceId,
             Guid ApprovalWorkflowTemplateId,
-            ResourceRequestAdditionalInfo AdditionalInfo
+            ResourceRequestAdditionalInfo AdditionalInfo,
+            Progress Progress
         )
         {
             this.NAFId = NAFId;
             this.ResourceId = ResourceId;
             this.ApprovalWorkflowTemplateId = ApprovalWorkflowTemplateId;
             this.AdditionalInfo = AdditionalInfo;
+            this.Progress = Progress;
             CurrentStep = 1;
-            Progress = Progress.OPEN;
             IsActive = true;
         }
 
@@ -56,6 +57,13 @@ namespace NAFServer.src.Domain.Entities
             if (Progress == Progress.ACCOMPLISHED) throw new DomainException("Already Approved");
             Progress = Progress.ACCOMPLISHED;
             AccomplishedAt = DateTime.UtcNow;
+            return this;
+        }
+
+        public ResourceRequest SetToImplementation()
+        {
+            if (Progress == Progress.IMPLEMENTATION) throw new DomainException("Already In Implementation");
+            Progress = Progress.IMPLEMENTATION;
             return this;
         }
 

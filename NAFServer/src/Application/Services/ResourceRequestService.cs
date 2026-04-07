@@ -73,7 +73,7 @@ namespace NAFServer.src.Application.Services
                 var workflowId = await _approvalWorkflowTemplateRepository
                     .GetActiveWorkflowIdOfResourceAsync(request.resourceId);
 
-                var rr = new ResourceRequest(request.nafId, request.resourceId, workflowId, additionalInfo)
+                var rr = new ResourceRequest(request.nafId, request.resourceId, workflowId, additionalInfo, Progress.OPEN)
                 {
                     //Resource = resource,
                     NAF = naf,
@@ -113,33 +113,41 @@ namespace NAFServer.src.Application.Services
 
         public async Task<ResourceRequestDTO> CreateBasicAsync(CreateResourceRequestDTO request)
         {
-
-            var resource = await _resourceRepository.GetResourceByIdAsync(request.resourceId);
-            if (resource.IsSpecial)
+            try
             {
-                throw new ArgumentException("Invalid Resource. Using Create Basic for special resource.");
+                var resource = await _resourceRepository.GetResourceByIdAsync(request.resourceId);
+                if (resource.IsSpecial)
+                {
+                    throw new ArgumentException("Invalid Resource. Using Create Basic for special resource.");
+                }
+                //var naf = await _nafRepository.GetByIdAsync(request.nafId);
+                var workflow = await _approvalWorkflowTemplateRepository.GetActiveWorkflowIdOfResourceAsync(request.resourceId);
+
+                var rr = new ResourceRequest(
+                    request.nafId,
+                    request.resourceId,
+                    workflow,
+                    null,
+                    Progress.IMPLEMENTATION
+                );
+                //{
+                //    Resource = resource
+                //    //NAF = naf
+                //}
+                //;
+
+                await _context.ResourceRequests.AddAsync(rr);
+                await _context.SaveChangesAsync();
+                await _context.Implementations.AddAsync(new Domain.Entities.ResourceRequestImplementation(rr.Id));
+                await _context.SaveChangesAsync();
+
+                rr.Resource = resource;
+                return ResourceRequestMapper.ToDTO(rr);
             }
-            //var naf = await _nafRepository.GetByIdAsync(request.nafId);
-            var workflow = await _approvalWorkflowTemplateRepository.GetActiveWorkflowIdOfResourceAsync(request.resourceId);
-
-            var rr = new ResourceRequest(
-                request.nafId,
-                request.resourceId,
-                workflow,
-                null
-            );
-            //{
-            //    Resource = resource
-            //    //NAF = naf
-            //}
-            //;
-
-            await _context.ResourceRequests.AddAsync(rr);
-            await _context.Implementations.AddAsync(new Domain.Entities.ResourceRequestImplementation(rr.Id));
-            await _context.SaveChangesAsync();
-
-            rr.Resource = resource;
-            return ResourceRequestMapper.ToDTO(rr);
+            catch (Exception ex)
+            {
+                throw new ArgumentException(ex.Message);
+            }
         }
 
         public async Task<List<ResourceRequestApprovalStep>> FetchApproversAsync(ResourceRequest request)

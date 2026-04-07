@@ -48,6 +48,7 @@ import { PROGRESS_CONFIG } from "./progressBadge";
 import { EditPurposeDialog } from "./editPurposeDialog";
 import { DeleteConfirmDialog } from "./deleteConfirmDialog";
 import { ResubmitDialog } from "./resubmitDialog";
+import { Progress } from "@/types/enum/progress";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -535,7 +536,7 @@ export function ResourceRequestAccordionItem({
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
 
-  const progress = request.progress as unknown as ProgressStatus;
+  const progress = request.progress as unknown as Progress;
 
   const config = PROGRESS_CONFIG[progress];
   const initialPurpose = request.purposes?.[0]?.purpose ?? "";
@@ -544,14 +545,11 @@ export function ResourceRequestAccordionItem({
     .flatMap((s) => s.histories)
     .find((h) => h.status === Status.REJECTED)?.reasonForRejection;
 
-  const showHistory = progress !== ProgressStatus.Open;
-  console.log(
-    `${request.resource.name} is ${ProgressStatus[request.progress]}`,
-  );
+  const showHistory = progress !== Progress.OPEN;
+  console.log(`${request.resource.name} is ${Progress[request.progress]}`);
 
   const isPending =
-    progress === ProgressStatus.Open ||
-    progress === ProgressStatus["In Progress"];
+    progress === Progress.OPEN || progress === Progress.IN_PROGRESS;
 
   console.log(isCurrentApprover);
 
@@ -592,7 +590,7 @@ export function ResourceRequestAccordionItem({
           {/* Current Approver action area */}
           {isApprover && isCurrentApprover && (
             <>
-              {progress != ProgressStatus.Rejected && (
+              {progress != Progress.REJECTED && (
                 <ApproverActions
                   onApprove={() => setApproveDialogOpen(true)}
                   onReject={() => setRejectDialogOpen(true)}
@@ -606,32 +604,30 @@ export function ResourceRequestAccordionItem({
           {/* Requestor */}
           {!isCurrentApprover && !isApprover && (
             <>
-              {progress === ProgressStatus.Open && (
+              {progress === Progress.OPEN && (
                 <OpenActions
                   onEdit={() => setEditDialogOpen(true)}
                   onDelete={() => setDeleteDialogOpen(true)}
                 />
               )}
 
-              {progress === ProgressStatus["For Screening"] && (
-                <ReminderAction onRemind={() => onRemind(request.id)} />
-              )}
+              {progress === Progress.IMPLEMENTATION && null}
 
-              {progress === ProgressStatus.Accomplished && isRequestor && (
+              {progress === Progress.ACCOMPLISHED && isRequestor && (
                 <DeactivateAction
                   onDeactivate={() => onDeactivate(request.id)}
                 />
               )}
 
-              {progress === ProgressStatus.Accomplished && !isRequestor && null}
+              {progress === Progress.ACCOMPLISHED && !isRequestor && null}
 
-              {progress === ProgressStatus.Rejected && (
+              {progress === Progress.REJECTED && (
                 <RejectedActions
                   rejectionReason={rejectionReason}
                   onResubmit={() => setEditDialogOpen(true)}
                 />
               )}
-              {progress === ProgressStatus["In Progress"] && (
+              {progress === Progress.IN_PROGRESS && (
                 <ReminderAction onRemind={() => onRemind(request.id)} />
               )}
             </>

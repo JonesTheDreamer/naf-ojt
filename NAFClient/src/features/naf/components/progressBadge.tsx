@@ -1,31 +1,32 @@
 import { ProgressStatus } from "@/types/api/naf";
 import { cn } from "@/lib/utils";
+import { Progress } from "@/types/enum/progress";
 
 export const PROGRESS_CONFIG: Record<
-  ProgressStatus,
+  Progress,
   { label: string; className: string }
 > = {
-  [ProgressStatus.Open]: {
+  [Progress.OPEN]: {
     label: "Open",
     className: "text-amber-500 bg-amber-50 border-amber-200",
   },
-  [ProgressStatus["In Progress"]]: {
+  [Progress.IN_PROGRESS]: {
     label: "In Progress",
     className: "text-blue-600 bg-blue-50 border-blue-200",
   },
-  [ProgressStatus.Rejected]: {
+  [Progress.REJECTED]: {
     label: "Rejected",
     className: "text-red-500 bg-red-50 border-red-200",
   },
-  [ProgressStatus["For Screening"]]: {
-    label: "For Screening",
+  [Progress.IMPLEMENTATION]: {
+    label: "Implementation",
     className: "text-teal-600 bg-teal-50 border-teal-200",
   },
-  [ProgressStatus.Accomplished]: {
+  [Progress.ACCOMPLISHED]: {
     label: "Accomplished",
     className: "text-emerald-600 bg-emerald-50 border-emerald-200",
   },
-  [ProgressStatus["Not Accomplished"]]: {
+  [Progress.NOT_ACCOMPLISHED]: {
     label: "Not Accomplished",
     className: "text-gray-500 bg-gray-50 border-gray-200",
   },
@@ -35,7 +36,7 @@ export function ProgressBadge({
   progress,
   className,
 }: {
-  progress: ProgressStatus;
+  progress: Progress;
   className?: string;
 }) {
   const config = PROGRESS_CONFIG[progress] ?? {

@@ -11,6 +11,8 @@
         .ThenInclude(rr => rr.Resource)
     .Include(n => n.ResourceRequests)
         .ThenInclude(rr => rr.ResourceRequestPurposes)
+            .Include(n => n.ResourceRequests)
+        .ThenInclude(rr => rr.ResourceRequestImplementation)
     .Include(n => n.ResourceRequests)
         .ThenInclude(rr => rr.ResourceRequestsApprovalSteps)
             .ThenInclude(step => step.Histories)

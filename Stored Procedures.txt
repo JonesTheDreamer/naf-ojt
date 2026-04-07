@@ -216,7 +216,7 @@ GO
 -- Create date: <Create Date,,>
 -- Description:	<Description,,>
 -- =============================================
-CREATE PROCEDURE SearchEmployee 
+CREATE PROCEDURE sp_SearchEmployee 
 	-- Add the parameters for the stored procedure here
 	@SearchTerm NVARCHAR(100)
 AS

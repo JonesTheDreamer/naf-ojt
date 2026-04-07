@@ -72,13 +72,15 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
 
         public async Task<List<Employee>> SearchEmployee(string match)
         {
-            return await _context.Set<Employee>()
+            var toReturn = await _context.Set<Employee>()
                     .FromSqlRaw(
                         "EXEC sp_SearchEmployee @SearchTerm",
                         new SqlParameter("@SearchTerm", match)
                     )
                     .AsNoTracking()
                     .ToListAsync();
+
+            return toReturn;
         }
     }
 }
