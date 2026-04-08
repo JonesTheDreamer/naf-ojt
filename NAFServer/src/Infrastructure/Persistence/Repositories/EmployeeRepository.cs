@@ -1,4 +1,3 @@
-﻿using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using NAFServer.src.Domain.Entities;
@@ -11,7 +10,6 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
     {
         private readonly AppDbContext _context;
         private readonly CacheService _cacheService;
-        //private readonly string singleEmployeeCacheKey = "single_Employee";
 
         public EmployeeRepository(AppDbContext context, CacheService cacheService)
         {
@@ -35,14 +33,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
 
             return await _cacheService.GetOrSetAsync(cacheKey, async () =>
             {
-                var employee = await _context.Set<Employee>()
-                    .FromSqlRaw(
-                        "EXEC sp_GetEmployeeDetails @EmployeeNumber",
-                        new SqlParameter("@EmployeeNumber", employeeNumber)
-                    )
-                    .AsNoTracking()
-                    .ToListAsync();
-                return employee.SingleOrDefault();
+                return await _context.Employees.FindAsync(employeeNumber);
             },
             new MemoryCacheEntryOptions
             {
@@ -56,11 +47,10 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
 
             return await _cacheService.GetOrSetAsync(cacheKey, async () =>
             {
-                return await _context.Set<Employee>()
-                    .FromSqlRaw(
-                        "EXEC sp_GetSubordinates @EmployeeNumber",
-                        new SqlParameter("@EmployeeNumber", employeeNumber)
-                    )
+                return await _context.Employees
+                    .Where(e =>
+                        e.SupervisorId == employeeNumber ||
+                        e.DepartmentHeadId == employeeNumber)
                     .AsNoTracking()
                     .ToListAsync();
             },
@@ -72,15 +62,19 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
 
         public async Task<List<Employee>> SearchEmployee(string match)
         {
-            var toReturn = await _context.Set<Employee>()
-                    .FromSqlRaw(
-                        "EXEC sp_SearchEmployee @SearchTerm",
-                        new SqlParameter("@SearchTerm", match)
-                    )
-                    .AsNoTracking()
-                    .ToListAsync();
-
-            return toReturn;
+            return await _context.Employees
+                .Where(e =>
+                    e.Status == "1" && (
+                        e.Id.Contains(match) ||
+                        e.LastName.Contains(match) ||
+                        e.FirstName.Contains(match) ||
+                        (e.MiddleName != null && e.MiddleName.Contains(match)) ||
+                        (e.Location != null && e.Location.Contains(match)) ||
+                        e.DepartmentId.Contains(match)
+                    ))
+                .OrderBy(e => e.Id)
+                .AsNoTracking()
+                .ToListAsync();
         }
     }
 }

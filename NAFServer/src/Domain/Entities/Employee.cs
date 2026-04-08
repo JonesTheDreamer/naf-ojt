@@ -1,8 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-
 namespace NAFServer.src.Domain.Entities
 {
-    [Keyless]
     public class Employee
     {
         public string Id { get; set; }
@@ -52,6 +49,5 @@ namespace NAFServer.src.Domain.Entities
             this.DepartmentHeadId = DepartmentHeadId;
             this.DepartmentDesc = DepartmentDesc;
         }
-
     }
 }

@@ -1,8 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
-
 namespace NAFServer.src.Domain.Entities
 {
-    [Keyless]
     public class Department
     {
         public string Id { get; set; }
