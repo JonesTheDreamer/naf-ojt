@@ -78,6 +78,7 @@ using (var scope = app.Services.CreateScope())
     var serviceProvider = scope.ServiceProvider;
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     //context.Database.Migrate();
+    await EmployeeDepartmentSeeder.SeedAsync(context);
     await ResourceWorkflowSeeder.SeedAsync(context);
     await SharedFolderSeeder.SeedAsync(context);
     await InternetResourceSeeder.SeedAsync(context);
