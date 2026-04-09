@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NAFServer.src.Application.Interfaces;
+using NAFServer.src.Domain.Exceptions;
 
 namespace NAFServer.src.API.Controllers
 {
@@ -55,6 +56,10 @@ namespace NAFServer.src.API.Controllers
             {
                 return NotFound(ex.Message);
             }
+            catch (DomainException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPatch("{implementationId}/delayed")]
@@ -68,6 +73,10 @@ namespace NAFServer.src.API.Controllers
             {
                 return NotFound(ex.Message);
             }
+            catch (DomainException ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPatch("{implementationId}/accomplished")]
@@ -80,6 +89,10 @@ namespace NAFServer.src.API.Controllers
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
+            }
+            catch (DomainException ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }

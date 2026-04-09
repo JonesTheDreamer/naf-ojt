@@ -64,7 +64,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
         {
             return await _context.Employees
                 .Where(e =>
-                    e.Status == "1" && (
+                    e.Status == "Active" && (
                         e.Id.Contains(match) ||
                         e.LastName.Contains(match) ||
                         e.FirstName.Contains(match) ||
