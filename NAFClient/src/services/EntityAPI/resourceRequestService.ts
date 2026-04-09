@@ -1,5 +1,4 @@
-import type { NAF, PurposeProps, ResourceRequest } from "@/types/api/naf";
-import type { PagedResult } from "@/types/common/pagedResult";
+import type { PurposeProps, ResourceRequest } from "@/types/api/naf";
 import { api } from "../api";
 
 export const createResourceRequest = async (payload: {

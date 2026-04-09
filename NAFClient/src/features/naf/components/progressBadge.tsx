@@ -1,4 +1,4 @@
-import { ProgressStatus } from "@/types/api/naf";
+
 import { cn } from "@/lib/utils";
 import { Progress } from "@/types/enum/progress";
 

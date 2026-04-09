@@ -19,18 +19,31 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
         }
 
         private string GetCacheKey(string departmentCode) => $"single_Department:{departmentCode}";
+        //public async Task<Department?> GetByIdAsync(string departmentCode)
+        //{
+        //    string cacheKey = GetCacheKey(departmentCode);
+        //    return await _cacheService.GetOrSetAsync(cacheKey, async () =>
+        //    {
+        //        return await _context.Set<Department>()
+        //        .FromSqlRaw(
+        //            "EXEC sp_GetDepartmentDetails @DepartmentCode",
+        //            new SqlParameter("@DepartmentCode", departmentCode)
+        //        )
+        //        .AsNoTracking()
+        //            .SingleOrDefaultAsync();
+        //    },
+        //    new MemoryCacheEntryOptions
+        //    {
+        //        AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(4)
+        //    });
+        //}
+
         public async Task<Department?> GetByIdAsync(string departmentCode)
         {
             string cacheKey = GetCacheKey(departmentCode);
             return await _cacheService.GetOrSetAsync(cacheKey, async () =>
             {
-                return await _context.Set<Department>()
-                .FromSqlRaw(
-                    "EXEC sp_GetDepartmentDetails @DepartmentCode",
-                    new SqlParameter("@DepartmentCode", departmentCode)
-                )
-                .AsNoTracking()
-                    .SingleOrDefaultAsync();
+                return await _context.Departments.FindAsync(departmentCode);
             },
             new MemoryCacheEntryOptions
             {

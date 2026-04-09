@@ -21,11 +21,11 @@ import { useEffect, useState } from "react";
 import { searchEmployees } from "@/services/EntityAPI/employeeService";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
-import { useEmployeeNAF, useNAF } from "../hooks/useNAF";
+import { useNAF } from "../hooks/useNAF";
 import { useResource } from "@/features/resources/hooks/useResource";
 import { SelectComponent } from "@/global/component/select";
 import { Hardware } from "@/types/enum/hardware";
-import type { Resource } from "@/types/api/naf";
+
 import { Checkbox } from "@/components/ui/checkbox";
 import { FieldLabel } from "@/components/ui/field";
 
@@ -45,7 +45,6 @@ export function CreateNAFDialog() {
     employeeNAFs,
     createNAFAsync,
     isLoading: employeeLoading,
-    isError: employeeError,
   } = useNAF({ employeeId: selectedEmployee?.id });
 
   // const { createNAFAsync } = useNAF();
@@ -53,11 +52,10 @@ export function CreateNAFDialog() {
   const {
     getAllResource,
     isLoading: resourceLoading,
-    isError: resourceError,
   } = useResource();
 
   const loading = employeeLoading || resourceLoading;
-  const error = employeeError || resourceError;
+  
 
   const fetchEmployee = async (query: string): Promise<Employee[]> => {
     try {

@@ -2,6 +2,7 @@
 using NAFServer.src.Domain.Entities;
 using NAFServer.src.Domain.Interface;
 using NAFServer.src.Domain.Interface.Repository;
+using System.Linq.Expressions;
 
 namespace NAFServer.src.Infrastructure.Persistence.Repositories
 {
@@ -51,14 +52,20 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
         (
              Guid nafId,
              int resourceId,
-             Func<TAdditionalInfo, int> resourceSelector
+             Expression<Func<TAdditionalInfo, int>> resourceSelector
         ) where TAdditionalInfo : ResourceRequestAdditionalInfo
         {
+            var param = resourceSelector.Parameters[0];
+            var predicate = Expression.Lambda<Func<TAdditionalInfo, bool>>(
+                Expression.Equal(resourceSelector.Body, Expression.Constant(resourceId)),
+                param
+            );
+
             return await _context.ResourceRequests
-            .Where(rr => rr.NAF.Id == nafId)
-            .Select(rr => rr.AdditionalInfo)
-            .OfType<TAdditionalInfo>()
-            .AnyAsync(info => resourceSelector(info) == resourceId);
+                .Where(rr => rr.NAF.Id == nafId)
+                .Select(rr => rr.AdditionalInfo)
+                .OfType<TAdditionalInfo>()
+                .AnyAsync(predicate);
         }
     }
 }

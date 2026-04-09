@@ -1,4 +1,5 @@
 ﻿using NAFServer.src.Domain.Entities;
+using System.Linq.Expressions;
 
 namespace NAFServer.src.Domain.Interface.Repository
 {
@@ -10,7 +11,7 @@ namespace NAFServer.src.Domain.Interface.Repository
         (
              Guid nafId,
              int resourceId,
-             Func<TAdditionalInfo, int> resourceSelector
+             Expression<Func<TAdditionalInfo, int>> resourceSelector
         ) where TAdditionalInfo : ResourceRequestAdditionalInfo;
         //public Task<bool> ResourceRequestExistsAsync<TAdditionalInfo>(Guid employeeId, int resourceId)
     }

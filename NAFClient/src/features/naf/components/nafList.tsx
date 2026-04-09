@@ -86,11 +86,7 @@ export default function NAFListPage({
     [onSubordinatePageChange, onApprovalPageChange],
   );
 
-  const handleClearEmployeeFilter = useCallback(() => {
-    setSelectedEmployee(null);
-    onSubordinatePageChange(1);
-    onApprovalPageChange(1);
-  }, [onSubordinatePageChange, onApprovalPageChange]);
+  // handleClearEmployeeFilter removed (unused)
 
   const handleRowClick = useCallback(
     (naf: NAF) => {

@@ -1,11 +1,11 @@
-import { Home, Folder, User } from "lucide-react";
+import { User } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
-interface NavItem {
+export interface NavItem {
   label: string;
   icon: React.ReactNode;
   href: string;
-  active?: boolean;
 }
 
 interface SidebarProps {
@@ -13,28 +13,15 @@ interface SidebarProps {
   currentUser?: {
     name: string;
   };
-  activeItem?: string;
+  navItems: NavItem[];
 }
-
-const navItems: NavItem[] = [
-  {
-    label: "Home",
-    icon: <Home className="w-5 h-5" />,
-    href: "/",
-  },
-  {
-    label: "NAF",
-    icon: <Folder className="w-5 h-5" />,
-    href: "/naf",
-    active: true,
-  },
-];
 
 export default function Sidebar({
   isOpen = true,
-  currentUser = { name: "John Dela Cruz" },
-  activeItem = "NAF",
+  currentUser = { name: "User" },
+  navItems,
 }: SidebarProps) {
+  const location = useLocation();
   return (
     <aside
       className={cn(
@@ -46,11 +33,11 @@ export default function Sidebar({
       <nav className="flex-1 overflow-y-auto py-2">
         <ul className="space-y-0.5 px-2">
           {navItems.map((item) => {
-            const isActive = item.label === activeItem;
+            const isActive = location.pathname.startsWith(item.href);
             return (
               <li key={item.label}>
-                <a
-                  href={item.href}
+                <Link
+                  to={item.href}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
                     isActive
@@ -67,7 +54,7 @@ export default function Sidebar({
                     {item.icon}
                   </span>
                   <span>{item.label}</span>
-                </a>
+                </Link>
               </li>
             );
           })}

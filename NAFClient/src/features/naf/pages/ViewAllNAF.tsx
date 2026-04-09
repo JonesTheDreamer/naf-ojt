@@ -1,17 +1,12 @@
-// features/naf/pages/SubordinateNAFsPage.tsx
 import { useState, useCallback } from "react";
 import { useEmployeeNAF } from "../hooks/useNAF";
-import Layout from "@/components/layout/Layout";
+import RequestorLayout from "@/components/layout/RequestorLayout";
 import { CreateNAFDialog } from "../components/createNAFDialog";
 import type { Employee } from "@/types/api/employee";
 import NAFListPage from "../components/nafList";
 import type { PagedResult } from "@/types/common/pagedResult";
 import type { NAF } from "@/types/api/naf";
-import { useParams } from "react-router-dom";
-
-type ViewAllNAFsProps = {
-  employeeId?: string;
-};
+import { useAuth } from "@/features/auth/AuthContext";
 
 type NAFProps = PagedResult<NAF> & { isLoading: boolean };
 
@@ -41,15 +36,13 @@ function toNAFProps(
   };
 }
 
-// export default function ViewAllNAF({
-//   employeeId = "0011134",
-// }: ViewAllNAFsProps) {
 export default function ViewAllNAF() {
-  const { employeeId } = useParams();
+  const { user } = useAuth();
+  const employeeId = user?.employeeId;
   const [subordinatePage, setSubordinatePage] = useState<number>(1);
   const [approvalPage, setApprovalPage] = useState<number>(1);
 
-  const { subordinateNAFsQuery, approverNAFsQuery, isLoading, isError } =
+  const { subordinateNAFsQuery, approverNAFsQuery, isLoading } =
     useEmployeeNAF({ subordinatePage, approvalPage }, employeeId);
 
   const subordinateProps = toNAFProps(subordinateNAFsQuery.data, isLoading);
@@ -64,7 +57,7 @@ export default function ViewAllNAF() {
   }, []);
 
   return (
-    <Layout>
+    <RequestorLayout>
       <div className="flex flex-col gap-2 md:flex-row md:justify-between">
         <p className="text-2xl text-amber-500 font-bold">
           Network Access Requests
@@ -83,6 +76,6 @@ export default function ViewAllNAF() {
         onApprovalPageChange={handleApprovalPageChange}
         fetchEmployeeResults={async (_query: string): Promise<Employee[]> => []}
       />
-    </Layout>
+    </RequestorLayout>
   );
 }

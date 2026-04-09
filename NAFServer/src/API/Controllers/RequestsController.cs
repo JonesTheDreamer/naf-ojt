@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using NAFServer.src.Application.DTOs.ResourceRequest;
 using NAFServer.src.Application.Interfaces;
 
@@ -8,6 +9,7 @@ using NAFServer.src.Application.Interfaces;
 namespace NAFServer.src.API.Controllers
 {
     [Route("api/[controller]")]
+    [Authorize]
     [ApiController]
     public class RequestsController : ControllerBase
     {
