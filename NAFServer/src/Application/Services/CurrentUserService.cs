@@ -12,7 +12,7 @@
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public Guid UserId
+        public string EmployeeId
         {
             get
             {
@@ -24,9 +24,9 @@
                 var id = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
                 if (id == null)
-                    throw new UnauthorizedAccessException("User ID claim not found.");
+                    throw new UnauthorizedAccessException("Employee ID claim not found.");
 
-                return Guid.Parse(id);
+                return id;
             }
         }
 
