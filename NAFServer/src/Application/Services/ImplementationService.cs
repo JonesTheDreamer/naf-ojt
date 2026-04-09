@@ -73,10 +73,11 @@ namespace NAFServer.src.Application.Services
         public async Task<ForImplementationItemDTO> AssignToMeAsync(Guid resourceRequestId, string employeeId)
         {
             var existing = await _implementationRepository.GetByResourceRequestIdAsync(resourceRequestId);
-            if (existing != null)
-                throw new InvalidOperationException("This resource request already has an implementation record.");
 
-            var implementation = await _implementationRepository.CreateAsync(resourceRequestId);
+            if (existing != null && existing.EmployeeId != null)
+                throw new InvalidOperationException("This resource request is already assigned.");
+
+            var implementation = existing ?? await _implementationRepository.CreateAsync(resourceRequestId);
             implementation.SetToInProgress(employeeId);
             await _context.SaveChangesAsync();
 
