@@ -1,20 +1,21 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import type { NavItem } from "./Sidebar";
 
 interface LayoutProps {
   children: React.ReactNode;
   currentUser?: {
     name: string;
   };
-  activeItem?: string;
+  navItems: NavItem[];
 }
 
 export default function Layout({
   children,
-  currentUser = { name: "John Dela Cruz" },
-  activeItem = "NAF",
+  currentUser = { name: "User" },
+  navItems,
 }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -31,7 +32,7 @@ export default function Layout({
       <Sidebar
         isOpen={sidebarOpen}
         currentUser={currentUser}
-        activeItem={activeItem}
+        navItems={navItems}
       />
 
       {/* Overlay for mobile when sidebar is open */}
@@ -47,7 +48,6 @@ export default function Layout({
       <main
         className={cn(
           "pt-14 min-h-screen transition-all duration-300 ease-in-out flex flex-col gap-5",
-          // sidebarOpen ? "md:pl-64" : "md:pl-0",
         )}
       >
         <div className="p-6 flex flex-col gap-5">{children}</div>

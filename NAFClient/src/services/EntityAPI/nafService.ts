@@ -1,4 +1,3 @@
-import axios from "axios";
 import { api } from "../api";
 import type { NAF } from "@/types/api/naf";
 import type { PagedResult } from "@/types/common/pagedResult";

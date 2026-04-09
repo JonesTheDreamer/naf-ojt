@@ -4,7 +4,7 @@ import {
   editResourceRequestPurpose,
   rejectResourceRequest,
 } from "@/services/EntityAPI/resourceRequestService";
-import type { NAF, PurposeProps, ResourceRequest } from "@/types/api/naf";
+import type { NAF, PurposeProps } from "@/types/api/naf";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 export const useResourceRequest = (
@@ -53,7 +53,7 @@ export const useResourceRequest = (
 
   const removeResourceRequest = useMutation({
     mutationFn: deleteResourceRequest,
-    onSuccess: (_data, id) => {
+    onSuccess: (_data, _id) => {
       queryClient.invalidateQueries({ queryKey: ["nafs"] });
     },
   });

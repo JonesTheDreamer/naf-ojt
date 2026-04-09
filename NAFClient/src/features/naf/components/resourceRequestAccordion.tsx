@@ -42,10 +42,10 @@ import {
 import { cn } from "@/lib/utils";
 
 import type { ResourceRequest, PurposeProps } from "@/types/api/naf";
-import { ProgressStatus } from "@/types/api/naf";
+
 import { Status } from "@/types/enum/status";
 import { PROGRESS_CONFIG } from "./progressBadge";
-import { EditPurposeDialog } from "./editPurposeDialog";
+
 import { DeleteConfirmDialog } from "./deleteConfirmDialog";
 import { ResubmitDialog } from "./resubmitDialog";
 import { Progress } from "@/types/enum/progress";
@@ -527,7 +527,7 @@ export function ResourceRequestAccordionItem({
   onDelete,
   onRemind,
   onDeactivate,
-  onResubmit,
+  onResubmit: _onResubmit,
   onApprove,
   onReject,
 }: ResourceRequestAccordionItemProps) {
@@ -548,8 +548,7 @@ export function ResourceRequestAccordionItem({
   const showHistory = progress !== Progress.OPEN;
   console.log(`${request.resource.name} is ${Progress[request.progress]}`);
 
-  const isPending =
-    progress === Progress.OPEN || progress === Progress.IN_PROGRESS;
+  void (progress === Progress.OPEN || progress === Progress.IN_PROGRESS);
 
   console.log(isCurrentApprover);
 

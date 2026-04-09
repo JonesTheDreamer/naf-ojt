@@ -1,8 +1,6 @@
 /**
  * NAFDetailPage
  * Route: /NAF/:nafId
- *
- * Clean Architecture: Presentation -> Pages -> NAFDetailPage
  */
 
 import { useParams } from "react-router-dom";
@@ -13,13 +11,13 @@ import { Separator } from "@/components/ui/separator";
 import { X } from "lucide-react";
 import type { NAF, ResourceRequest, PurposeProps } from "@/types/api/naf";
 import { ProgressStatus } from "@/types/api/naf";
-import Layout from "@/components/layout/Layout";
-import { ProgressBadge } from "@/features/naf/components/progressBadge";
+import RequestorLayout from "@/components/layout/RequestorLayout";
 import { ResourceRequestAccordionItem } from "@/features/naf/components/resourceRequestAccordion";
 import { useNAF } from "../hooks/useNAF";
 import { useResourceRequest } from "../hooks/useResourceRequest";
 import { useState } from "react";
 import { AddResourceDialog } from "@/features/naf/components/addResourceDialog";
+import { useAuth } from "@/features/auth/AuthContext";
 
 // ─── Utils ────────────────────────────────────────────────────────────────────
 
@@ -152,12 +150,6 @@ function EmployeeDetailsCard({
 }
 
 // ─── Per-request wrapper ──────────────────────────────────────────────────────
-//
-// Each ResourceRequest gets its OWN wrapper component so that
-// useResourceRequest(req.id, req.nafId) is called at the TOP LEVEL of a
-// component — satisfying the Rules of Hooks.
-//
-// Never call hooks conditionally or inside callbacks/handlers.
 
 interface RequestItemWrapperProps {
   naf: NAF;
@@ -176,7 +168,6 @@ function RequestItemWrapper({
   onDeactivate,
   onResubmit,
 }: RequestItemWrapperProps) {
-  // Hook is called at the TOP LEVEL of this component — always, unconditionally
   const {
     updateResourceRequestAsync,
     deleteResourceRequestAsync,
@@ -204,7 +195,6 @@ function RequestItemWrapper({
     }
   };
 
-  // Determine if the current user is the approver for the active step
   const activeStep = request.steps.find(
     (s) => s.stepOrder === request.currentStep,
   );
@@ -223,7 +213,6 @@ function RequestItemWrapper({
       alert("No active step found");
       return;
     }
-
     try {
       await approveRequestAsync({ stepId: activeStep.id, comment: comment });
     } catch (error) {
@@ -359,10 +348,10 @@ function LoadingSkeleton() {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function NAFDetailPage() {
-  const { nafId, employeeId } = useParams<{
-    nafId: string;
-    employeeId: string;
-  }>();
+  const { nafId } = useParams<{ nafId: string }>();
+  const { user } = useAuth();
+  const currentUserId = user?.employeeId ?? "";
+
   const {
     nafQuery: naf,
     isLoading,
@@ -380,7 +369,7 @@ export default function NAFDetailPage() {
   };
 
   return (
-    <Layout>
+    <RequestorLayout>
       <div className="max-w-4xl mx-auto w-full space-y-6 pb-12 px-4 sm:px-6">
         {isLoading && <LoadingSkeleton />}
 
@@ -433,10 +422,10 @@ export default function NAFDetailPage() {
             />
 
             {/* Resource Requests */}
-            <RequestsSection naf={naf.data} currentUserId={employeeId ?? ""} />
+            <RequestsSection naf={naf.data} currentUserId={currentUserId} />
           </>
         )}
       </div>
-    </Layout>
+    </RequestorLayout>
   );
 }
