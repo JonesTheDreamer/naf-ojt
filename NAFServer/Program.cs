@@ -96,10 +96,9 @@ builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
-// Auth + Admin (added after repository/service creation)
-// builder.Services.AddScoped<IUserRepository, UserRepository>();
-// builder.Services.AddScoped<IAuthService, AuthService>();
-// builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+// builder.Services.AddScoped<IAdminService, AdminService>(); // added in next task
 
 var app = builder.Build();
 
