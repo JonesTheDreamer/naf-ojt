@@ -98,7 +98,7 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-// builder.Services.AddScoped<IAdminService, AdminService>(); // added in next task
+builder.Services.AddScoped<IAdminService, AdminService>();
 
 var app = builder.Build();
 
