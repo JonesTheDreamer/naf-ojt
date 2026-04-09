@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using NAFServer.src.Domain.Entities;
 using NAFServer.src.Domain.Interface;
 namespace NAFServer.src.Infrastructure.Persistence
@@ -25,6 +25,10 @@ namespace NAFServer.src.Infrastructure.Persistence
         public DbSet<SharedFolderRequestInfo> SharedFolderRequestInfos { get; set; }
         public DbSet<GroupEmailRequestInfo> GroupEmailRequestInfos { get; set; }
         public DbSet<ResourceRequestImplementation> Implementations { get; set; }
+        public DbSet<Employee> Employees { get; set; }
+        public DbSet<Department> Departments { get; set; }
+        public DbSet<User> Users { get; set; }
+        public DbSet<UserRole> UserRoles { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -44,8 +48,8 @@ namespace NAFServer.src.Infrastructure.Persistence
             }
 
             // Keyless entities
-            modelBuilder.Entity<Employee>().HasNoKey();
-            modelBuilder.Entity<Department>().HasNoKey();
+            //modelBuilder.Entity<Employee>().HasNoKey();
+            //modelBuilder.Entity<Department>().HasNoKey(); temporarily
 
             modelBuilder.Entity<ResourceRequestAdditionalInfo>()
                 .HasDiscriminator<string>("AdditionalInfoType")

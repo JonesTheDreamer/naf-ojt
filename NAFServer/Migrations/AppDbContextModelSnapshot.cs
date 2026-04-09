@@ -77,6 +77,9 @@ namespace NAFServer.Migrations
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.Department", b =>
                 {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("DepartmentDesc")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -85,15 +88,16 @@ namespace NAFServer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Id")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.HasKey("Id");
 
-                    b.ToTable("Department");
+                    b.ToTable("Departments");
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.Employee", b =>
                 {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
                     b.Property<string>("Company")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -114,10 +118,6 @@ namespace NAFServer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("HiredDate")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Id")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("LastName")
@@ -146,7 +146,9 @@ namespace NAFServer.Migrations
                     b.Property<string>("SupervisorId")
                         .HasColumnType("nvarchar(max)");
 
-                    b.ToTable("Employee");
+                    b.HasKey("Id");
+
+                    b.ToTable("Employees");
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.GroupEmail", b =>
@@ -501,6 +503,59 @@ namespace NAFServer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SharedFolders");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.User", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<DateTime>("date_added")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("date_removed")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("employeeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("location")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.UserRole", b =>
+                {
+                    b.Property<int>("id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+
+                    b.Property<DateTime>("date_added")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("date_removed")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("role")
+                        .HasColumnType("int");
+
+                    b.Property<string>("userId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("id");
+
+                    b.ToTable("UserRoles");
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Interface.ResourceRequestAdditionalInfo", b =>
