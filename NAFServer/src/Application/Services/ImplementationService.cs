@@ -1,5 +1,7 @@
-﻿using NAFServer.src.Application.DTOs.ResourceRequest;
+﻿using NAFServer.src.Application.DTOs.NAF;
+using NAFServer.src.Application.DTOs.ResourceRequest;
 using NAFServer.src.Application.Interfaces;
+using NAFServer.src.Domain.Entities;
 using NAFServer.src.Domain.Interface.Repository;
 using NAFServer.src.Infrastructure.Persistence;
 using NAFServer.src.Mapper;
@@ -10,11 +12,16 @@ namespace NAFServer.src.Application.Services
     public class ImplementationService : IImplementationService
     {
         private readonly IImplementationRepository _implementationRepository;
+        private readonly IEmployeeRepository _employeeRepository;
         private readonly AppDbContext _context;
 
-        public ImplementationService(IImplementationRepository implementationRepository, AppDbContext context)
+        public ImplementationService(
+            IImplementationRepository implementationRepository,
+            IEmployeeRepository employeeRepository,
+            AppDbContext context)
         {
             _implementationRepository = implementationRepository;
+            _employeeRepository = employeeRepository;
             _context = context;
         }
 
@@ -42,32 +49,16 @@ namespace NAFServer.src.Application.Services
             return ResourceRequestImplementationMapper.ToDTO(implementation);
         }
 
-        public async Task<List<ForImplementationItemDTO>> GetMyTasksAsync(string employeeId)
+        public async Task<List<NAFDTO>> GetForImplementationsAsync()
         {
-            var implementations = await _implementationRepository.GetByEmployeeIdAsync(employeeId);
-            return implementations.Select(i => new ForImplementationItemDTO(
-                i.ResourceRequest.Id,
-                i.ResourceRequest.NAFId,
-                i.ResourceRequest.Progress.ToString(),
-                i.ResourceRequest.Resource.Name,
-                i.Id,
-                i.Status,
-                i.EmployeeId
-            )).ToList();
+            var nafs = await _implementationRepository.GetForImplementationsAsync();
+            return await MapNAFsToDTO(nafs);
         }
 
-        public async Task<List<ForImplementationItemDTO>> GetForImplementationsAsync()
+        public async Task<List<NAFDTO>> GetMyTasksAsync(string employeeId)
         {
-            var resourceRequests = await _implementationRepository.GetForImplementationsAsync();
-            return resourceRequests.Select(rr => new ForImplementationItemDTO(
-                rr.Id,
-                rr.NAFId,
-                rr.Progress.ToString(),
-                rr.Resource.Name,
-                rr.ResourceRequestImplementation?.Id,
-                rr.ResourceRequestImplementation?.Status,
-                rr.ResourceRequestImplementation?.EmployeeId
-            )).ToList();
+            var nafs = await _implementationRepository.GetMyTasksByEmployeeIdAsync(employeeId);
+            return await MapNAFsToDTO(nafs);
         }
 
         public async Task<ForImplementationItemDTO> AssignToMeAsync(Guid resourceRequestId, string employeeId)
@@ -90,6 +81,26 @@ namespace NAFServer.src.Application.Services
                 implementation.Status,
                 implementation.EmployeeId
             );
+        }
+
+        private async Task<List<NAFDTO>> MapNAFsToDTO(List<NAF> nafs)
+        {
+            var employeeIds = nafs.Select(n => n.EmployeeId).Distinct().ToList();
+            var employees = new List<Employee>();
+            foreach (var id in employeeIds)
+            {
+                var employee = await _employeeRepository.GetByIdAsync(id);
+                if (employee != null) employees.Add(employee);
+            }
+            var employeeLookup = employees.ToDictionary(e => e.Id);
+
+            var result = new List<NAFDTO>();
+            foreach (var naf in nafs)
+            {
+                if (!employeeLookup.TryGetValue(naf.EmployeeId, out var employee)) continue;
+                result.Add(NAFMapper.ToDTO(naf, employee));
+            }
+            return result;
         }
     }
 }
