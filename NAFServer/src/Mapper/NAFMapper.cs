@@ -94,7 +94,8 @@ public static class NAFMapper
                          rr.ResourceRequestImplementation.DelayedAt,
                          rr.ResourceRequestImplementation.CreatedAt,
                          rr.ResourceRequestImplementation.UpdatedAt
-                     ) : null
+                     ) : null,
+                     rr.CreatedAt
                 );
             }).ToList()
         );

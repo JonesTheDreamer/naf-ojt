@@ -15,6 +15,7 @@ namespace NAFServer.src.Application.DTOs.ResourceRequest
         object? AdditionalInfo,
         List<ResourceRequestPurposeDTO> Purposes,
         List<ResourceRequestApprovalStepDTO> Steps,
-        ResourceRequestImplementationDTO? Implementation
+        ResourceRequestImplementationDTO? Implementation,
+        DateTime CreatedAt
     );
 }

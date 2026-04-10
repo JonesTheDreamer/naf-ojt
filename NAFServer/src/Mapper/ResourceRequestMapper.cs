@@ -66,7 +66,8 @@ namespace NAFServer.src.Mapper
                          rr.ResourceRequestImplementation.DelayedAt,
                          rr.ResourceRequestImplementation.CreatedAt,
                          rr.ResourceRequestImplementation.UpdatedAt
-                     ) : null
+                     ) : null,
+                     rr.CreatedAt
             );
         }
     }
