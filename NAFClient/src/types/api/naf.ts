@@ -26,6 +26,8 @@ export interface ResourceRequest extends Entity<string> {
   additionalInfo?: AdditionalInfo;
   purposes: Purpose[];
   steps: Step[];
+  createdAt: string;
+  implementation?: Implementation;
 }
 
 export interface Resource extends Entity<number> {
@@ -61,6 +63,19 @@ export interface History extends Entity<string> {
   reasonForRejection?: string;
   actionAt: string;
   resourceRequestApprovalStepId: string;
+}
+
+export interface Implementation {
+  id: string;
+  resourceRequestId: string;
+  acceptedAt?: string;
+  accomplishedAt?: string;
+  employeeId?: string;
+  status: "OPEN" | "IN_PROGRESS" | "DELAYED" | "ACCOMPLISHED";
+  delayReason?: string;
+  delayedAt?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export type AdditionalInfo =

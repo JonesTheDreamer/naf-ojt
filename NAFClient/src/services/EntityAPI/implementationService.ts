@@ -1,21 +1,13 @@
+import type { NAF } from "@/types/api/naf";
 import { api } from "../api";
-
-export interface ForImplementationItemDTO {
-  id: string;
-  nafId: string;
-  progress: string;
-  resourceName: string;
-  implementationId: string | null;
-  implementationStatus: string | null;
-  assignedTo: string | null;
-}
+import type { ForImplementationItemDTO } from "@/features/tech/types";
 
 export const implementationService = {
   getMyTasks: () =>
-    api.get<ForImplementationItemDTO[]>("/implementations/my-tasks").then((r) => r.data),
+    api.get<NAF[]>("/implementations/my-tasks").then((r) => r.data),
 
   getForImplementations: () =>
-    api.get<ForImplementationItemDTO[]>("/implementations/for-implementations").then((r) => r.data),
+    api.get<NAF[]>("/implementations/for-implementations").then((r) => r.data),
 
   assignToMe: (resourceRequestId: string) =>
     api
