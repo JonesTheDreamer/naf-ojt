@@ -33,6 +33,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
                         .ThenInclude(step => step.Histories)
                 .Include(n => n.ResourceRequests.Where(rr => rr.Progress == Progress.IMPLEMENTATION))
                     .ThenInclude(rr => rr.ResourceRequestImplementation)
+                .AsNoTracking()
                 .ToListAsync();
 
             var rrIds = nafs.SelectMany(n => n.ResourceRequests).Select(rr => rr.Id).ToList();
@@ -70,16 +71,17 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
                 return new List<NAF>();
 
             var nafs = await _context.NAFs
-                .Where(n => n.ResourceRequests.Any(rr => resourceRequestIds.Contains(rr.Id)))
-                .Include(n => n.ResourceRequests.Where(rr => resourceRequestIds.Contains(rr.Id)))
+                .Where(n => n.ResourceRequests.Any(rr => resourceRequestIds.Contains(rr.Id) && rr.Progress == Progress.IMPLEMENTATION))
+                .Include(n => n.ResourceRequests.Where(rr => resourceRequestIds.Contains(rr.Id) && rr.Progress == Progress.IMPLEMENTATION))
                     .ThenInclude(rr => rr.Resource)
-                .Include(n => n.ResourceRequests.Where(rr => resourceRequestIds.Contains(rr.Id)))
+                .Include(n => n.ResourceRequests.Where(rr => resourceRequestIds.Contains(rr.Id) && rr.Progress == Progress.IMPLEMENTATION))
                     .ThenInclude(rr => rr.ResourceRequestPurposes)
-                .Include(n => n.ResourceRequests.Where(rr => resourceRequestIds.Contains(rr.Id)))
+                .Include(n => n.ResourceRequests.Where(rr => resourceRequestIds.Contains(rr.Id) && rr.Progress == Progress.IMPLEMENTATION))
                     .ThenInclude(rr => rr.ResourceRequestsApprovalSteps)
                         .ThenInclude(step => step.Histories)
-                .Include(n => n.ResourceRequests.Where(rr => resourceRequestIds.Contains(rr.Id)))
+                .Include(n => n.ResourceRequests.Where(rr => resourceRequestIds.Contains(rr.Id) && rr.Progress == Progress.IMPLEMENTATION))
                     .ThenInclude(rr => rr.ResourceRequestImplementation)
+                .AsNoTracking()
                 .ToListAsync();
 
             var rrIds = nafs.SelectMany(n => n.ResourceRequests).Select(rr => rr.Id).ToList();
