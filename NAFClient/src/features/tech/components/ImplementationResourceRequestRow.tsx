@@ -35,7 +35,7 @@ function ImplementationStatusBadge({
         STATUS_COLORS[status] ?? "bg-gray-100 text-gray-600"
       }`}
     >
-      {status.replace(/_/g, " ")}
+      {status.split("_").join(" ")}
     </span>
   );
 }
