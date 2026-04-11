@@ -1,5 +1,5 @@
 import type { Progress } from "../enum/progress";
-import type { Status } from "../enum/status";
+import type { ImplementationStatus, Status } from "../enum/status";
 import type { Employee } from "./employee";
 import type { Entity } from "./entity";
 
@@ -71,7 +71,7 @@ export interface Implementation {
   acceptedAt?: string;
   accomplishedAt?: string;
   employeeId?: string;
-  status: "OPEN" | "IN_PROGRESS" | "DELAYED" | "ACCOMPLISHED";
+  status: ImplementationStatus;
   delayReason?: string;
   delayedAt?: string;
   createdAt: string;

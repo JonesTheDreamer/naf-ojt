@@ -3,6 +3,7 @@ import { Info, UserPlus, Clock, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ResourceRequest } from "@/types/api/naf";
 import { handleAdditionalInfoStructured } from "@/types/api/naf";
+import { ImplementationStatus } from "@/types/enum/status";
 import { ResourceRequestInfoModal } from "./ResourceRequestInfoModal";
 import { DelayedReasonModal } from "./DelayedReasonModal";
 
@@ -15,19 +16,26 @@ interface Props {
   isSubmitting?: boolean;
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  OPEN: "bg-gray-100 text-gray-700",
-  IN_PROGRESS: "bg-blue-100 text-blue-700",
-  DELAYED: "bg-yellow-100 text-yellow-700",
-  ACCOMPLISHED: "bg-green-100 text-green-700",
+const STATUS_LABELS: Record<ImplementationStatus, string> = {
+  [ImplementationStatus.OPEN]: "Open",
+  [ImplementationStatus.IN_PROGRESS]: "In Progress",
+  [ImplementationStatus.DELAYED]: "Delayed",
+  [ImplementationStatus.ACCOMPLISHED]: "Accomplished",
+};
+
+const STATUS_COLORS: Record<ImplementationStatus, string> = {
+  [ImplementationStatus.OPEN]: "bg-gray-100 text-gray-700",
+  [ImplementationStatus.IN_PROGRESS]: "bg-blue-100 text-blue-700",
+  [ImplementationStatus.DELAYED]: "bg-yellow-100 text-yellow-700",
+  [ImplementationStatus.ACCOMPLISHED]: "bg-green-100 text-green-700",
 };
 
 function ImplementationStatusBadge({
   status,
 }: {
-  status: string | null | undefined;
+  status: ImplementationStatus | null | undefined;
 }) {
-  if (!status)
+  if (status == null)
     return <span className="text-xs text-muted-foreground italic">Unassigned</span>;
   return (
     <span
@@ -35,7 +43,7 @@ function ImplementationStatusBadge({
         STATUS_COLORS[status] ?? "bg-gray-100 text-gray-600"
       }`}
     >
-      {status.split("_").join(" ")}
+      {STATUS_LABELS[status]}
     </span>
   );
 }
@@ -52,8 +60,8 @@ export function ImplementationResourceRequestRow({
   const [delayOpen, setDelayOpen] = useState(false);
 
   const impl = request.implementation;
-  const isAccomplished = impl?.status === "ACCOMPLISHED";
-  const isDelayed = impl?.status === "DELAYED";
+  const isAccomplished = impl?.status === ImplementationStatus.ACCOMPLISHED;
+  const isDelayed = impl?.status === ImplementationStatus.DELAYED;
 
   const additionalInfoSummary =
     request.additionalInfo
