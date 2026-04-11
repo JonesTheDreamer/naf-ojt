@@ -9,12 +9,6 @@ export function useMyTasks() {
     queryFn: implementationService.getMyTasks,
   });
 
-  const setToInProgressMutation = useMutation({
-    mutationFn: (implementationId: string) =>
-      implementationService.setToInProgress(implementationId),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tech", "my-tasks"] }),
-  });
-
   const setToDelayedMutation = useMutation({
     mutationFn: ({ implementationId, reason }: { implementationId: string; reason: string }) =>
       implementationService.setToDelayed(implementationId, reason),
@@ -27,5 +21,5 @@ export function useMyTasks() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["tech", "my-tasks"] }),
   });
 
-  return { myTasksQuery, setToInProgressMutation, setToDelayedMutation, setToAccomplishedMutation };
+  return { myTasksQuery, setToDelayedMutation, setToAccomplishedMutation };
 }

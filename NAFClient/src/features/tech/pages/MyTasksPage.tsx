@@ -1,55 +1,60 @@
+import { useState } from "react";
 import TechTeamLayout from "@/components/layout/TechTeamLayout";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { useMyTasks } from "../hooks/useMyTasks";
-
-function statusColor(status: string | null) {
-  switch (status) {
-    case "IN_PROGRESS": return "bg-blue-100 text-blue-700";
-    case "DELAYED": return "bg-yellow-100 text-yellow-700";
-    case "ACCOMPLISHED": return "bg-green-100 text-green-700";
-    default: return "bg-gray-100 text-gray-600";
-  }
-}
+import { ImplementationViewToggle } from "../components/ImplementationViewToggle";
+import { ImplementationNAFAccordion } from "../components/ImplementationNAFAccordion";
+import { ImplementationResourceAccordion } from "../components/ImplementationResourceAccordion";
 
 export default function MyTasksPage() {
-  const { myTasksQuery, setToAccomplishedMutation } = useMyTasks();
+  const [viewMode, setViewMode] = useState<"per-naf" | "per-resource">("per-naf");
+  const { myTasksQuery, setToDelayedMutation, setToAccomplishedMutation } =
+    useMyTasks();
+
+  const nafs = myTasksQuery.data ?? [];
+
+  const handleMarkDelayed = (implementationId: string, reason: string) => {
+    setToDelayedMutation.mutate({ implementationId, reason });
+  };
+
+  const handleMarkAccomplished = (implementationId: string) => {
+    setToAccomplishedMutation.mutate(implementationId);
+  };
+
+  const isSubmitting =
+    setToDelayedMutation.isPending || setToAccomplishedMutation.isPending;
 
   return (
     <TechTeamLayout>
-      <h1 className="text-2xl font-bold text-amber-500">My Tasks</h1>
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <h1 className="text-2xl font-bold text-amber-500">My Tasks</h1>
+        <ImplementationViewToggle value={viewMode} onChange={setViewMode} />
+      </div>
 
-      {myTasksQuery.isLoading && <p className="text-muted-foreground">Loading...</p>}
-      {myTasksQuery.data?.length === 0 && (
+      {myTasksQuery.isLoading && (
+        <p className="text-muted-foreground">Loading...</p>
+      )}
+
+      {!myTasksQuery.isLoading && nafs.length === 0 && (
         <p className="text-muted-foreground">No tasks assigned to you.</p>
       )}
 
-      <div className="space-y-3">
-        {myTasksQuery.data?.map((item) => (
-          <Card key={item.id}>
-            <CardContent className="pt-4 flex items-center justify-between flex-wrap gap-3">
-              <div>
-                <p className="font-semibold">{item.resourceName}</p>
-                <p className="text-sm text-muted-foreground">Progress: {item.progress}</p>
-                {item.implementationStatus && (
-                  <span className={`inline-block mt-1 text-xs px-2 py-0.5 rounded-full font-medium ${statusColor(item.implementationStatus)}`}>
-                    {item.implementationStatus}
-                  </span>
-                )}
-              </div>
-              {item.implementationId && item.implementationStatus !== "ACCOMPLISHED" && (
-                <Button
-                  size="sm"
-                  onClick={() => setToAccomplishedMutation.mutate(item.implementationId!)}
-                  disabled={setToAccomplishedMutation.isPending}
-                >
-                  Mark Accomplished
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      {viewMode === "per-naf" ? (
+        <ImplementationNAFAccordion
+          nafs={nafs}
+          mode="my-tasks"
+          onMarkDelayed={handleMarkDelayed}
+          onMarkAccomplished={handleMarkAccomplished}
+          isSubmitting={isSubmitting}
+        />
+      ) : (
+        <ImplementationResourceAccordion
+          nafs={nafs}
+          mode="my-tasks"
+          onMarkDelayed={handleMarkDelayed}
+          onMarkAccomplished={handleMarkAccomplished}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </TechTeamLayout>
   );
 }
