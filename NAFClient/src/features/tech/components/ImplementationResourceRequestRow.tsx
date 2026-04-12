@@ -36,7 +36,9 @@ function ImplementationStatusBadge({
   status: ImplementationStatus | null | undefined;
 }) {
   if (status == null)
-    return <span className="text-xs text-muted-foreground italic">Unassigned</span>;
+    return (
+      <span className="text-xs text-muted-foreground italic">Unassigned</span>
+    );
   return (
     <span
       className={`text-xs px-2 py-0.5 rounded-full font-medium ${
@@ -63,10 +65,9 @@ export function ImplementationResourceRequestRow({
   const isAccomplished = impl?.status === ImplementationStatus.ACCOMPLISHED;
   const isDelayed = impl?.status === ImplementationStatus.DELAYED;
 
-  const additionalInfoSummary =
-    request.additionalInfo
-      ? handleAdditionalInfoStructured(request.additionalInfo)
-      : null;
+  const additionalInfoSummary = request.additionalInfo
+    ? handleAdditionalInfoStructured(request.additionalInfo)
+    : null;
 
   const additionalInfoText = additionalInfoSummary
     ? `${additionalInfoSummary.label}: ${Object.values(additionalInfoSummary.data).filter(Boolean).join(", ")}`
@@ -92,7 +93,9 @@ export function ImplementationResourceRequestRow({
           </div>
 
           {request.resource.isSpecial && additionalInfoText && (
-            <p className="text-xs text-muted-foreground">{additionalInfoText}</p>
+            <p className="text-xs text-muted-foreground">
+              {additionalInfoText}
+            </p>
           )}
 
           {mode === "for-implementations" && (
