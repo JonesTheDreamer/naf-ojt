@@ -7,12 +7,12 @@
         public string location { get; set; }
         public DateTime date_added { get; set; }
         public string? date_removed { get; set; }
-
+        public List<UserRole> roles { get; set; }
         public User(string employeeId, string location)
         {
             this.employeeId = employeeId;
             this.location = location;
-            this.date_added = DateTime.Now;
+            date_added = DateTime.Now;
         }
     }
 }

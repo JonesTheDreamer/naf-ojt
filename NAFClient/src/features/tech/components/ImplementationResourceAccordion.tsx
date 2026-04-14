@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import type { NAF, ResourceRequest } from "@/types/api/naf";
 import { ImplementationResourceRequestRow } from "./ImplementationResourceRequestRow";
+import { getDateUrgency } from "@/lib/dateUrgency";
 
 type EnrichedRequest = ResourceRequest & {
   nafReference: string;
@@ -58,10 +59,11 @@ function buildResourceGroups(nafs: NAF[]): ResourceGroup[] {
 
   const groups = Array.from(groupMap.values());
   for (const group of groups) {
-    group.requests.sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-    );
+    group.requests.sort((a, b) => {
+      const aTime = a.dateNeeded ? new Date(a.dateNeeded).getTime() : Infinity;
+      const bTime = b.dateNeeded ? new Date(b.dateNeeded).getTime() : Infinity;
+      return aTime - bTime;
+    });
   }
   return groups;
 }
@@ -97,21 +99,37 @@ export function ImplementationResourceAccordion({
             </AccordionTrigger>
 
             <AccordionContent className="px-4 pt-2 pb-4">
-              {group.requests.map((rr) => (
-                <div key={rr.id}>
-                  <p className="text-xs text-muted-foreground pt-2 pb-0.5">
-                    NAF {rr.nafReference} — {rr.employeeName}
-                  </p>
-                  <ImplementationResourceRequestRow
-                    request={rr}
-                    mode={mode}
-                    onAssign={onAssign}
-                    onMarkDelayed={onMarkDelayed}
-                    onMarkAccomplished={onMarkAccomplished}
-                    isSubmitting={isSubmitting}
-                  />
-                </div>
-              ))}
+              {group.requests.map((rr) => {
+                const urgency = getDateUrgency(rr.dateNeeded);
+                return (
+                  <div key={rr.id}>
+                    <div className="flex items-center gap-2 pt-2 pb-0.5">
+                      <p className="text-xs text-muted-foreground">
+                        NAF {rr.nafReference} — {rr.employeeName}
+                      </p>
+                      {urgency && (
+                        <span
+                          className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${
+                            urgency.overdue
+                              ? "bg-red-100 text-red-700"
+                              : "bg-amber-50 text-amber-700"
+                          }`}
+                        >
+                          {urgency.label}
+                        </span>
+                      )}
+                    </div>
+                    <ImplementationResourceRequestRow
+                      request={rr}
+                      mode={mode}
+                      onAssign={onAssign}
+                      onMarkDelayed={onMarkDelayed}
+                      onMarkAccomplished={onMarkAccomplished}
+                      isSubmitting={isSubmitting}
+                    />
+                  </div>
+                );
+              })}
 
               {mode === "for-implementations" && unassignedIds.length > 0 && (
                 <div className="flex justify-end mt-3">

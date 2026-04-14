@@ -21,6 +21,7 @@ namespace NAFServer.src.Application.Services
         private readonly IResourceRepository _resourceRepository;
         private readonly IApprovalWorkflowTemplateRepository _approvalWorkflowTemplateRepository;
         private readonly IResourceRequestHandlerRegistry _resourceRequestHandlerRegistry;
+        private readonly IUserRepository _userRepository;
 
         public ResourceRequestService(
             IResourceRequestRepository resourceRequestRepository,
@@ -31,6 +32,7 @@ namespace NAFServer.src.Application.Services
             IResourceRepository resourceRepository,
             IApprovalWorkflowTemplateRepository approvalWorkflowTemplateRepository,
             IResourceRequestHandlerRegistry resourceRequestHandlerRegistry,
+            IUserRepository userRepository,
             AppDbContext context
         )
         {
@@ -42,6 +44,7 @@ namespace NAFServer.src.Application.Services
             _resourceRepository = resourceRepository;
             _approvalWorkflowTemplateRepository = approvalWorkflowTemplateRepository;
             _resourceRequestHandlerRegistry = resourceRequestHandlerRegistry;
+            _userRepository = userRepository;
             _context = context;
         }
 
@@ -72,19 +75,17 @@ namespace NAFServer.src.Application.Services
             {
                 var naf = await _nafRepository.GetByIdAsync(request.nafId);
 
-                _context.Resources.Attach(resource);
-                _context.NAFs.Attach(naf);
+                //_context.Resources.Attach(resource);
+                //_context.NAFs.Attach(naf);
 
                 var workflowId = await _approvalWorkflowTemplateRepository
                     .GetActiveWorkflowIdOfResourceAsync(request.resourceId);
 
-                var rr = new ResourceRequest(request.nafId, request.resourceId, workflowId, additionalInfo, Progress.OPEN)
-                {
-                    NAF = naf,
-                    AdditionalInfo = additionalInfo
-                };
+                var rr = new ResourceRequest(request.nafId, request.resourceId, workflowId, additionalInfo, Progress.OPEN);
+                rr.DateNeeded = request.dateNeeded;
 
                 additionalInfo.ResourceRequest = rr;
+                rr.NAF = naf;
 
                 _context.ResourceRequests.Add(rr);
 
@@ -106,7 +107,8 @@ namespace NAFServer.src.Application.Services
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
-                return ResourceRequestMapper.ToDTO(rr);
+                var saved = await _resourceRequestRepository.GetByIdAsync(rr.Id);
+                return ResourceRequestMapper.ToDTO(saved);
             }
             catch
             {
@@ -134,6 +136,7 @@ namespace NAFServer.src.Application.Services
                     null,
                     Progress.IMPLEMENTATION
                 );
+                rr.DateNeeded = request.dateNeeded;
                 //{
                 //    Resource = resource
                 //    //NAF = naf
@@ -156,8 +159,6 @@ namespace NAFServer.src.Application.Services
 
         public async Task<List<ResourceRequestApprovalStep>> FetchApproversAsync(ResourceRequest request)
         {
-
-
             var employee = await _employeeRepository.GetByIdAsync(request.NAF.EmployeeId);
 
             if (employee is null) throw new KeyNotFoundException();
@@ -186,12 +187,20 @@ namespace NAFServer.src.Application.Services
                             .DepartmentHeadId
                         };
                         break;
-                    case ApproverRole.POSITION:
+                    //case ApproverRole.POSITION:
+                    //    approverId = step.ApproverEntity switch
+                    //    {
+                    //        "Network Admin" => "9229523",
+                    //        //_ => (await _departmentRepository.GetByIdAsync(employee.DepartmentId))
+                    //        //.PositionHeadId
+                    //    };
+                    //    break;
+                    case ApproverRole.TECHNICAL_HEAD:
+                        var user = await _userRepository.GetUserById(employee.Id);
+                        var approver = await _userRepository.GetNetworkAdminOfLocation(user.location);
                         approverId = step.ApproverEntity switch
                         {
-                            "Network Admin" => "9229523",
-                            //_ => (await _departmentRepository.GetByIdAsync(employee.DepartmentId))
-                            //.PositionHeadId
+                            "EMPLOYEE" => approver.employeeId
                         };
                         break;
                 }
@@ -230,6 +239,16 @@ namespace NAFServer.src.Application.Services
 
             rr.EditPurpose(request.purpose, request.resourceRequestApprovalStepHistoryId);
             if (rr.Progress == Progress.REJECTED) rr.SetToInProgress();
+
+            var approver = await _employeeRepository.GetByIdAsync(currentStep.ApproverId);
+
+            await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
+            (
+                rr.Id,
+                ResourceRequestAction.EDITED,
+                "Resource request edited"
+            ));
+
             await _context.SaveChangesAsync();
             return ResourceRequestMapper.ToDTO(rr);
         }

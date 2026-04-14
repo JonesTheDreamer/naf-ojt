@@ -1,5 +1,6 @@
 ﻿using NAFServer.src.Application.Interfaces;
 using NAFServer.src.Domain.Entities;
+using NAFServer.src.Domain.Enums;
 using NAFServer.src.Domain.Interface.Repository;
 using NAFServer.src.Infrastructure.Persistence;
 
@@ -10,12 +11,14 @@ namespace NAFServer.src.Application.Services
         private readonly AppDbContext _context;
         private readonly IResourceRequestStepRepository _resourceRequestStepRepository;
         private readonly IResourceRequestRepository _resourceRequestRepository;
+        private readonly IEmployeeRepository _employeeRepository;
 
-        public ResourceRequestApprovalStepService(AppDbContext context, IResourceRequestStepRepository resourceRequestStepRepository, IResourceRequestRepository resourceRequestRepository)
+        public ResourceRequestApprovalStepService(AppDbContext context, IResourceRequestStepRepository resourceRequestStepRepository, IResourceRequestRepository resourceRequestRepository, IEmployeeRepository employeeRepository)
         {
             _context = context;
             _resourceRequestStepRepository = resourceRequestStepRepository;
             _resourceRequestRepository = resourceRequestRepository;
+            _employeeRepository = employeeRepository;
         }
         public async Task<ResourceRequestApprovalStep> ApproveStepAsync(Guid stepId, string? comment)
         {
@@ -32,17 +35,24 @@ namespace NAFServer.src.Application.Services
 
                 step.SetToApproved(comment);
                 rr.NextStep();
-
                 if (rr.IsAccomplished())
                 {
-                    rr.SetToAccomplished();
+                    rr.SetToImplementation();
                     await _context.Implementations.AddAsync(new ResourceRequestImplementation(rr.Id));
-
-                    if (naf.IsFullyApproved())
-                    {
-                        naf.SetToApproved();
-                    }
                 }
+                else
+                {
+                    rr.SetToInProgress();
+                }
+
+                var approver = await _employeeRepository.GetByIdAsync(step.ApproverId);
+
+                await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
+                (
+                    rr.Id,
+                    ResourceRequestAction.ACCEPT,
+                    "Employee " + approver.FirstName + " " + approver.LastName + " approved the resource request"
+                ));
 
                 await _context.SaveChangesAsync();
 
@@ -57,9 +67,8 @@ namespace NAFServer.src.Application.Services
 
         public async Task<ResourceRequestApprovalStep> RejectStepAsync(Guid stepId, string reasonForRejection)
         {
-            var resourceRequest = await _resourceRequestRepository.GetByApprovalStepId(stepId);
             var rr = await _resourceRequestRepository.GetByApprovalStepId(stepId);
-            var step = resourceRequest.ResourceRequestsApprovalSteps.FirstOrDefault(s => s.Id == stepId)
+            var step = rr.ResourceRequestsApprovalSteps.FirstOrDefault(s => s.Id == stepId)
                 ?? throw new KeyNotFoundException("Step not found");
 
             if (reasonForRejection == null)
@@ -68,6 +77,15 @@ namespace NAFServer.src.Application.Services
             step.SetToRejected(reasonForRejection);
             rr.SetToRejected();
             await _context.SaveChangesAsync();
+            var approver = await _employeeRepository.GetByIdAsync(step.ApproverId);
+
+            await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
+            (
+                rr.Id,
+                ResourceRequestAction.ACCEPT,
+                "Employee " + approver.FirstName + " " + approver.LastName + " approved the resource request"
+            ));
+
             return step;
         }
 

@@ -6,6 +6,8 @@ import { handleAdditionalInfoStructured } from "@/types/api/naf";
 import { ImplementationStatus } from "@/types/enum/status";
 import { ResourceRequestInfoModal } from "./ResourceRequestInfoModal";
 import { DelayedReasonModal } from "./DelayedReasonModal";
+import { getDateUrgency } from "@/lib/dateUrgency";
+import { cn } from "@/lib/utils";
 
 interface Props {
   request: ResourceRequest;
@@ -75,7 +77,10 @@ export function ImplementationResourceRequestRow({
 
   return (
     <>
-      <div className="flex items-start justify-between gap-3 py-3 border-b last:border-b-0">
+      <div className={cn(
+  "flex items-start justify-between gap-3 py-3 border-b last:border-b-0",
+  getDateUrgency(request.dateNeeded)?.overdue && "bg-red-50/40",
+)}>
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             {request.resource.iconUrl && (
@@ -97,6 +102,22 @@ export function ImplementationResourceRequestRow({
               {additionalInfoText}
             </p>
           )}
+
+          {(() => {
+            const urgency = getDateUrgency(request.dateNeeded);
+            if (!urgency) return null;
+            return (
+              <span
+                className={`text-xs font-medium px-2 py-0.5 rounded-full inline-block ${
+                  urgency.overdue
+                    ? "bg-red-100 text-red-700"
+                    : "bg-amber-50 text-amber-700"
+                }`}
+              >
+                {urgency.label}
+              </span>
+            );
+          })()}
 
           {mode === "for-implementations" && (
             <p className="text-xs text-muted-foreground">

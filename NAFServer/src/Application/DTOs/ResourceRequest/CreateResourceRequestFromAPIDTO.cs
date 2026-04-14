@@ -4,6 +4,7 @@
     (
         int resourceId,
         string purpose,
-        object? additionalInfo
+        object? additionalInfo,
+        DateTime? dateNeeded = null
     );
 }

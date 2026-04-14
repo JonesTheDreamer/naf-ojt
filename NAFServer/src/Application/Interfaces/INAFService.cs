@@ -13,6 +13,6 @@ namespace NAFServer.src.Application.Interfaces
         public Task<PagedResult<NAFDTO>> GetNAFToApproveAsync(string employeeId, int page);
         public Task<bool> EmployeeHasNAFForDepartmentAsync(string employeeId, string departmentId);
         public Task<List<NAFDTO>> GetNAFByEmployeeIdAsync(string employeeId);
-        Task<List<AddBasicResourceResultDTO>> AddBasicResourcesToNAFAsync(Guid nafId, List<int> resourceIds);
+        Task<List<AddBasicResourceResultDTO>> AddBasicResourcesToNAFAsync(Guid nafId, List<BasicResourceWithDateDTO> resources);
     }
 }

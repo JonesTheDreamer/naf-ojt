@@ -21,6 +21,7 @@ import {
   type InternetEntry,
   type GroupEmailEntry,
   type SharedFolderEntry,
+  type BasicResourceWithDate,
 } from "../hooks/useAddResource";
 
 // ── Searchable Combobox ────────────────────────────────────────────────────────
@@ -217,6 +218,17 @@ function InternetEntryCard({
           rows={2}
         />
       </div>
+
+      <div className="space-y-1">
+        <FieldLabel>Date Needed</FieldLabel>
+        <input
+          type="date"
+          value={entry.dateNeeded}
+          min={new Date().toISOString().split("T")[0]}
+          onChange={(e) => onChange({ dateNeeded: e.target.value })}
+          className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+        />
+      </div>
     </div>
   );
 }
@@ -270,6 +282,17 @@ function GroupEmailEntryCard({
           value={entry.purpose}
           onChange={(e) => onChange({ purpose: e.target.value })}
           rows={2}
+        />
+      </div>
+
+      <div className="space-y-1">
+        <FieldLabel>Date Needed</FieldLabel>
+        <input
+          type="date"
+          value={entry.dateNeeded}
+          min={new Date().toISOString().split("T")[0]}
+          onChange={(e) => onChange({ dateNeeded: e.target.value })}
+          className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
         />
       </div>
     </div>
@@ -327,6 +350,17 @@ function SharedFolderEntryCard({
           rows={2}
         />
       </div>
+
+      <div className="space-y-1">
+        <FieldLabel>Date Needed</FieldLabel>
+        <input
+          type="date"
+          value={entry.dateNeeded}
+          min={new Date().toISOString().split("T")[0]}
+          onChange={(e) => onChange({ dateNeeded: e.target.value })}
+          className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+        />
+      </div>
     </div>
   );
 }
@@ -344,7 +378,7 @@ export function AddResourceDialog({
   open,
   onOpenChange,
 }: AddResourceDialogProps) {
-  const [selectedBasic, setSelectedBasic] = useState<number[]>([]);
+  const [basicResources, setBasicResources] = useState<BasicResourceWithDate[]>([]);
   const [internetEntries, setInternetEntries] = useState<InternetEntry[]>([]);
   const [groupEmailEntries, setGroupEmailEntries] = useState<GroupEmailEntry[]>(
     [],
@@ -384,19 +418,19 @@ export function AddResourceDialog({
   const addInternetEntry = () =>
     setInternetEntries((prev) => [
       ...prev,
-      { _id: newEntry(), internetPurposeId: null, internetResourceId: null, purpose: "" },
+      { _id: newEntry(), internetPurposeId: null, internetResourceId: null, purpose: "", dateNeeded: "" },
     ]);
 
   const addGroupEmailEntry = () =>
     setGroupEmailEntries((prev) => [
       ...prev,
-      { _id: newEntry(), groupEmailId: null, purpose: "" },
+      { _id: newEntry(), groupEmailId: null, purpose: "", dateNeeded: "" },
     ]);
 
   const addSharedFolderEntry = () =>
     setSharedFolderEntries((prev) => [
       ...prev,
-      { _id: newEntry(), sharedFolderId: null, purpose: "" },
+      { _id: newEntry(), sharedFolderId: null, purpose: "", dateNeeded: "" },
     ]);
 
   const patchInternetEntry = (_id: string, patch: Partial<InternetEntry>) =>
@@ -427,7 +461,7 @@ export function AddResourceDialog({
     e.sharedFolderId !== null && e.purpose.trim().length > 0;
 
   const hasAnything =
-    selectedBasic.length > 0 ||
+    basicResources.length > 0 ||
     internetEntries.length > 0 ||
     groupEmailEntries.length > 0 ||
     sharedFolderEntries.length > 0;
@@ -440,7 +474,7 @@ export function AddResourceDialog({
   const canSubmit = hasAnything && allComplete && !isSubmitting;
 
   const reset = () => {
-    setSelectedBasic([]);
+    setBasicResources([]);
     setInternetEntries([]);
     setGroupEmailEntries([]);
     setSharedFolderEntries([]);
@@ -454,7 +488,7 @@ export function AddResourceDialog({
 
     const result = await submit({
       nafId: naf.id,
-      basicResourceIds: selectedBasic,
+      basicResources,
       internetEntries,
       groupEmailEntries,
       sharedFolderEntries,
@@ -496,23 +530,44 @@ export function AddResourceDialog({
               <p className="text-sm font-semibold text-amber-500">
                 BASIC RESOURCES
               </p>
-              <div className="flex flex-wrap gap-4">
-                {availableBasic.map((r) => (
-                  <div key={r.id} className="flex items-center gap-2">
-                    <Checkbox
-                      id={`basic-${r.id}`}
-                      checked={selectedBasic.includes(r.id)}
-                      onCheckedChange={(checked) =>
-                        setSelectedBasic((prev) =>
-                          checked
-                            ? [...prev, r.id]
-                            : prev.filter((id) => id !== r.id),
-                        )
-                      }
-                    />
-                    <FieldLabel htmlFor={`basic-${r.id}`}>{r.name}</FieldLabel>
-                  </div>
-                ))}
+              <div className="flex flex-col gap-2">
+                {availableBasic.map((r) => {
+                  const entry = basicResources.find((b) => b.id === r.id);
+                  const isChecked = !!entry;
+                  return (
+                    <div key={r.id} className="border rounded-md p-2 space-y-1.5">
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          id={`basic-${r.id}`}
+                          checked={isChecked}
+                          onCheckedChange={(checked) => {
+                            if (checked) {
+                              setBasicResources((prev) => [...prev, { id: r.id, dateNeeded: "" }]);
+                            } else {
+                              setBasicResources((prev) => prev.filter((b) => b.id !== r.id));
+                            }
+                          }}
+                        />
+                        <FieldLabel htmlFor={`basic-${r.id}`}>{r.name}</FieldLabel>
+                      </div>
+                      {isChecked && (
+                        <input
+                          type="date"
+                          value={entry!.dateNeeded}
+                          min={new Date().toISOString().split("T")[0]}
+                          onChange={(e) =>
+                            setBasicResources((prev) =>
+                              prev.map((b) =>
+                                b.id === r.id ? { ...b, dateNeeded: e.target.value } : b,
+                              ),
+                            )
+                          }
+                          className="h-8 w-full rounded-md border border-input bg-background px-2 py-1 text-sm shadow-sm"
+                        />
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </section>
           )}

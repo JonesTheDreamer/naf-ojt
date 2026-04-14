@@ -4,6 +4,7 @@
     {
         SUPERVISOR,
         DEPARTMENT_HEAD,
-        POSITION
+        POSITION,
+        TECHNICAL_HEAD
     }
 }

@@ -67,6 +67,7 @@ export const createNAF = async (payload: {
   employeeId: string;
   requestorId: string;
   resourceIds: number[];
+  dateNeeded?: string | null;
 }) => {
   const response = await api.post("/NAFs", payload);
   return response.data;

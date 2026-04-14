@@ -2,10 +2,10 @@
 using NAFServer.src.Application.DTOs.ResourceRequest;
 using NAFServer.src.Application.Interfaces;
 using NAFServer.src.Domain.Entities;
+using NAFServer.src.Domain.Enums;
 using NAFServer.src.Domain.Interface.Repository;
 using NAFServer.src.Infrastructure.Persistence;
 using NAFServer.src.Mapper;
-using static NAFServer.src.Domain.Entities.ResourceRequestImplementation;
 
 namespace NAFServer.src.Application.Services
 {
@@ -13,15 +13,18 @@ namespace NAFServer.src.Application.Services
     {
         private readonly IImplementationRepository _implementationRepository;
         private readonly IEmployeeRepository _employeeRepository;
+        private readonly IResourceRequestRepository _resourceRequestRepository;
         private readonly AppDbContext _context;
 
         public ImplementationService(
             IImplementationRepository implementationRepository,
             IEmployeeRepository employeeRepository,
+            IResourceRequestRepository resourceRequestRepository,
             AppDbContext context)
         {
             _implementationRepository = implementationRepository;
             _employeeRepository = employeeRepository;
+            _resourceRequestRepository = resourceRequestRepository;
             _context = context;
         }
 
@@ -29,6 +32,16 @@ namespace NAFServer.src.Application.Services
         {
             var implementation = await _implementationRepository.GetByIdAsync(request);
             implementation.SetToAccomplished();
+            var resourceRequest = await _resourceRequestRepository.GetByIdAsync(implementation.ResourceRequestId);
+            resourceRequest.SetToAccomplished();
+
+            await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
+            (
+                implementation.ResourceRequestId,
+                ResourceRequestAction.ACCOMPLISH,
+                "Resource Request accomplished"
+            ));
+
             await _context.SaveChangesAsync();
             return ResourceRequestImplementationMapper.ToDTO(implementation);
         }
@@ -37,6 +50,14 @@ namespace NAFServer.src.Application.Services
         {
             var implementation = await _implementationRepository.GetByIdAsync(request);
             implementation.SetToDelayed(delayReason);
+
+            await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
+            (
+                implementation.ResourceRequestId,
+                ResourceRequestAction.DELAY,
+                "Resource Request delayed"
+            ));
+
             await _context.SaveChangesAsync();
             return ResourceRequestImplementationMapper.ToDTO(implementation);
         }
@@ -45,6 +66,12 @@ namespace NAFServer.src.Application.Services
         {
             var implementation = await _implementationRepository.GetByIdAsync(request);
             implementation.SetToInProgress(employeeId);
+            await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
+            (
+                implementation.ResourceRequestId,
+                ResourceRequestAction.ACCEPT,
+                "Resource Request accepted by Technical Team"
+            ));
             await _context.SaveChangesAsync();
             return ResourceRequestImplementationMapper.ToDTO(implementation);
         }

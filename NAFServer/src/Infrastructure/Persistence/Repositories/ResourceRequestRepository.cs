@@ -19,6 +19,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
         {
             return await _context.ResourceRequests
                 .Include(rr => rr.ResourceRequestPurposes)
+                .Include(rr => rr.Histories)
                 .Include(rr => rr.ResourceRequestsApprovalSteps)
                     .ThenInclude(rras => rras.Histories)
                 .Include(rr => rr.NAF)
@@ -36,6 +37,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             return await _context.ResourceRequests
                 .Where(rr => rr.ResourceRequestsApprovalSteps.Any(step => step.Id == id))
                 .Include(rr => rr.ResourceRequestPurposes)
+                .Include(rr => rr.Histories)
                 .Include(rr => rr.ResourceRequestsApprovalSteps)
                     .ThenInclude(rras => rras.Histories)
                 .Include(rr => rr.NAF)

@@ -15,6 +15,7 @@ namespace NAFServer.src.Mapper
                      rr.CurrentStep,
                      rr.Progress,
                      rr.AccomplishedAt,
+                     rr.DateNeeded,
                      rr.NAFId,
                      rr.ApprovalWorkflowTemplateId,
                      new ResourceDTO(
@@ -26,6 +27,13 @@ namespace NAFServer.src.Mapper
                          rr.Resource.Color
                      ),
                      rr.AdditionalInfo != null ? AdditionalInfoMapper.MapAdditionalInfo(rr.AdditionalInfo) : null,
+                     rr.Histories.Select(h => new ResourceRequestHistoryDTO(
+                        h.Id,
+                        h.ResourceRequestId,
+                        h.Type,
+                        h.Description,
+                        h.CreatedAt
+                    )).ToList(),
                      rr.ResourceRequestPurposes.Select(p => new ResourceRequestPurposeDTO(
                          p.Id,
                          p.Purpose,

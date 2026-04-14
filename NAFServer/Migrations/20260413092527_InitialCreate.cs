@@ -12,22 +12,23 @@ namespace NAFServer.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Department",
+                name: "Departments",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     DepartmentDesc = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     DepartmentHeadId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
+                    table.PrimaryKey("PK_Departments", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
-                name: "Employee",
+                name: "Employees",
                 columns: table => new
                 {
-                    Id = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     FirstName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     MiddleName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LastName = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -45,6 +46,7 @@ namespace NAFServer.Migrations
                 },
                 constraints: table =>
                 {
+                    table.PrimaryKey("PK_Employees", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -130,6 +132,23 @@ namespace NAFServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    employeeId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    location = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    date_added = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    date_removed = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.id);
+                    table.UniqueConstraint("AK_Users_employeeId", x => x.employeeId);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "InternetResources",
                 columns: table => new
                 {
@@ -169,6 +188,28 @@ namespace NAFServer.Migrations
                         column: x => x.ResourceId,
                         principalTable: "Resources",
                         principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UserRoles",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    userId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    role = table.Column<int>(type: "int", nullable: false),
+                    date_added = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    date_removed = table.Column<DateTime>(type: "datetime2", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UserRoles", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_UserRoles_Users_userId",
+                        column: x => x.userId,
+                        principalTable: "Users",
+                        principalColumn: "employeeId",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -321,6 +362,27 @@ namespace NAFServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ResourceRequestHistories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
+                    ResourceRequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Type = table.Column<int>(type: "int", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ResourceRequestHistories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ResourceRequestHistories_ResourceRequests_ResourceRequestId",
+                        column: x => x.ResourceRequestId,
+                        principalTable: "ResourceRequests",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ResourceRequestApprovalStepHistories",
                 columns: table => new
                 {
@@ -421,6 +483,11 @@ namespace NAFServer.Migrations
                 column: "ResourceRequestId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ResourceRequestHistories_ResourceRequestId",
+                table: "ResourceRequestHistories",
+                column: "ResourceRequestId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ResourceRequestPurposes_ResourceRequestApprovalStepHistoryId",
                 table: "ResourceRequestPurposes",
                 column: "ResourceRequestApprovalStepHistoryId");
@@ -444,6 +511,11 @@ namespace NAFServer.Migrations
                 name: "IX_ResourceRequests_ResourceId",
                 table: "ResourceRequests",
                 column: "ResourceId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_UserRoles_userId",
+                table: "UserRoles",
+                column: "userId");
         }
 
         /// <inheritdoc />
@@ -456,16 +528,22 @@ namespace NAFServer.Migrations
                 name: "ApprovalWorkflowStepsTemplates");
 
             migrationBuilder.DropTable(
-                name: "Department");
+                name: "Departments");
 
             migrationBuilder.DropTable(
-                name: "Employee");
+                name: "Employees");
 
             migrationBuilder.DropTable(
                 name: "Implementations");
 
             migrationBuilder.DropTable(
+                name: "ResourceRequestHistories");
+
+            migrationBuilder.DropTable(
                 name: "ResourceRequestPurposes");
+
+            migrationBuilder.DropTable(
+                name: "UserRoles");
 
             migrationBuilder.DropTable(
                 name: "GroupEmails");
@@ -478,6 +556,9 @@ namespace NAFServer.Migrations
 
             migrationBuilder.DropTable(
                 name: "ResourceRequestApprovalStepHistories");
+
+            migrationBuilder.DropTable(
+                name: "Users");
 
             migrationBuilder.DropTable(
                 name: "InternetPurposes");

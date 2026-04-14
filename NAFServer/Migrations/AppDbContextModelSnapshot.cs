@@ -408,6 +408,33 @@ namespace NAFServer.Migrations
                     b.ToTable("ResourceRequestApprovalStepHistories");
                 });
 
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.ResourceRequestHistory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("ResourceRequestId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResourceRequestId");
+
+                    b.ToTable("ResourceRequestHistories");
+                });
+
             modelBuilder.Entity("NAFServer.src.Domain.Entities.ResourceRequestImplementation", b =>
                 {
                     b.Property<Guid>("Id")
@@ -521,7 +548,7 @@ namespace NAFServer.Migrations
 
                     b.Property<string>("employeeId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("location")
                         .IsRequired()
@@ -551,9 +578,11 @@ namespace NAFServer.Migrations
 
                     b.Property<string>("userId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("id");
+
+                    b.HasIndex("userId");
 
                     b.ToTable("UserRoles");
                 });
@@ -703,6 +732,15 @@ namespace NAFServer.Migrations
                     b.Navigation("ResourceRequestApprovalStep");
                 });
 
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.ResourceRequestHistory", b =>
+                {
+                    b.HasOne("NAFServer.src.Domain.Entities.ResourceRequest", null)
+                        .WithMany("Histories")
+                        .HasForeignKey("ResourceRequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("NAFServer.src.Domain.Entities.ResourceRequestImplementation", b =>
                 {
                     b.HasOne("NAFServer.src.Domain.Entities.ResourceRequest", "ResourceRequest")
@@ -729,6 +767,16 @@ namespace NAFServer.Migrations
                     b.Navigation("ResourceRequest");
 
                     b.Navigation("ResourceRequestApprovalStepHistory");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.UserRole", b =>
+                {
+                    b.HasOne("NAFServer.src.Domain.Entities.User", null)
+                        .WithMany("roles")
+                        .HasForeignKey("userId")
+                        .HasPrincipalKey("employeeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Interface.ResourceRequestAdditionalInfo", b =>
@@ -795,6 +843,8 @@ namespace NAFServer.Migrations
                     b.Navigation("AdditionalInfo")
                         .IsRequired();
 
+                    b.Navigation("Histories");
+
                     b.Navigation("ResourceRequestImplementation")
                         .IsRequired();
 
@@ -806,6 +856,11 @@ namespace NAFServer.Migrations
             modelBuilder.Entity("NAFServer.src.Domain.Entities.ResourceRequestApprovalStep", b =>
                 {
                     b.Navigation("Histories");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.User", b =>
+                {
+                    b.Navigation("roles");
                 });
 #pragma warning restore 612, 618
         }

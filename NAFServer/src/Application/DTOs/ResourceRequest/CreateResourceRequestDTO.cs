@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 
 namespace NAFServer.src.Application.DTOs.ResourceRequest
 {
@@ -7,6 +7,7 @@ namespace NAFServer.src.Application.DTOs.ResourceRequest
         Guid nafId,
         int resourceId,
         string purpose,
-        JsonElement? additionalInfo
+        JsonElement? additionalInfo,
+        DateTime? dateNeeded = null
     );
 }

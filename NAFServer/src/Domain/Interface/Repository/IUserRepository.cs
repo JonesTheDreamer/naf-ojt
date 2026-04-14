@@ -12,5 +12,7 @@ namespace NAFServer.src.Domain.Interface.Repository
         Task RemoveRoleAsync(string employeeId, Roles role);
         Task<List<string>> GetLocationsAsync();
         Task AssignLocationAsync(string employeeId, string location);
+        Task<User> GetNetworkAdminOfLocation(string location);
+        Task<User> GetUserById(string employeeId);
     }
 }

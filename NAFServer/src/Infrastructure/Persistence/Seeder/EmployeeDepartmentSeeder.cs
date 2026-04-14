@@ -131,35 +131,47 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
             });
             departments.Add(new Department("HR", "Human Resources", "EMP00076"));
 
-            // ── INFORMATION TECHNOLOGY ────────────────────────────────────
+            // ── INFORMATION TECHNOLOGY — MAIN OFFICE ─────────────────────
             employees.AddRange(new[] {
-                new Employee("EMP00101", "Michael",   "A.", "Navarro",    null,      "Active", "Acme Corporation", "IT Director",                      "Main Office", "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00102", "Francis",   "B.", "Aquino",     "EMP00101","Active", "Acme Corporation", "Systems & Infrastructure Manager", "Main Office", "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00103", "Christine", "C.", "Villanueva", "EMP00101","Active", "Acme Corporation", "Software Development Manager",     "Main Office", "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00104", "Ronald",    "D.", "Soriano",    "EMP00101","Active", "Acme Corporation", "IT Support Manager",               "Branch A",    "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00105", "Jasmine",   "E.", "Mercado",    "EMP00102","Active", "Acme Corporation", "System Administrator",             "Main Office", "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00106", "Kenneth",   "F.", "Hernandez",  "EMP00102","Active", "Acme Corporation", "Network Administrator",            "Main Office", "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00107", "Lorena",    "G.", "Gutierrez",  "EMP00102","Active", "Acme Corporation", "Network Engineer",                 "Branch A",    "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00108", "Mario",     "H.", "Ong",        "EMP00102","Active", "Acme Corporation", "Database Administrator",           "Main Office", "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00109", "Noreen",    "I.", "Ferrer",     "EMP00102","Active", "Acme Corporation", "Database Administrator",           "Branch B",    "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00110", "Oscar",     "J.", "Padilla",    "EMP00102","Active", "Acme Corporation", "Infrastructure Engineer",          "Main Office", "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00111", "Pamela",    "K.", "Chua",       "EMP00102","Active", "Acme Corporation", "Security Engineer",                "Main Office", "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00112", "Quirino",   "L.", "dela Torre", "EMP00102","Active", "Acme Corporation", "Systems Engineer",                 "Branch A",    "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00113", "Renato",    "M.", "Pascual",    "EMP00103","Active", "Acme Corporation", "Senior Software Engineer",         "Main Office", "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00114", "Shirley",   "N.", "Reyes",      "EMP00103","Active", "Acme Corporation", "Senior Software Engineer",         "Main Office", "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00115", "Teofilo",   "O.", "Tan",        "EMP00103","Active", "Acme Corporation", "Software Engineer",                "Branch A",    "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00116", "Ursula",    "P.", "Lim",        "EMP00103","Active", "Acme Corporation", "Software Engineer",                "Main Office", "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00117", "Victor",    "Q.", "Garcia",     "EMP00103","Active", "Acme Corporation", "Software Engineer",                "Branch B",    "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00118", "Wilda",     "R.", "Torres",     "EMP00103","Active", "Acme Corporation", "Junior Software Engineer",         "Main Office", "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00119", "Xavier",    "S.", "Mendoza",    "EMP00103","Active", "Acme Corporation", "Junior Software Engineer",         "Branch A",    "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00120", "Yolanda",   "T.", "Ramos",      "EMP00104","Active", "Acme Corporation", "IT Support Specialist",            "Branch A",    "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00121", "Zachary",   "U.", "Navarro",    "EMP00104","Active", "Acme Corporation", "IT Support Specialist",            "Main Office", "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00122", "Alberto",   "V.", "Castillo",   "EMP00104","Active", "Acme Corporation", "IT Support Specialist",            "Branch B",    "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00123", "Belinda",   "W.", "Dela Cruz",  "EMP00104","Active", "Acme Corporation", "Help Desk Analyst",                "Main Office", "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00124", "Celestino", "X.", "Villanueva", "EMP00104","Active", "Acme Corporation", "Help Desk Analyst",                "Branch A",    "IT", "EMP00101", "Information Technology"),
-                new Employee("EMP00125", "Dolores",   "Y.", "Soriano",    "EMP00104","Active", "Acme Corporation", "Help Desk Analyst",                "Main Office", "IT", "EMP00101", "Information Technology"),
+                new Employee("EMP00101", "Michael",   "A.", "Navarro",    null,      "Active", "Acme Corporation", "IT Director",                      "Main Office", "IT",     "EMP00101", "Information Technology"),
+                new Employee("EMP00102", "Francis",   "B.", "Aquino",     "EMP00101","Active", "Acme Corporation", "Systems & Infrastructure Manager", "Main Office", "IT",     "EMP00101", "Information Technology"),
+                new Employee("EMP00103", "Christine", "C.", "Villanueva", "EMP00101","Active", "Acme Corporation", "Software Development Manager",     "Main Office", "IT",     "EMP00101", "Information Technology"),
+                new Employee("EMP00105", "Jasmine",   "E.", "Mercado",    "EMP00102","Active", "Acme Corporation", "System Administrator",             "Main Office", "IT",     "EMP00101", "Information Technology"),
+                new Employee("EMP10000", "Kenneth",   "F.", "Hernandez",  "EMP00102","Active", "Acme Corporation", "Network Administrator",            "Main Office", "IT",     "EMP00101", "Information Technology"),
+                new Employee("EMP00108", "Mario",     "H.", "Ong",        "EMP00102","Active", "Acme Corporation", "Database Administrator",           "Main Office", "IT",     "EMP00101", "Information Technology"),
+                new Employee("EMP00110", "Oscar",     "J.", "Padilla",    "EMP00102","Active", "Acme Corporation", "Infrastructure Engineer",          "Main Office", "IT",     "EMP00101", "Information Technology"),
+                new Employee("EMP00111", "Pamela",    "K.", "Chua",       "EMP00102","Active", "Acme Corporation", "Security Engineer",                "Main Office", "IT",     "EMP00101", "Information Technology"),
+                new Employee("EMP00113", "Renato",    "M.", "Pascual",    "EMP00103","Active", "Acme Corporation", "Senior Software Engineer",         "Main Office", "IT",     "EMP00101", "Information Technology"),
+                new Employee("EMP00114", "Shirley",   "N.", "Reyes",      "EMP00103","Active", "Acme Corporation", "Senior Software Engineer",         "Main Office", "IT",     "EMP00101", "Information Technology"),
+                new Employee("EMP00116", "Ursula",    "P.", "Lim",        "EMP00103","Active", "Acme Corporation", "Software Engineer",                "Main Office", "IT",     "EMP00101", "Information Technology"),
+                new Employee("EMP00118", "Wilda",     "R.", "Torres",     "EMP00103","Active", "Acme Corporation", "Junior Software Engineer",         "Main Office", "IT",     "EMP00101", "Information Technology"),
+                new Employee("EMP00121", "Zachary",   "U.", "Navarro",    "EMP00104","Active", "Acme Corporation", "IT Support Specialist",            "Main Office", "IT",     "EMP00101", "Information Technology"),
+                new Employee("EMP00123", "Belinda",   "W.", "Dela Cruz",  "EMP00104","Active", "Acme Corporation", "Help Desk Analyst",                "Main Office", "IT",     "EMP00101", "Information Technology"),
+                new Employee("EMP00125", "Dolores",   "Y.", "Soriano",    "EMP00104","Active", "Acme Corporation", "Help Desk Analyst",                "Main Office", "IT",     "EMP00101", "Information Technology"),
             });
             departments.Add(new Department("IT", "Information Technology", "EMP00101"));
+
+            // ── INFORMATION TECHNOLOGY — BRANCH A ────────────────────────
+            employees.AddRange(new[] {
+                new Employee("EMP00104", "Ronald",    "D.", "Soriano",    "EMP00101","Active", "Acme Corporation", "IT Support Manager",               "Branch A",    "IT_BRA", "EMP00104", "Information Technology"),
+                new Employee("EMP10001", "John",      "F.", "Doe",        "EMP00102","Active", "Acme Corporation", "Network Administrator",            "Branch A",    "IT_BRA", "EMP00104", "Information Technology"),
+                new Employee("EMP00107", "Lorena",    "G.", "Gutierrez",  "EMP00102","Active", "Acme Corporation", "Network Engineer",                 "Branch A",    "IT_BRA", "EMP00104", "Information Technology"),
+                new Employee("EMP00112", "Quirino",   "L.", "dela Torre", "EMP00102","Active", "Acme Corporation", "Systems Engineer",                 "Branch A",    "IT_BRA", "EMP00104", "Information Technology"),
+                new Employee("EMP00115", "Teofilo",   "O.", "Tan",        "EMP00103","Active", "Acme Corporation", "Software Engineer",                "Branch A",    "IT_BRA", "EMP00104", "Information Technology"),
+                new Employee("EMP00119", "Xavier",    "S.", "Mendoza",    "EMP00103","Active", "Acme Corporation", "Junior Software Engineer",         "Branch A",    "IT_BRA", "EMP00104", "Information Technology"),
+                new Employee("EMP00120", "Yolanda",   "T.", "Ramos",      "EMP00104","Active", "Acme Corporation", "IT Support Specialist",            "Branch A",    "IT_BRA", "EMP00104", "Information Technology"),
+                new Employee("EMP00124", "Celestino", "X.", "Villanueva", "EMP00104","Active", "Acme Corporation", "Help Desk Analyst",                "Branch A",    "IT_BRA", "EMP00104", "Information Technology"),
+            });
+            departments.Add(new Department("IT_BRA", "Information Technology", "EMP00104"));
+
+            // ── INFORMATION TECHNOLOGY — BRANCH B ────────────────────────
+            employees.AddRange(new[] {
+                new Employee("EMP10002", "Ako",       "I.", "Cutie",      "EMP00102","Active", "Acme Corporation", "Network Administrator",            "Branch B",    "IT_BRB", "EMP10002", "Information Technology"),
+                new Employee("EMP00109", "Noreen",    "I.", "Ferrer",     "EMP00102","Active", "Acme Corporation", "Database Administrator",           "Branch B",    "IT_BRB", "EMP10002", "Information Technology"),
+                new Employee("EMP00117", "Victor",    "Q.", "Garcia",     "EMP00103","Active", "Acme Corporation", "Software Engineer",                "Branch B",    "IT_BRB", "EMP10002", "Information Technology"),
+                new Employee("EMP00122", "Alberto",   "V.", "Castillo",   "EMP00104","Active", "Acme Corporation", "IT Support Specialist",            "Branch B",    "IT_BRB", "EMP10002", "Information Technology"),
+            });
+            departments.Add(new Department("IT_BRB", "Information Technology", "EMP10002"));
 
             // ── OPERATIONS ────────────────────────────────────────────────
             employees.AddRange(new[] {

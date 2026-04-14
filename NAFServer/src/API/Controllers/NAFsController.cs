@@ -81,7 +81,7 @@ namespace NAFServer.src.API.Controllers
         {
             try
             {
-                var results = await _nafService.AddBasicResourcesToNAFAsync(nafId, request.ResourceIds);
+                var results = await _nafService.AddBasicResourcesToNAFAsync(nafId, request.Resources);
                 return Ok(results);
             }
             catch (Exception ex)

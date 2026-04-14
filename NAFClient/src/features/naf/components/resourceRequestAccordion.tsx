@@ -40,6 +40,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { getDateUrgency } from "@/lib/dateUrgency";
 
 import type { ResourceRequest, PurposeProps } from "@/types/api/naf";
 
@@ -94,6 +95,24 @@ function ActivityBadge({ status }: { status: Status }) {
   );
 }
 
+function DateUrgencyBadge({ dateNeeded }: { dateNeeded?: string | null }) {
+  const urgency = getDateUrgency(dateNeeded);
+  if (!urgency) return null;
+
+  return (
+    <span
+      className={cn(
+        "text-xs font-medium px-2 py-0.5 rounded-full shrink-0",
+        urgency.overdue
+          ? "bg-red-100 text-red-700"
+          : "bg-amber-50 text-amber-700",
+      )}
+    >
+      {urgency.label}
+    </span>
+  );
+}
+
 function HistoryTable({ steps }: { steps: ResourceRequest["steps"] }) {
   const histories = steps.flatMap((step) =>
     step.histories.map((h) => ({
@@ -144,12 +163,18 @@ function PurposeBlock({ request }: { request: ResourceRequest }) {
 
   return (
     <div className="space-y-3">
-      <div>
-        <p className="text-xs text-muted-foreground mb-0.5">Date Needed</p>
-        <p className="text-sm font-medium">
-          {formatDateTime(request.accomplishedAt ?? "")}
-        </p>
-      </div>
+      {request.dateNeeded && (
+        <div>
+          <p className="text-xs text-muted-foreground mb-0.5">Date Needed</p>
+          <p className="text-sm font-medium">
+            {new Date(request.dateNeeded).toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            })}
+          </p>
+        </div>
+      )}
 
       {purpose && (
         <div>
@@ -539,6 +564,7 @@ export function ResourceRequestAccordionItem({
   const progress = request.progress as unknown as Progress;
 
   const config = PROGRESS_CONFIG[progress];
+  const urgency = getDateUrgency(request.dateNeeded);
   const initialPurpose = request.purposes?.[0]?.purpose ?? "";
 
   const rejectionReason = request.steps
@@ -556,7 +582,10 @@ export function ResourceRequestAccordionItem({
     <>
       <AccordionItem
         value={request.id}
-        className="border rounded-lg px-0 overflow-hidden"
+        className={cn(
+          "border rounded-lg px-0 overflow-hidden",
+          urgency?.overdue && "border-red-300 bg-red-50/30",
+        )}
       >
         <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 [&[data-state=open]]:bg-muted/20">
           <div className="flex items-center gap-3 flex-1 min-w-0">
@@ -567,6 +596,7 @@ export function ResourceRequestAccordionItem({
             <span className="text-sm font-medium truncate">
               {request.resource.name}
             </span>
+            <DateUrgencyBadge dateNeeded={request.dateNeeded} />
           </div>
           <span
             className={cn(

@@ -47,12 +47,9 @@ namespace NAFServer.src.Application.Handlers.ResourceRequestHandler
             var info = dto.Deserialize<InternetInfoRequestDTO>()
                 ?? throw new Exception("Invalid Internet request payload");
 
-            var internetResource = await _internetResourceRepository.GetByIdAsync(info.InternetResourceId);
+            _ = await _internetResourceRepository.GetByIdAsync(info.InternetResourceId); // existence check
 
-            var additionalInfo = new InternetRequestInfo(info.InternetResourceId)
-            {
-                InternetResource = internetResource
-            };
+            var additionalInfo = new InternetRequestInfo(info.InternetResourceId);
 
 
             return additionalInfo;

@@ -6,6 +6,7 @@ export const createResourceRequest = async (payload: {
   resourceId: number;
   purpose: string;
   additionalInfo: Record<string, unknown>;
+  dateNeeded?: string | null;
 }): Promise<ResourceRequest> => {
   return (await api.post("/Requests", payload)).data;
 };

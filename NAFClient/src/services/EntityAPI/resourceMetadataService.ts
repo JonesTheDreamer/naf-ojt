@@ -25,7 +25,12 @@ export const getSharedFolders = async (): Promise<SharedFolderItem[]> => {
 
 export const addBasicResourcesToNAF = async (
   nafId: string,
-  resourceIds: number[],
+  resources: { id: number; dateNeeded: string }[],
 ): Promise<AddBasicResourceResult[]> => {
-  return (await api.post(`/NAFs/${nafId}/resources/basic`, { resourceIds })).data;
+  return (await api.post(`/NAFs/${nafId}/resources/basic`, {
+    resources: resources.map((r) => ({
+      resourceId: r.id,
+      dateNeeded: r.dateNeeded || null,
+    })),
+  })).data;
 };

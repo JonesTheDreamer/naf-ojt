@@ -28,8 +28,10 @@ import { Hardware } from "@/types/enum/hardware";
 
 import { Checkbox } from "@/components/ui/checkbox";
 import { FieldLabel } from "@/components/ui/field";
+import { useAuth } from "@/features/auth/AuthContext";
 
 export function CreateNAFDialog() {
+  const { user } = useAuth();
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
     null,
   );
@@ -40,6 +42,7 @@ export function CreateNAFDialog() {
   const [selectedHardware, setSelectedHardware] = useState<Hardware>(
     Hardware.None,
   );
+  const [dateNeeded, setDateNeeded] = useState<string>("");
 
   const {
     employeeNAFs,
@@ -49,13 +52,9 @@ export function CreateNAFDialog() {
 
   // const { createNAFAsync } = useNAF();
 
-  const {
-    getAllResource,
-    isLoading: resourceLoading,
-  } = useResource();
+  const { getAllResource, isLoading: resourceLoading } = useResource();
 
   const loading = employeeLoading || resourceLoading;
-  
 
   const fetchEmployee = async (query: string): Promise<Employee[]> => {
     try {
@@ -131,16 +130,18 @@ export function CreateNAFDialog() {
     setShowEmployeeHasNAFAlert(false);
     setToRequest([]);
     setSelectedHardware(Hardware.None);
+    setDateNeeded("");
   };
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
     console.log("called");
 
-    if (!selectedEmployee) return;
+    if (!selectedEmployee || !user) return;
     const payload = {
       employeeId: selectedEmployee.id,
-      requestorId: "0011134",
+      requestorId: user.employeeId,
       resourceIds: [...toRequest, Number(selectedHardware)],
+      dateNeeded: dateNeeded || null,
     };
     try {
       await createNAFAsync(payload);
@@ -246,6 +247,17 @@ export function CreateNAFDialog() {
                   <div className="flex flex-col gap-2 overflow-y-auto">
                     <p className="font-bold text-amber-500">Resources</p>
                     <HardwareSelect />
+                    <div className="flex flex-col gap-1">
+                      <FieldLabel htmlFor="date-needed">Date Needed</FieldLabel>
+                      <input
+                        id="date-needed"
+                        type="date"
+                        value={dateNeeded}
+                        min={new Date().toISOString().split("T")[0]}
+                        onChange={(e) => setDateNeeded(e.target.value)}
+                        className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+                      />
+                    </div>
                     <BasicResources />
                   </div>
                 )}

@@ -8,6 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import type { NAF } from "@/types/api/naf";
 import { ImplementationResourceRequestRow } from "./ImplementationResourceRequestRow";
+import { getDateUrgency } from "@/lib/dateUrgency";
+import { cn } from "@/lib/utils";
 
 interface Props {
   nafs: NAF[];
@@ -30,9 +32,21 @@ export function ImplementationNAFAccordion({
 }: Props) {
   if (nafs.length === 0) return null;
 
+  const getEarliestDate = (naf: NAF): number => {
+    const dates = naf.resourceRequests
+      .map((rr) => rr.dateNeeded)
+      .filter((d): d is string => !!d)
+      .map((d) => new Date(d).getTime());
+    return dates.length > 0 ? Math.min(...dates) : Infinity;
+  };
+
+  const sortedNafs = [...nafs].sort(
+    (a, b) => getEarliestDate(a) - getEarliestDate(b),
+  );
+
   return (
     <Accordion type="multiple" className="space-y-2">
-      {nafs.map((naf) => {
+      {sortedNafs.map((naf) => {
         const emp = naf.employee;
         const employeeName = [emp.firstName, emp.middleName, emp.lastName]
           .filter(Boolean)
@@ -42,11 +56,24 @@ export function ImplementationNAFAccordion({
           .filter((rr) => !rr.implementation?.employeeId)
           .map((rr) => rr.id);
 
+        const hasOverdue = naf.resourceRequests.some(
+          (rr) => getDateUrgency(rr.dateNeeded)?.overdue,
+        );
+
+        const nearestDate = naf.resourceRequests
+          .map((rr) => rr.dateNeeded)
+          .filter((d): d is string => !!d)
+          .reduce<string | null>(
+            (min, d) => (min === null || new Date(d) < new Date(min) ? d : min),
+            null,
+          );
+        const nearestUrgency = getDateUrgency(nearestDate);
+
         return (
           <AccordionItem
             key={naf.id}
             value={naf.id}
-            className="border rounded-lg overflow-hidden"
+            className={cn("border rounded-lg overflow-hidden", hasOverdue && "border-red-300")}
           >
             <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 [&[data-state=open]]:bg-muted/20">
               <div className="flex flex-col items-start gap-0.5 text-left">
@@ -54,6 +81,16 @@ export function ImplementationNAFAccordion({
                 <span className="text-xs text-muted-foreground">
                   {employeeName}
                 </span>
+                {nearestUrgency && (
+                  <span
+                    className={cn(
+                      "text-xs font-medium",
+                      nearestUrgency.overdue ? "text-red-600" : "text-amber-600",
+                    )}
+                  >
+                    {nearestUrgency.label}
+                  </span>
+                )}
               </div>
             </AccordionTrigger>
 

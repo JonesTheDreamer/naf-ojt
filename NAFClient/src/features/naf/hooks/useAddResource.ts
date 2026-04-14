@@ -9,23 +9,31 @@ export type InternetEntry = {
   internetPurposeId: number | null;
   internetResourceId: number | null;
   purpose: string;
+  dateNeeded: string;
 };
 
 export type GroupEmailEntry = {
   _id: string;
   groupEmailId: number | null;
   purpose: string;
+  dateNeeded: string;
 };
 
 export type SharedFolderEntry = {
   _id: string;
   sharedFolderId: number | null;
   purpose: string;
+  dateNeeded: string;
+};
+
+export type BasicResourceWithDate = {
+  id: number;
+  dateNeeded: string;
 };
 
 type AddResourcesParams = {
   nafId: string;
-  basicResourceIds: number[];
+  basicResources: BasicResourceWithDate[];
   internetEntries: InternetEntry[];
   groupEmailEntries: GroupEmailEntry[];
   sharedFolderEntries: SharedFolderEntry[];
@@ -44,11 +52,11 @@ export const useAddResource = () => {
     let anySuccess = false;
 
     // ── Basic resources ───────────────────────────────────────────────────────
-    if (params.basicResourceIds.length > 0) {
+    if (params.basicResources.length > 0) {
       try {
         const results = await addBasicResourcesToNAF(
           params.nafId,
-          params.basicResourceIds,
+          params.basicResources,
         );
         results.forEach((r) => {
           if (r.success) {
@@ -72,6 +80,7 @@ export const useAddResource = () => {
           resourceId: 1,
           purpose: entry.purpose,
           additionalInfo: { InternetResourceId: entry.internetResourceId! },
+          dateNeeded: entry.dateNeeded || null,
         })
           .then(() => {
             anySuccess = true;
@@ -90,6 +99,7 @@ export const useAddResource = () => {
           resourceId: 2,
           purpose: entry.purpose,
           additionalInfo: { GroupEmailId: entry.groupEmailId! },
+          dateNeeded: entry.dateNeeded || null,
         })
           .then(() => {
             anySuccess = true;
@@ -108,6 +118,7 @@ export const useAddResource = () => {
           resourceId: 3,
           purpose: entry.purpose,
           additionalInfo: { SharedFolderId: entry.sharedFolderId! },
+          dateNeeded: entry.dateNeeded || null,
         })
           .then(() => {
             anySuccess = true;

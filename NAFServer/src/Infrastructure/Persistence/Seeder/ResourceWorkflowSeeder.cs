@@ -65,10 +65,10 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
             await context.SaveChangesAsync();
 
             var specialInternetResourceFirstStep = new ApprovalWorkflowStepsTemplate(specialInternetResource.Id, 1, StepAction.APPROVER, ApproverRole.DEPARTMENT_HEAD, "EMPLOYEE");
-            var specialInternetResourceSecondStep = new ApprovalWorkflowStepsTemplate(specialInternetResource.Id, 2, StepAction.FOR_SCREENING, ApproverRole.POSITION, "Network Admin");
+            var specialInternetResourceSecondStep = new ApprovalWorkflowStepsTemplate(specialInternetResource.Id, 2, StepAction.FOR_SCREENING, ApproverRole.TECHNICAL_HEAD, "EMPLOYEE");
 
             var groupEmailResourceFirstStep = new ApprovalWorkflowStepsTemplate(groupEmailResource.Id, 1, StepAction.APPROVER, ApproverRole.DEPARTMENT_HEAD, "EMPLOYEE");
-            var groupEmailResourceSecondStep = new ApprovalWorkflowStepsTemplate(groupEmailResource.Id, 2, StepAction.FOR_SCREENING, ApproverRole.POSITION, "Network Admin");
+            var groupEmailResourceSecondStep = new ApprovalWorkflowStepsTemplate(groupEmailResource.Id, 2, StepAction.FOR_SCREENING, ApproverRole.TECHNICAL_HEAD, "EMPLOYEE");
 
             var sharedFolderResourceFirstStep = new ApprovalWorkflowStepsTemplate(sharedFolderResource.Id, 1, StepAction.APPROVER, ApproverRole.DEPARTMENT_HEAD, "EMPLOYEE");
             var sharedFolderResourceSecondStep = new ApprovalWorkflowStepsTemplate(sharedFolderResource.Id, 2, StepAction.APPROVER, ApproverRole.DEPARTMENT_HEAD, "FOLDER_OWNER");

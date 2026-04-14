@@ -1,4 +1,4 @@
 namespace NAFServer.src.Application.DTOs.NAF
 {
-    public record AddBasicResourcesDTO(List<int> ResourceIds);
+    public record AddBasicResourcesDTO(List<BasicResourceWithDateDTO> Resources);
 }

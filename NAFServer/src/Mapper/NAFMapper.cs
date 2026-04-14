@@ -45,6 +45,7 @@ public static class NAFMapper
                     rr.CurrentStep,
                     rr.Progress,
                     rr.AccomplishedAt,
+                    rr.DateNeeded,
                     rr.NAFId,
                     rr.ApprovalWorkflowTemplateId,
                     new ResourceDTO(
@@ -58,6 +59,13 @@ public static class NAFMapper
                      rr.AdditionalInfo != null
                     ? AdditionalInfoMapper.MapAdditionalInfo(rr.AdditionalInfo)
                     : null,
+                     rr.Histories.Select(h => new ResourceRequestHistoryDTO(
+                        h.Id,
+                        h.ResourceRequestId,
+                        h.Type,
+                        h.Description,
+                        h.CreatedAt
+                    )).ToList(),
                     rr.ResourceRequestPurposes.Select(p => new ResourceRequestPurposeDTO(
                         p.Id,
                         p.Purpose,

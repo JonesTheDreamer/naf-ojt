@@ -29,6 +29,7 @@ namespace NAFServer.src.Infrastructure.Persistence
         public DbSet<Department> Departments { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<ResourceRequestHistory> ResourceRequestHistories { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -96,6 +97,12 @@ namespace NAFServer.src.Infrastructure.Persistence
                 .WithOne(h => h.ResourceRequestApprovalStep)
                 .HasForeignKey(h => h.ResourceRequestApprovalStepId)
                 .IsRequired();
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.roles)
+                .WithOne()
+                .HasForeignKey(ur => ur.userId)
+                .HasPrincipalKey(u => u.employeeId);
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)

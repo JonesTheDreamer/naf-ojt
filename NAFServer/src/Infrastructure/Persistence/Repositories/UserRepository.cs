@@ -14,6 +14,11 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             _context = context;
         }
 
+        public async Task<User> GetUserById(string employeeId)
+        {
+            return await _context.Users.Where(u => u.employeeId == employeeId).FirstAsync();
+        }
+
         public async Task<bool> HasRoleAsync(string employeeId, Roles role)
         {
             return await _context.UserRoles.AnyAsync(ur =>
@@ -39,6 +44,14 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             await _context.Users.AddAsync(user);
             await _context.UserRoles.AddAsync(userRole);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<User> GetNetworkAdminOfLocation(string location)
+        {
+            return await _context.Users
+                .Where(u => u.location == location &&
+                            u.roles.Any(r => r.role == Roles.TECHNICAL_HEAD && r.date_removed == null))
+                .FirstAsync();
         }
 
         public async Task RemoveRoleAsync(string employeeId, Roles role)

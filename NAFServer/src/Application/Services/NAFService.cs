@@ -83,7 +83,8 @@ namespace NAFServer.src.Application.Services
                             naf.Id,
                             r,
                             "Basic resource needed for all employee",
-                            null
+                            null,
+                            request.DateNeeded
                         )
                     );
                 }
@@ -142,32 +143,32 @@ namespace NAFServer.src.Application.Services
             return nafs;
         }
 
-        public async Task<List<AddBasicResourceResultDTO>> AddBasicResourcesToNAFAsync(Guid nafId, List<int> resourceIds)
+        public async Task<List<AddBasicResourceResultDTO>> AddBasicResourcesToNAFAsync(Guid nafId, List<BasicResourceWithDateDTO> resources)
         {
             var results = new List<AddBasicResourceResultDTO>();
 
-            foreach (var resourceId in resourceIds.Distinct())
+            foreach (var resource in resources.DistinctBy(r => r.ResourceId))
             {
                 try
                 {
                     bool alreadyExists = await _context.ResourceRequests
-                        .AnyAsync(rr => rr.NAFId == nafId && rr.ResourceId == resourceId);
+                        .AnyAsync(rr => rr.NAFId == nafId && rr.ResourceId == resource.ResourceId);
 
                     if (alreadyExists)
                     {
                         results.Add(new AddBasicResourceResultDTO(
-                            resourceId, false, "Resource already exists in this NAF", null));
+                            resource.ResourceId, false, "Resource already exists in this NAF", null));
                         continue;
                     }
 
                     var rr = await _resourceRequestService.CreateBasicAsync(
-                        new CreateResourceRequestDTO(nafId, resourceId, "Basic resource needed", null));
+                        new CreateResourceRequestDTO(nafId, resource.ResourceId, "Basic resource needed", null, resource.DateNeeded));
 
-                    results.Add(new AddBasicResourceResultDTO(resourceId, true, null, rr));
+                    results.Add(new AddBasicResourceResultDTO(resource.ResourceId, true, null, rr));
                 }
                 catch (Exception ex)
                 {
-                    results.Add(new AddBasicResourceResultDTO(resourceId, false, ex.Message, null));
+                    results.Add(new AddBasicResourceResultDTO(resource.ResourceId, false, ex.Message, null));
                 }
             }
 

@@ -14,7 +14,7 @@ namespace NAFServer.src.Domain.Entities
         {
             this.userId = userId;
             this.role = role;
-            this.date_added = DateTime.Now;
+            date_added = DateTime.Now;
         }
     }
 }
