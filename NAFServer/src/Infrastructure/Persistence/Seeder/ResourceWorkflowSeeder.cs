@@ -18,6 +18,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
             var basicInternet = new Resource("Basic Internet", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/1006/1006771.png", false);
             var printerBlackAndWhite = new Resource("Printer Access (Black and White)", "B4FF9F", "https://images.vexels.com/media/users/3/136620/isolated/preview/0092395e0d1009ae4190b2ca7b941793-print-printer-icon.png", false);
             var microsoft365e1 = new Resource("Microsoft 365 (E1)", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/732/732221.png", false);
+            var activeDirectory = new Resource("Active Directory", "FFD59E", "https://cdn-icons-png.flaticon.com/512/1383/1383970.png", false);
             var specialInternet = new Resource("Special Internet", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/1006/1006771.png", true);
             var groupEmail = new Resource("Group Email", "F9FFA4", "https://static.vecteezy.com/system/resources/thumbnails/052/933/905/small/white-envelope-icon-with-transparent-background-png.png", true);
             var sharedFolder = new Resource("Shared Folder", "FFD59E", "https://cdn-icons-png.flaticon.com/512/1383/1383970.png", true);
@@ -33,31 +34,34 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
                 email,
                 basicInternet,
                 printerBlackAndWhite,
-                microsoft365e1
+                microsoft365e1,
+                activeDirectory
             );
             await context.SaveChangesAsync();
 
-            var computerResource = new ApprovalWorkflowTemplate(computer.Id, 1);
-            var laptopResource = new ApprovalWorkflowTemplate(laptop.Id, 1);
-            var commonPcResource = new ApprovalWorkflowTemplate(commonPc.Id, 1);
-            var microsoft365Resource = new ApprovalWorkflowTemplate(microsoft365.Id, 1);
-            var emailResource = new ApprovalWorkflowTemplate(email.Id, 1);
-            var basicInternetResource = new ApprovalWorkflowTemplate(basicInternet.Id, 1);
-            var printerBlackAndWhiteResource = new ApprovalWorkflowTemplate(printerBlackAndWhite.Id, 1);
-            var microsoft365e1Resource = new ApprovalWorkflowTemplate(microsoft365e1.Id, 1);
+            //var computerResource = new ApprovalWorkflowTemplate(computer.Id, 1);
+            //var laptopResource = new ApprovalWorkflowTemplate(laptop.Id, 1);
+            //var commonPcResource = new ApprovalWorkflowTemplate(commonPc.Id, 1);
+            //var microsoft365Resource = new ApprovalWorkflowTemplate(microsoft365.Id, 1);
+            //var emailResource = new ApprovalWorkflowTemplate(email.Id, 1);
+            //var basicInternetResource = new ApprovalWorkflowTemplate(basicInternet.Id, 1);
+            //var printerBlackAndWhiteResource = new ApprovalWorkflowTemplate(printerBlackAndWhite.Id, 1);
+            //var microsoft365e1Resource = new ApprovalWorkflowTemplate(microsoft365e1.Id, 1);
+            //var activeDirectoryResource = new ApprovalWorkflowTemplate(activeDirectory.Id, 1);
             var specialInternetResource = new ApprovalWorkflowTemplate(specialInternet.Id, 1);
             var groupEmailResource = new ApprovalWorkflowTemplate(groupEmail.Id, 1);
             var sharedFolderResource = new ApprovalWorkflowTemplate(sharedFolder.Id, 1);
 
             context.ApprovalWorkflowTemplates.AddRange(
-                computerResource,
-                laptopResource,
-                commonPcResource,
-                microsoft365Resource,
-                emailResource,
-                basicInternetResource,
-                printerBlackAndWhiteResource,
-                microsoft365e1Resource,
+                //computerResource,
+                //laptopResource,
+                //commonPcResource,
+                //microsoft365Resource,
+                //emailResource,
+                //basicInternetResource,
+                //printerBlackAndWhiteResource,
+                //microsoft365e1Resource,
+                //activeDirectoryResource,
                 specialInternetResource,
                 groupEmailResource,
                 sharedFolderResource

@@ -66,12 +66,7 @@ namespace NAFServer.src.Application.Services
         {
             var implementation = await _implementationRepository.GetByIdAsync(request);
             implementation.SetToInProgress(employeeId);
-            await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
-            (
-                implementation.ResourceRequestId,
-                ResourceRequestAction.ACCEPT,
-                "Resource Request accepted by Technical Team"
-            ));
+
             await _context.SaveChangesAsync();
             return ResourceRequestImplementationMapper.ToDTO(implementation);
         }
@@ -97,6 +92,12 @@ namespace NAFServer.src.Application.Services
 
             var implementation = existing ?? await _implementationRepository.CreateAsync(resourceRequestId);
             implementation.SetToInProgress(employeeId);
+            await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
+            (
+                implementation.ResourceRequestId,
+                ResourceRequestAction.ACCEPT,
+                "Resource Request accepted by Technical Team"
+            ));
             await _context.SaveChangesAsync();
 
             return new ForImplementationItemDTO(

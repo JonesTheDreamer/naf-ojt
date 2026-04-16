@@ -1,8 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
 import {
   addBasicResourcesToNAF,
+  createInternetPurpose,
+  createInternetResource,
 } from "@/services/EntityAPI/resourceMetadataService";
 import { createResourceRequest } from "@/services/EntityAPI/resourceRequestService";
+import { toast } from "sonner";
 
 export type InternetEntry = {
   _id: string;
@@ -10,6 +13,13 @@ export type InternetEntry = {
   internetResourceId: number | null;
   purpose: string;
   dateNeeded: string;
+  // "Other" mode — user is creating a new purpose + resource
+  isOther: boolean;
+  newPurposeName: string;
+  newPurposeDescription: string;
+  newResourceName: string;
+  newResourceUrl: string;
+  newResourceDescription: string;
 };
 
 export type GroupEmailEntry = {
@@ -70,25 +80,44 @@ export const useAddResource = () => {
       }
     }
 
-    // ── Special resources (fired in parallel, non-blocking per item) ──────────
+    // ── Special resources (fired sequentially for "other" entries, parallel otherwise) ──
     const specialTasks: Promise<void>[] = [];
 
     params.internetEntries.forEach((entry) => {
       specialTasks.push(
-        createResourceRequest({
-          nafId: params.nafId,
-          resourceId: 1,
-          purpose: entry.purpose,
-          additionalInfo: { InternetResourceId: entry.internetResourceId! },
-          dateNeeded: entry.dateNeeded || null,
-        })
-          .then(() => {
+        (async () => {
+          try {
+            let resourceId = entry.internetResourceId;
+
+            if (entry.isOther) {
+              const newPurpose = await createInternetPurpose(
+                entry.newPurposeName,
+                entry.newPurposeDescription,
+              );
+              const newResource = await createInternetResource(
+                entry.newResourceName,
+                entry.newResourceUrl,
+                entry.newResourceDescription || null,
+                newPurpose.id,
+              );
+              resourceId = newResource.id;
+              queryClient.invalidateQueries({ queryKey: ["internetPurposes"] });
+              queryClient.invalidateQueries({ queryKey: ["internetResources"] });
+            }
+
+            await createResourceRequest({
+              nafId: params.nafId,
+              resourceId: 1,
+              purpose: entry.purpose,
+              additionalInfo: { InternetResourceId: resourceId! },
+              dateNeeded: entry.dateNeeded || null,
+            });
             anySuccess = true;
-          })
-          .catch((e: any) => {
+          } catch (e: any) {
             const msg = e?.response?.data ?? e?.message ?? "Unknown error";
             errors.push(`Internet resource: ${msg}`);
-          }),
+          }
+        })(),
       );
     });
 
@@ -134,9 +163,21 @@ export const useAddResource = () => {
 
     if (anySuccess) {
       queryClient.invalidateQueries({ queryKey: ["naf", params.nafId] });
+      queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
+      queryClient.invalidateQueries({ queryKey: ["approverNAFs"] });
     }
 
-    return { errors, allSucceeded: errors.length === 0 };
+    const result = { errors, allSucceeded: errors.length === 0 };
+
+    if (result.allSucceeded) {
+      toast.success("Resources added successfully");
+    } else if (anySuccess) {
+      toast.warning("Some resources could not be added");
+    } else {
+      toast.error("Failed to add resources");
+    }
+
+    return result;
   };
 
   return { submit };

@@ -8,7 +8,9 @@ using NAFServer.src.Mapper.Helper;
 
 public static class NAFMapper
 {
-    public static NAFDTO ToDTO(NAF naf, Employee emp)
+    public static NAFDTO ToDTO(NAF naf, Employee emp) => ToDTO(naf, emp, null);
+
+    public static NAFDTO ToDTO(NAF naf, Employee emp, Dictionary<string, string>? approverNames)
     {
         return new NAFDTO(
             naf.Id,
@@ -45,6 +47,7 @@ public static class NAFMapper
                     rr.CurrentStep,
                     rr.Progress,
                     rr.AccomplishedAt,
+                    rr.CancelledAt,
                     rr.DateNeeded,
                     rr.NAFId,
                     rr.ApprovalWorkflowTemplateId,
@@ -78,6 +81,7 @@ public static class NAFMapper
                         s.ResourceRequestId,
                         s.StepOrder,
                         s.ApproverId,
+                        approverNames?.GetValueOrDefault(s.ApproverId),
                         s.Progress,
                         s.ApprovedAt,
                         s.Histories.Select(h => new ResourceRequestApprovalStepHistoryDTO(

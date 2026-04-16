@@ -20,6 +20,7 @@ export interface ResourceRequest extends Entity<string> {
   currentStep: number;
   progress: Progress;
   accomplishedAt?: string;
+  cancelledAt?: string;
   dateNeeded?: string;
   nafId: string;
   resource: Resource;
@@ -39,6 +40,7 @@ export enum ResourceRequestAction {
   ACCEPT = 3,
   ACCOMPLISH = 4,
   EDITED = 5,
+  CANCELLED = 6,
 }
 
 export interface ResourceRequestHistory {
@@ -61,7 +63,7 @@ export interface Purpose extends Entity<string> {
   id: string;
   purpose: string;
   resourceRequestId: string;
-  resourceRequestApprovalStepHistoryId?: null;
+  resourceRequestApprovalStepHistoryId?: string | null;
   createdAt: string;
 }
 
@@ -70,6 +72,7 @@ export interface Step extends Entity<string> {
   resourceRequestId: string;
   stepOrder: number;
   approverId: string;
+  approverName?: string | null;
   progress: number;
   approvedAt?: string;
   histories: History[];
@@ -174,7 +177,6 @@ export enum ProgressStatus {
 
 export type PurposeProps = {
   purpose: string;
-  resourceRequestApprovalStepHistoryId?: string;
 };
 
 // ── Lookup types (used by Add Resource modal) ─────────────────────────────────

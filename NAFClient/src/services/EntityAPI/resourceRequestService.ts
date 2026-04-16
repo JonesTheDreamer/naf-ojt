@@ -33,6 +33,12 @@ export const approveResourceRequest = async (
   return (await api.put(`/ApprovalSteps/${stepId}/approve`, comment)).data;
 };
 
+export const cancelResourceRequest = async (
+  resourceRequestId: string,
+): Promise<void> => {
+  await api.put(`/Requests/${resourceRequestId}/cancel`);
+};
+
 export const rejectResourceRequest = async (
   stepId: string,
   reasonForRejection: string,

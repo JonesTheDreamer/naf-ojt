@@ -12,9 +12,6 @@ import {
 
 import search from "@/assets/images/search.svg";
 
-// import { Field, FieldGroup } from "@/components/ui/field";
-// import { Input } from "@/components/ui/input";
-// import { Label } from "@/components/ui/label";
 import SearchBar from "../../../components/common/searchbar";
 import type { Employee } from "@/types/api/employee";
 import { useEffect, useState } from "react";
@@ -22,13 +19,19 @@ import { searchEmployees } from "@/services/EntityAPI/employeeService";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { useNAF } from "../hooks/useNAF";
-import { useResource } from "@/features/resources/hooks/useResource";
 import { SelectComponent } from "@/global/component/select";
 import { Hardware } from "@/types/enum/hardware";
-
-import { Checkbox } from "@/components/ui/checkbox";
 import { FieldLabel } from "@/components/ui/field";
 import { useAuth } from "@/features/auth/AuthContext";
+
+const WITH_HARDWARE_RESOURCES = [
+  "Microsoft 365 (E1)",
+  "Basic Internet Access",
+  "Active Directory",
+  "Printer Access (Black and White)",
+];
+
+const NO_HARDWARE_RESOURCES = ["Active Directory"];
 
 export function CreateNAFDialog() {
   const { user } = useAuth();
@@ -38,7 +41,6 @@ export function CreateNAFDialog() {
   const [open, setOpen] = useState<boolean>(false);
   const [showEmployeeHasNAFAlert, setShowEmployeeHasNAFAlert] =
     useState<boolean>(false);
-  const [toRequest, setToRequest] = useState<number[]>([]);
   const [selectedHardware, setSelectedHardware] = useState<Hardware>(
     Hardware.None,
   );
@@ -50,16 +52,18 @@ export function CreateNAFDialog() {
     isLoading: employeeLoading,
   } = useNAF({ employeeId: selectedEmployee?.id });
 
-  // const { createNAFAsync } = useNAF();
+  const hasHardware =
+    selectedHardware === Hardware.Computer ||
+    selectedHardware === Hardware.Laptop ||
+    selectedHardware === Hardware["Common PC"];
 
-  const { getAllResource, isLoading: resourceLoading } = useResource();
-
-  const loading = employeeLoading || resourceLoading;
+  const autoAddedResources = hasHardware
+    ? WITH_HARDWARE_RESOURCES
+    : NO_HARDWARE_RESOURCES;
 
   const fetchEmployee = async (query: string): Promise<Employee[]> => {
     try {
-      const fetch = await searchEmployees(query);
-      return fetch;
+      return await searchEmployees(query);
     } catch (error) {
       console.log(error);
       return [];
@@ -84,6 +88,7 @@ export function CreateNAFDialog() {
       )
     );
   }
+
   function HardwareSelect() {
     return (
       <SelectComponent<Hardware>
@@ -101,46 +106,46 @@ export function CreateNAFDialog() {
     );
   }
 
-  function BasicResources() {
-    return getAllResource.data?.map(
-      (r) =>
-        !r.isSpecial &&
-        r.id != 4 &&
-        r.id != 5 &&
-        r.id != 6 && (
-          <div key={r.id} className="flex items-center gap-2">
-            <Checkbox
-              id={r.id.toString()}
-              name={r.id.toString()}
-              value={r.id}
-              checked={toRequest.includes(r.id)}
-              onCheckedChange={(checked) => {
-                if (checked) setToRequest([...toRequest, r.id]);
-                else setToRequest(toRequest.filter((id) => id !== r.id));
-              }}
-            />
-            <FieldLabel htmlFor={r.id.toString()}>{r.name}</FieldLabel>
-          </div>
-        ),
+  function AutoAddedResourcesInfo() {
+    return (
+      <div className="flex flex-col gap-1 rounded-md border border-amber-200 bg-amber-50 p-3">
+        <p className="text-sm font-semibold text-amber-700">
+          The following resources will be added automatically:
+        </p>
+        {hasHardware && (
+          <p className="text-sm text-amber-600">
+            •{" "}
+            {selectedHardware === Hardware.Computer
+              ? "Computer"
+              : selectedHardware === Hardware.Laptop
+                ? "Laptop"
+                : "Common PC"}
+          </p>
+        )}
+        {autoAddedResources.map((name) => (
+          <p key={name} className="text-sm text-amber-600">
+            • {name}
+          </p>
+        ))}
+      </div>
     );
   }
 
   const reset = () => {
     setSelectedEmployee(null);
     setShowEmployeeHasNAFAlert(false);
-    setToRequest([]);
     setSelectedHardware(Hardware.None);
     setDateNeeded("");
   };
+
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-    console.log("called");
 
     if (!selectedEmployee || !user) return;
     const payload = {
       employeeId: selectedEmployee.id,
       requestorId: user.employeeId,
-      resourceIds: [...toRequest, Number(selectedHardware)],
+      hardwareId: Number(selectedHardware),
       dateNeeded: dateNeeded || null,
     };
     try {
@@ -157,7 +162,6 @@ export function CreateNAFDialog() {
     } else {
       setShowEmployeeHasNAFAlert(false);
     }
-    console.log(employeeNAFs.data);
   }, [employeeNAFs.data]);
 
   useEffect(() => {
@@ -165,10 +169,6 @@ export function CreateNAFDialog() {
       reset();
     }
   }, [open]);
-
-  useEffect(() => {
-    console.log(toRequest);
-  }, [toRequest]);
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -181,7 +181,7 @@ export function CreateNAFDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent className="w-full max-w-md md:max-w-2xl lg:max-w-4xl md:h-[95vh] flex flex-col">
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-amber-600">
               Create NAF
@@ -214,7 +214,7 @@ export function CreateNAFDialog() {
             />
           </div>
 
-          <div className="flex flex-col md:flex-row gap-4 justify-around flex-1  overflow-y-auto">
+          <div className="flex flex-col md:flex-row gap-4 justify-around flex-1 overflow-y-auto">
             <div className="flex flex-col p-4 w-full border overflow-y-auto justify-center">
               {!selectedEmployee ? (
                 <div className="w-full max-w-full grid place-items-center overflow-hidden">
@@ -239,8 +239,8 @@ export function CreateNAFDialog() {
                 </>
               )}
             </div>
-            {!loading && selectedEmployee && (
-              <div className="w-full flex flex-col gap-4 border p-4 justify-center ">
+            {!employeeLoading && selectedEmployee && (
+              <div className="w-full flex flex-col gap-4 border p-4 justify-center">
                 {showEmployeeHasNAFAlert ? (
                   <EmployeeHasNAFAlert />
                 ) : (
@@ -258,7 +258,7 @@ export function CreateNAFDialog() {
                         className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
                       />
                     </div>
-                    <BasicResources />
+                    <AutoAddedResourcesInfo />
                   </div>
                 )}
               </div>

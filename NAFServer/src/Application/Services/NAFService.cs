@@ -49,8 +49,34 @@ namespace NAFServer.src.Application.Services
         {
             var naf = await _nafRepository.GetByIdAsync(id);
             var employee = await _employeeRepository.GetByIdAsync(naf.EmployeeId);
-            return NAFMapper.ToDTO(naf, employee);
+
+            var approverIds = naf.ResourceRequests
+                .SelectMany(rr => rr.ResourceRequestsApprovalSteps)
+                .Select(s => s.ApproverId)
+                .Distinct()
+                .ToList();
+
+            var approverEmployees = await Task.WhenAll(
+                approverIds.Select(approverId => _employeeRepository.GetByIdAsync(approverId))
+            );
+
+            var approverNames = approverEmployees
+                .Where(e => e != null)
+                .ToDictionary(
+                    e => e.Id,
+                    e => $"{e.FirstName} {e.LastName}".Trim()
+                );
+
+            return NAFMapper.ToDTO(naf, employee, approverNames);
         }
+
+        // Resource IDs are seeded in a fixed order by ResourceWorkflowSeeder.
+        // Hardware resources: Computer=4, Laptop=5, Common PC=6
+        private static readonly HashSet<int> _hardwareResourceIds = new() { 4, 5, 6 };
+        // Auto-added with hardware: Microsoft 365 E1=11, Basic Internet=9, Active Directory=12, Printer B&W=10
+        private static readonly int[] _withHardwareResources = { 11, 9, 12, 10 };
+        // Auto-added when no hardware: Active Directory=12 only
+        private static readonly int[] _noHardwareResources = { 12 };
 
         public async Task<NAFDTO> CreateAsync(CreateNAFRequestDTO request)
         {
@@ -63,20 +89,28 @@ namespace NAFServer.src.Application.Services
 
             if (hasNAFForDepartment) throw new InvalidOperationException("Employee already has a NAF for this department");
 
-            var basicResourcesIds = request.resourceIds.Distinct().ToList();
-            //var resources = await _resourceRepository.GetAllResourcesAsync(basicResourcesIds);
+            // Determine which resources to add automatically based on hardware selection
+            var resourcesToAdd = new List<int>();
+            if (_hardwareResourceIds.Contains(request.HardwareId))
+            {
+                resourcesToAdd.Add(request.HardwareId);
+                resourcesToAdd.AddRange(_withHardwareResources);
+            }
+            else
+            {
+                resourcesToAdd.AddRange(_noHardwareResources);
+            }
+
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                //temporary reference
                 string reference = $"NAF-{DateTime.UtcNow:yyyyMMddHHmmss}-{employee.Id}-{Guid.NewGuid().ToString("N").Substring(0, 6)}";
 
-                // Create NAF entity
                 var naf = new NAF(reference, request.RequestorId, request.EmployeeId, employee.DepartmentId);
                 await _context.NAFs.AddAsync(naf);
                 await _context.SaveChangesAsync();
 
-                foreach (var r in basicResourcesIds)
+                foreach (var r in resourcesToAdd)
                 {
                     await _resourceRequestService.CreateBasicAsync(
                         new CreateResourceRequestDTO(
@@ -89,8 +123,6 @@ namespace NAFServer.src.Application.Services
                     );
                 }
 
-                //await Task.WhenAll(resourceRequestTasks);
-                //await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
                 var nafDto = await _context.NAFs
                     .Where(n => n.Id == naf.Id)

@@ -27,12 +27,12 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
 
                 // Determine Role
                 var role = DetermineRole(emp.Position);
-
-
                 userRoles.Add(new UserRole(emp.Id, role));
+
                 if (emp.Position == "Network Administrator")
                 {
                     userRoles.Add(new UserRole(emp.Id, Roles.TECHNICAL_HEAD));
+                    userRoles.Add(new UserRole(emp.Id, Roles.REQUESTOR_APPROVER));
                 }
 
             }

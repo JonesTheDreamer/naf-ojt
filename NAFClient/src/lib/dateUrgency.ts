@@ -12,7 +12,9 @@ export type UrgencyResult =
  *   - > 1 week remaining: weeks
  *   - <= 1 week remaining: days
  */
-export function getDateUrgency(dateNeeded: string | null | undefined): UrgencyResult | null {
+export function getDateUrgency(
+  dateNeeded: string | null | undefined,
+): UrgencyResult | null {
   if (!dateNeeded) return null;
 
   const now = new Date();
@@ -27,32 +29,56 @@ export function getDateUrgency(dateNeeded: string | null | undefined): UrgencyRe
     const absDays = Math.abs(diffDays);
     if (absDays >= 365) {
       const years = Math.floor(absDays / 365);
-      return { overdue: true, label: `${years} ${years === 1 ? "year" : "years"} overdue` };
+      return {
+        overdue: true,
+        label: `${years} ${years === 1 ? "year" : "years"} overdue`,
+      };
     }
     if (absDays >= 30) {
       const months = Math.floor(absDays / 30);
-      return { overdue: true, label: `${months} ${months === 1 ? "month" : "months"} overdue` };
+      return {
+        overdue: true,
+        label: `${months} ${months === 1 ? "month" : "months"} overdue`,
+      };
     }
     if (absDays >= 7) {
       const weeks = Math.floor(absDays / 7);
-      return { overdue: true, label: `${weeks} ${weeks === 1 ? "week" : "weeks"} overdue` };
+      return {
+        overdue: true,
+        label: `${weeks} ${weeks === 1 ? "week" : "weeks"} overdue`,
+      };
     }
-    return { overdue: true, label: `${absDays} ${absDays === 1 ? "day" : "days"} overdue` };
+    return {
+      overdue: true,
+      label: `${absDays} ${absDays === 1 ? "day" : "days"} overdue`,
+    };
   }
 
-  if (diffDays === 0) return { overdue: false, label: "due today" };
+  if (diffDays === 0) return { overdue: false, label: "Due Today" };
 
   if (diffDays >= 365) {
     const years = Math.floor(diffDays / 365);
-    return { overdue: false, label: `${years} ${years === 1 ? "year" : "years"} remaining` };
+    return {
+      overdue: false,
+      label: `${years} ${years === 1 ? "year" : "years"} remaining`,
+    };
   }
   if (diffDays >= 30) {
     const months = Math.floor(diffDays / 30);
-    return { overdue: false, label: `${months} ${months === 1 ? "month" : "months"} remaining` };
+    return {
+      overdue: false,
+      label: `${months} ${months === 1 ? "month" : "months"} remaining`,
+    };
   }
   if (diffDays > 7) {
     const weeks = Math.floor(diffDays / 7);
-    return { overdue: false, label: `${weeks} ${weeks === 1 ? "week" : "weeks"} remaining` };
+    return {
+      overdue: false,
+      label: `${weeks} ${weeks === 1 ? "week" : "weeks"} remaining`,
+    };
   }
-  return { overdue: false, label: `${diffDays} ${diffDays === 1 ? "day" : "days"} remaining` };
+  return {
+    overdue: false,
+    label: `${diffDays} ${diffDays === 1 ? "day" : "days"} remaining`,
+  };
 }

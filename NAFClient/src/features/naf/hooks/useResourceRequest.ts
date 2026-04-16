@@ -1,11 +1,13 @@
 import {
   approveResourceRequest,
+  cancelResourceRequest,
   deleteResourceRequest,
   editResourceRequestPurpose,
   rejectResourceRequest,
 } from "@/services/EntityAPI/resourceRequestService";
 import type { NAF, PurposeProps } from "@/types/api/naf";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 
 export const useResourceRequest = (
   resourceRequestId: string,
@@ -26,65 +28,33 @@ export const useResourceRequest = (
           ),
         };
       });
-
-      const nafListQueries = queryClient.getQueriesData<NAF[]>({
-        queryKey: ["nafs"],
-      });
-
-      nafListQueries.forEach(([key, data]) => {
-        if (!data) return;
-
-        queryClient.setQueryData(
-          key,
-          data.map((naf) =>
-            naf.id === NAFId
-              ? {
-                  ...naf,
-                  resourceRequests: naf.resourceRequests.map((req) =>
-                    req.id === updatedRequest.id ? updatedRequest : req,
-                  ),
-                }
-              : naf,
-          ),
-        );
-      });
+      toast.success("Purpose updated");
     },
+    onError: () => toast.error("Failed to update purpose"),
   });
 
   const removeResourceRequest = useMutation({
     mutationFn: deleteResourceRequest,
-    onSuccess: (_data, _id) => {
-      queryClient.invalidateQueries({ queryKey: ["nafs"] });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["naf", NAFId] });
+      queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
+      queryClient.invalidateQueries({ queryKey: ["approverNAFs"] });
+      toast.success("Resource removed");
     },
+    onError: () => toast.error("Failed to remove resource"),
   });
 
   const approveRequest = useMutation({
     mutationFn: ({ stepId, comment }: { stepId: string; comment?: string }) =>
       approveResourceRequest(stepId, comment),
 
-    onSuccess: (updatedRequest) => {
-      const nafListQueries = queryClient.getQueriesData<any>({
-        queryKey: ["nafs"],
-      });
-
-      nafListQueries.forEach(([key, data]) => {
-        if (!data) return;
-
-        queryClient.setQueryData(key, {
-          ...data,
-          items: data.items.map((naf: NAF) =>
-            naf.id === NAFId
-              ? {
-                  ...naf,
-                  resourceRequests: naf.resourceRequests.map((req) =>
-                    req.id === resourceRequestId ? updatedRequest : req,
-                  ),
-                }
-              : naf,
-          ),
-        });
-      });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["naf", NAFId] });
+      queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
+      queryClient.invalidateQueries({ queryKey: ["approverNAFs"] });
+      toast.success("Request approved");
     },
+    onError: () => toast.error("Failed to approve request"),
   });
 
   const rejectRequest = useMutation({
@@ -96,29 +66,23 @@ export const useResourceRequest = (
       reasonForRejection: string;
     }) => rejectResourceRequest(stepId, reasonForRejection),
 
-    onSuccess: (updatedRequest) => {
-      const nafListQueries = queryClient.getQueriesData<any>({
-        queryKey: ["nafs"],
-      });
-
-      nafListQueries.forEach(([key, data]) => {
-        if (!data) return;
-
-        queryClient.setQueryData(key, {
-          ...data,
-          items: data.items.map((naf: NAF) =>
-            naf.id === NAFId
-              ? {
-                  ...naf,
-                  resourceRequests: naf.resourceRequests.map((req) =>
-                    req.id === resourceRequestId ? updatedRequest : req,
-                  ),
-                }
-              : naf,
-          ),
-        });
-      });
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["naf", NAFId] });
+      queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
+      queryClient.invalidateQueries({ queryKey: ["approverNAFs"] });
+      toast.success("Request rejected");
     },
+    onError: () => toast.error("Failed to reject request"),
+  });
+
+  const cancelRequest = useMutation({
+    mutationFn: () => cancelResourceRequest(resourceRequestId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["naf", NAFId] });
+      queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
+      toast.success("Request cancelled");
+    },
+    onError: () => toast.error("Failed to cancel request"),
   });
 
   return {
@@ -130,5 +94,7 @@ export const useResourceRequest = (
     approveRequestError: approveRequest.isError,
     rejectRequestAsync: rejectRequest.mutateAsync,
     rejectRequestError: rejectRequest.isError,
+    cancelRequestAsync: cancelRequest.mutateAsync,
+    cancelRequestError: cancelRequest.isError,
   };
 };

@@ -314,14 +314,20 @@ namespace NAFServer.Migrations
                     b.Property<DateTime>("AccomplishedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("ApprovalWorkflowTemplateId")
+                    b.Property<Guid?>("ApprovalWorkflowTemplateId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CancelledAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("CurrentStep")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("DateNeeded")
+                        .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -688,8 +694,7 @@ namespace NAFServer.Migrations
                     b.HasOne("NAFServer.src.Domain.Entities.ApprovalWorkflowTemplate", "ApprovalWorkflowTemplate")
                         .WithMany("ResourceRequests")
                         .HasForeignKey("ApprovalWorkflowTemplateId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("NAFServer.src.Domain.Entities.NAF", "NAF")
                         .WithMany("ResourceRequests")

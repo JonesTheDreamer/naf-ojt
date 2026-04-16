@@ -4,7 +4,7 @@ namespace NAFServer.src.Application.DTOs.NAF
     (
         string EmployeeId,
         string RequestorId,
-        List<int> resourceIds,
-        DateTime? DateNeeded
+        int HardwareId,
+        DateTime DateNeeded
     );
 }

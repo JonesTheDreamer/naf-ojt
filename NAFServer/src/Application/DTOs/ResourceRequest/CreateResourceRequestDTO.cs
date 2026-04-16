@@ -8,6 +8,6 @@ namespace NAFServer.src.Application.DTOs.ResourceRequest
         int resourceId,
         string purpose,
         JsonElement? additionalInfo,
-        DateTime? dateNeeded = null
+        DateTime dateNeeded
     );
 }

@@ -12,35 +12,36 @@
 
 ## File Map
 
-| File | Change |
-|---|---|
-| `NAFServer/src/Application/DTOs/NAF/CreateNAFRequestDTO.cs` | Add `DateTime? DateNeeded` |
-| `NAFServer/src/Application/DTOs/NAF/BasicResourceWithDateDTO.cs` | **Create** — per-resource payload for basic add |
-| `NAFServer/src/Application/DTOs/NAF/AddBasicResourcesDTO.cs` | Change `List<int>` → `List<BasicResourceWithDateDTO>` |
-| `NAFServer/src/Application/DTOs/ResourceRequest/CreateResourceRequestDTO.cs` | Add `DateTime? dateNeeded = null` |
-| `NAFServer/src/Application/DTOs/ResourceRequest/CreateResourceRequestFromAPIDTO.cs` | Add `DateTime? dateNeeded = null` |
-| `NAFServer/src/Application/Interfaces/INAFService.cs` | Update `AddBasicResourcesToNAFAsync` signature |
-| `NAFServer/src/Application/Services/NAFService.cs` | Pass `DateNeeded` to `CreateBasicAsync`; update `AddBasicResourcesToNAFAsync` |
-| `NAFServer/src/Application/Services/ResourceRequestService.cs` | Set `rr.DateNeeded` in `CreateBasicAsync` and `CreateSpecialAsync` |
-| `NAFServer/src/API/Controllers/NAFsController.cs` | Update `AddBasicResources` to use `request.Resources` |
-| `NAFClient/src/types/api/naf.ts` | Add `dateNeeded?: string` to `ResourceRequest` |
-| `NAFClient/src/services/EntityAPI/nafService.ts` | Add `dateNeeded` to `createNAF` payload |
-| `NAFClient/src/services/EntityAPI/resourceRequestService.ts` | Add `dateNeeded` to `createResourceRequest` payload |
-| `NAFClient/src/services/EntityAPI/resourceMetadataService.ts` | Change `addBasicResourcesToNAF` to accept per-resource dates |
-| `NAFClient/src/features/naf/hooks/useAddResource.ts` | Add `dateNeeded` to all entry types; switch to `basicResources` array |
-| `NAFClient/src/features/naf/components/createNAFDialog.tsx` | Add single shared date picker |
-| `NAFClient/src/features/naf/components/addResourceDialog.tsx` | Add per-resource date inputs; track `BasicResourceWithDate[]` |
-| `NAFClient/src/lib/dateUrgency.ts` | **Create** — `getDateUrgency` utility |
-| `NAFClient/src/features/naf/components/resourceRequestAccordion.tsx` | Add `DateUrgencyBadge`, fix `PurposeBlock`, add overdue highlight |
-| `NAFClient/src/features/tech/components/ImplementationResourceRequestRow.tsx` | Add urgency badge + overdue row highlight |
-| `NAFClient/src/features/tech/components/ImplementationNAFAccordion.tsx` | Sort by nearest deadline; add overdue NAF border |
-| `NAFClient/src/features/tech/components/ImplementationResourceAccordion.tsx` | Sort requests within group by `dateNeeded` |
+| File                                                                                | Change                                                                        |
+| ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `NAFServer/src/Application/DTOs/NAF/CreateNAFRequestDTO.cs`                         | Add `DateTime? DateNeeded`                                                    |
+| `NAFServer/src/Application/DTOs/NAF/BasicResourceWithDateDTO.cs`                    | **Create** — per-resource payload for basic add                               |
+| `NAFServer/src/Application/DTOs/NAF/AddBasicResourcesDTO.cs`                        | Change `List<int>` → `List<BasicResourceWithDateDTO>`                         |
+| `NAFServer/src/Application/DTOs/ResourceRequest/CreateResourceRequestDTO.cs`        | Add `DateTime? dateNeeded = null`                                             |
+| `NAFServer/src/Application/DTOs/ResourceRequest/CreateResourceRequestFromAPIDTO.cs` | Add `DateTime? dateNeeded = null`                                             |
+| `NAFServer/src/Application/Interfaces/INAFService.cs`                               | Update `AddBasicResourcesToNAFAsync` signature                                |
+| `NAFServer/src/Application/Services/NAFService.cs`                                  | Pass `DateNeeded` to `CreateBasicAsync`; update `AddBasicResourcesToNAFAsync` |
+| `NAFServer/src/Application/Services/ResourceRequestService.cs`                      | Set `rr.DateNeeded` in `CreateBasicAsync` and `CreateSpecialAsync`            |
+| `NAFServer/src/API/Controllers/NAFsController.cs`                                   | Update `AddBasicResources` to use `request.Resources`                         |
+| `NAFClient/src/types/api/naf.ts`                                                    | Add `dateNeeded?: string` to `ResourceRequest`                                |
+| `NAFClient/src/services/EntityAPI/nafService.ts`                                    | Add `dateNeeded` to `createNAF` payload                                       |
+| `NAFClient/src/services/EntityAPI/resourceRequestService.ts`                        | Add `dateNeeded` to `createResourceRequest` payload                           |
+| `NAFClient/src/services/EntityAPI/resourceMetadataService.ts`                       | Change `addBasicResourcesToNAF` to accept per-resource dates                  |
+| `NAFClient/src/features/naf/hooks/useAddResource.ts`                                | Add `dateNeeded` to all entry types; switch to `basicResources` array         |
+| `NAFClient/src/features/naf/components/createNAFDialog.tsx`                         | Add single shared date picker                                                 |
+| `NAFClient/src/features/naf/components/addResourceDialog.tsx`                       | Add per-resource date inputs; track `BasicResourceWithDate[]`                 |
+| `NAFClient/src/lib/dateUrgency.ts`                                                  | **Create** — `getDateUrgency` utility                                         |
+| `NAFClient/src/features/naf/components/resourceRequestAccordion.tsx`                | Add `DateUrgencyBadge`, fix `PurposeBlock`, add overdue highlight             |
+| `NAFClient/src/features/tech/components/ImplementationResourceRequestRow.tsx`       | Add urgency badge + overdue row highlight                                     |
+| `NAFClient/src/features/tech/components/ImplementationNAFAccordion.tsx`             | Sort by nearest deadline; add overdue NAF border                              |
+| `NAFClient/src/features/tech/components/ImplementationResourceAccordion.tsx`        | Sort requests within group by `dateNeeded`                                    |
 
 ---
 
 ## Task 1: Backend — Pass DateNeeded through Create NAF flow
 
 **Files:**
+
 - Modify: `NAFServer/src/Application/DTOs/NAF/CreateNAFRequestDTO.cs`
 - Modify: `NAFServer/src/Application/DTOs/ResourceRequest/CreateResourceRequestDTO.cs`
 - Modify: `NAFServer/src/Application/Services/ResourceRequestService.cs`
@@ -137,6 +138,7 @@ git commit -m "feat: pass DateNeeded through Create NAF flow"
 ## Task 2: Backend — Pass DateNeeded through Add Resource flow
 
 **Files:**
+
 - Create: `NAFServer/src/Application/DTOs/NAF/BasicResourceWithDateDTO.cs`
 - Modify: `NAFServer/src/Application/DTOs/NAF/AddBasicResourcesDTO.cs`
 - Modify: `NAFServer/src/Application/DTOs/ResourceRequest/CreateResourceRequestFromAPIDTO.cs`
@@ -302,6 +304,7 @@ git commit -m "feat: pass DateNeeded through Add Resource flow with per-resource
 ## Task 3: Frontend — Add dateNeeded to types, nafService, and createNAFDialog
 
 **Files:**
+
 - Modify: `NAFClient/src/types/api/naf.ts`
 - Modify: `NAFClient/src/services/EntityAPI/nafService.ts`
 - Modify: `NAFClient/src/services/EntityAPI/resourceRequestService.ts`
@@ -434,6 +437,7 @@ git commit -m "feat: add DateNeeded field to create NAF form"
 ## Task 4: Frontend — Add per-resource DateNeeded to addResourceDialog
 
 **Files:**
+
 - Modify: `NAFClient/src/features/naf/hooks/useAddResource.ts`
 - Modify: `NAFClient/src/services/EntityAPI/resourceMetadataService.ts`
 - Modify: `NAFClient/src/features/naf/components/addResourceDialog.tsx`
@@ -444,9 +448,7 @@ Replace the entry types and params in `NAFClient/src/features/naf/hooks/useAddRe
 
 ```typescript
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  addBasicResourcesToNAF,
-} from "@/services/EntityAPI/resourceMetadataService";
+import { addBasicResourcesToNAF } from "@/services/EntityAPI/resourceMetadataService";
 import { createResourceRequest } from "@/services/EntityAPI/resourceRequestService";
 
 export type InternetEntry = {
@@ -527,7 +529,9 @@ export const useAddResource = () => {
           additionalInfo: { InternetResourceId: entry.internetResourceId! },
           dateNeeded: entry.dateNeeded || null,
         })
-          .then(() => { anySuccess = true; })
+          .then(() => {
+            anySuccess = true;
+          })
           .catch((e: any) => {
             const msg = e?.response?.data ?? e?.message ?? "Unknown error";
             errors.push(`Internet resource: ${msg}`);
@@ -544,7 +548,9 @@ export const useAddResource = () => {
           additionalInfo: { GroupEmailId: entry.groupEmailId! },
           dateNeeded: entry.dateNeeded || null,
         })
-          .then(() => { anySuccess = true; })
+          .then(() => {
+            anySuccess = true;
+          })
           .catch((e: any) => {
             const msg = e?.response?.data ?? e?.message ?? "Unknown error";
             errors.push(`Group email: ${msg}`);
@@ -561,7 +567,9 @@ export const useAddResource = () => {
           additionalInfo: { SharedFolderId: entry.sharedFolderId! },
           dateNeeded: entry.dateNeeded || null,
         })
-          .then(() => { anySuccess = true; })
+          .then(() => {
+            anySuccess = true;
+          })
           .catch((e: any) => {
             const msg = e?.response?.data ?? e?.message ?? "Unknown error";
             errors.push(`Shared folder: ${msg}`);
@@ -591,12 +599,14 @@ export const addBasicResourcesToNAF = async (
   nafId: string,
   resources: { id: number; dateNeeded: string }[],
 ): Promise<AddBasicResourceResult[]> => {
-  return (await api.post(`/NAFs/${nafId}/resources/basic`, {
-    resources: resources.map((r) => ({
-      resourceId: r.id,
-      dateNeeded: r.dateNeeded || null,
-    })),
-  })).data;
+  return (
+    await api.post(`/NAFs/${nafId}/resources/basic`, {
+      resources: resources.map((r) => ({
+        resourceId: r.id,
+        dateNeeded: r.dateNeeded || null,
+      })),
+    })
+  ).data;
 };
 ```
 
@@ -607,14 +617,21 @@ In `NAFClient/src/features/naf/components/addResourceDialog.tsx`:
 1. Add import at the top:
 
 ```typescript
-import type { BasicResourceWithDate, InternetEntry, GroupEmailEntry, SharedFolderEntry } from "../hooks/useAddResource";
+import type {
+  BasicResourceWithDate,
+  InternetEntry,
+  GroupEmailEntry,
+  SharedFolderEntry,
+} from "../hooks/useAddResource";
 ```
 
 2. Replace the `selectedBasic` state declaration:
 
 ```typescript
 // Remove: const [selectedBasic, setSelectedBasic] = useState<number[]>([]);
-const [basicResources, setBasicResources] = useState<BasicResourceWithDate[]>([]);
+const [basicResources, setBasicResources] = useState<BasicResourceWithDate[]>(
+  [],
+);
 ```
 
 3. Update `reset()`:
@@ -659,7 +676,13 @@ In `addResourceDialog.tsx`, update the three factory functions:
 const addInternetEntry = () =>
   setInternetEntries((prev) => [
     ...prev,
-    { _id: newEntry(), internetPurposeId: null, internetResourceId: null, purpose: "", dateNeeded: "" },
+    {
+      _id: newEntry(),
+      internetPurposeId: null,
+      internetResourceId: null,
+      purpose: "",
+      dateNeeded: "",
+    },
   ]);
 
 const addGroupEmailEntry = () =>
@@ -692,7 +715,10 @@ In `addResourceDialog.tsx`, replace the basic resources rendering section (insid
             checked={isChecked}
             onCheckedChange={(checked) => {
               if (checked) {
-                setBasicResources((prev) => [...prev, { id: r.id, dateNeeded: "" }]);
+                setBasicResources((prev) => [
+                  ...prev,
+                  { id: r.id, dateNeeded: "" },
+                ]);
               } else {
                 setBasicResources((prev) => prev.filter((b) => b.id !== r.id));
               }
@@ -792,6 +818,7 @@ git commit -m "feat: add per-resource DateNeeded to Add Resource dialog"
 ## Task 5: Frontend — Date urgency utility and requestor accordion display
 
 **Files:**
+
 - Create: `NAFClient/src/lib/dateUrgency.ts`
 - Modify: `NAFClient/src/features/naf/components/resourceRequestAccordion.tsx`
 
@@ -814,7 +841,9 @@ export type UrgencyResult =
  *   - > 1 week remaining: weeks
  *   - <= 1 week remaining: days
  */
-export function getDateUrgency(dateNeeded: string | null | undefined): UrgencyResult | null {
+export function getDateUrgency(
+  dateNeeded: string | null | undefined,
+): UrgencyResult | null {
   if (!dateNeeded) return null;
 
   const now = new Date();
@@ -829,34 +858,58 @@ export function getDateUrgency(dateNeeded: string | null | undefined): UrgencyRe
     const absDays = Math.abs(diffDays);
     if (absDays >= 365) {
       const years = Math.floor(absDays / 365);
-      return { overdue: true, label: `${years} ${years === 1 ? "year" : "years"} overdue` };
+      return {
+        overdue: true,
+        label: `${years} ${years === 1 ? "year" : "years"} overdue`,
+      };
     }
     if (absDays >= 30) {
       const months = Math.floor(absDays / 30);
-      return { overdue: true, label: `${months} ${months === 1 ? "month" : "months"} overdue` };
+      return {
+        overdue: true,
+        label: `${months} ${months === 1 ? "month" : "months"} overdue`,
+      };
     }
     if (absDays >= 7) {
       const weeks = Math.floor(absDays / 7);
-      return { overdue: true, label: `${weeks} ${weeks === 1 ? "week" : "weeks"} overdue` };
+      return {
+        overdue: true,
+        label: `${weeks} ${weeks === 1 ? "week" : "weeks"} overdue`,
+      };
     }
-    return { overdue: true, label: `${absDays} ${absDays === 1 ? "day" : "days"} overdue` };
+    return {
+      overdue: true,
+      label: `${absDays} ${absDays === 1 ? "day" : "days"} overdue`,
+    };
   }
 
   if (diffDays === 0) return { overdue: false, label: "due today" };
 
   if (diffDays >= 365) {
     const years = Math.floor(diffDays / 365);
-    return { overdue: false, label: `${years} ${years === 1 ? "year" : "years"} remaining` };
+    return {
+      overdue: false,
+      label: `${years} ${years === 1 ? "year" : "years"} remaining`,
+    };
   }
   if (diffDays >= 30) {
     const months = Math.floor(diffDays / 30);
-    return { overdue: false, label: `${months} ${months === 1 ? "month" : "months"} remaining` };
+    return {
+      overdue: false,
+      label: `${months} ${months === 1 ? "month" : "months"} remaining`,
+    };
   }
   if (diffDays > 7) {
     const weeks = Math.floor(diffDays / 7);
-    return { overdue: false, label: `${weeks} ${weeks === 1 ? "week" : "weeks"} remaining` };
+    return {
+      overdue: false,
+      label: `${weeks} ${weeks === 1 ? "week" : "weeks"} remaining`,
+    };
   }
-  return { overdue: false, label: `${diffDays} ${diffDays === 1 ? "day" : "days"} remaining` };
+  return {
+    overdue: false,
+    label: `${diffDays} ${diffDays === 1 ? "day" : "days"} remaining`,
+  };
 }
 ```
 
@@ -1000,6 +1053,7 @@ git commit -m "feat: add date urgency badges and overdue highlights to accordion
 ## Task 6: Frontend — Technical team urgency display and sorting
 
 **Files:**
+
 - Modify: `NAFClient/src/features/tech/components/ImplementationResourceRequestRow.tsx`
 - Modify: `NAFClient/src/features/tech/components/ImplementationNAFAccordion.tsx`
 - Modify: `NAFClient/src/features/tech/components/ImplementationResourceAccordion.tsx`
@@ -1025,21 +1079,23 @@ In the outer `div` of the row, add the overdue background class:
 In the left info section (after the `additionalInfoText` paragraph), add a date urgency inline:
 
 ```tsx
-{(() => {
-  const urgency = getDateUrgency(request.dateNeeded);
-  if (!urgency) return null;
-  return (
-    <span
-      className={`text-xs font-medium px-2 py-0.5 rounded-full inline-block ${
-        urgency.overdue
-          ? "bg-red-100 text-red-700"
-          : "bg-amber-50 text-amber-700"
-      }`}
-    >
-      {urgency.label}
-    </span>
-  );
-})()}
+{
+  (() => {
+    const urgency = getDateUrgency(request.dateNeeded);
+    if (!urgency) return null;
+    return (
+      <span
+        className={`text-xs font-medium px-2 py-0.5 rounded-full inline-block ${
+          urgency.overdue
+            ? "bg-red-100 text-red-700"
+            : "bg-amber-50 text-amber-700"
+        }`}
+      >
+        {urgency.label}
+      </span>
+    );
+  })();
+}
 ```
 
 - [ ] **Step 2: Sort NAFs by nearest dateNeeded in ImplementationNAFAccordion**
@@ -1145,37 +1201,39 @@ import { getDateUrgency } from "@/lib/dateUrgency";
 In the rendering loop for `group.requests.map(...)`, update the NAF reference label to include urgency:
 
 ```tsx
-{group.requests.map((rr) => {
-  const urgency = getDateUrgency(rr.dateNeeded);
-  return (
-    <div key={rr.id}>
-      <div className="flex items-center gap-2 pt-2 pb-0.5">
-        <p className="text-xs text-muted-foreground">
-          NAF {rr.nafReference} — {rr.employeeName}
-        </p>
-        {urgency && (
-          <span
-            className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${
-              urgency.overdue
-                ? "bg-red-100 text-red-700"
-                : "bg-amber-50 text-amber-700"
-            }`}
-          >
-            {urgency.label}
-          </span>
-        )}
+{
+  group.requests.map((rr) => {
+    const urgency = getDateUrgency(rr.dateNeeded);
+    return (
+      <div key={rr.id}>
+        <div className="flex items-center gap-2 pt-2 pb-0.5">
+          <p className="text-xs text-muted-foreground">
+            NAF {rr.nafReference} — {rr.employeeName}
+          </p>
+          {urgency && (
+            <span
+              className={`text-xs font-medium px-1.5 py-0.5 rounded-full ${
+                urgency.overdue
+                  ? "bg-red-100 text-red-700"
+                  : "bg-amber-50 text-amber-700"
+              }`}
+            >
+              {urgency.label}
+            </span>
+          )}
+        </div>
+        <ImplementationResourceRequestRow
+          request={rr}
+          mode={mode}
+          onAssign={onAssign}
+          onMarkDelayed={onMarkDelayed}
+          onMarkAccomplished={onMarkAccomplished}
+          isSubmitting={isSubmitting}
+        />
       </div>
-      <ImplementationResourceRequestRow
-        request={rr}
-        mode={mode}
-        onAssign={onAssign}
-        onMarkDelayed={onMarkDelayed}
-        onMarkAccomplished={onMarkAccomplished}
-        isSubmitting={isSubmitting}
-      />
-    </div>
-  );
-})}
+    );
+  });
+}
 ```
 
 - [ ] **Step 5: TypeScript build check**
@@ -1198,6 +1256,7 @@ git commit -m "feat: add urgency display and deadline sorting to technical team 
 ## Self-Review
 
 ### Spec coverage:
+
 1. ✅ Date needed on create NAF form, shared across all resources → Task 3
 2. ✅ Date needed per resource when adding to existing NAF → Task 4
 3. ✅ Display how long remaining (years/months/weeks/days) → Task 5, `getDateUrgency` utility
@@ -1207,11 +1266,13 @@ git commit -m "feat: add urgency display and deadline sorting to technical team 
 7. ✅ Highlight overdue in technical team view → Task 6, `border-red-300` on `AccordionItem`, `bg-red-50/40` on row
 
 ### Placeholder scan:
+
 - All steps contain actual code.
 - No "TBD", "TODO", or "similar to Task N" references.
 - All file paths are exact.
 
 ### Type consistency:
+
 - `BasicResourceWithDate` defined in `useAddResource.ts`, exported, imported in `addResourceDialog.tsx`.
 - `dateNeeded: string` on all entry types (not `string | null` — empty string means unset, converted to `null` before sending to API).
 - `request.dateNeeded` accessed as `string | undefined` everywhere, consistent with the type addition in Task 3 Step 1.

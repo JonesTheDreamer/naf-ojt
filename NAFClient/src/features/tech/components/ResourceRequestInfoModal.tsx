@@ -67,16 +67,40 @@ export function ResourceRequestInfoModal({ open, onOpenChange, request }: Props)
     )
     .sort((a, b) => new Date(a.actionAt).getTime() - new Date(b.actionAt).getTime());
 
-  const purposeHistory = sortedPurposes.map((p, index) => ({
-    purpose: p.purpose,
-    createdAt: p.createdAt,
-    label:
-      index === 0
-        ? "Initial Submission"
-        : p.resourceRequestApprovalStepHistoryId
-        ? "Edited after rejection"
-        : "Edited while open",
-  }));
+  // Map historyId → rejection details (step info included)
+  const rejectionHistoryMap = new Map(
+    request.steps.flatMap((step) =>
+      step.histories
+        .filter((h) => h.status === Status.REJECTED)
+        .map((h) => [
+          h.id,
+          {
+            reasonForRejection: h.reasonForRejection,
+            actionAt: h.actionAt,
+            approverId: step.approverId,
+            approverName: step.approverName,
+            stepOrder: step.stepOrder,
+          },
+        ]),
+    ),
+  );
+
+  const purposeHistory = sortedPurposes.map((p, index) => {
+    const rejection = p.resourceRequestApprovalStepHistoryId
+      ? rejectionHistoryMap.get(p.resourceRequestApprovalStepHistoryId)
+      : null;
+    return {
+      purpose: p.purpose,
+      createdAt: p.createdAt,
+      label:
+        index === 0
+          ? "Initial Submission"
+          : rejection
+          ? "Edited after rejection"
+          : "Edited while open",
+      rejection: rejection ?? null,
+    };
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -148,16 +172,53 @@ export function ResourceRequestInfoModal({ open, onOpenChange, request }: Props)
               </h3>
               <div className="space-y-3">
                 {purposeHistory.map((p, i) => (
-                  <div key={i} className="border rounded p-3 space-y-1">
+                  <div key={i} className="border rounded p-3 space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-muted-foreground">
+                      <span
+                        className={cn(
+                          "text-xs font-medium",
+                          p.rejection
+                            ? "text-red-600"
+                            : i === 0
+                            ? "text-muted-foreground"
+                            : "text-blue-600",
+                        )}
+                      >
                         {p.label}
                       </span>
                       <span className="text-xs text-muted-foreground">
                         {formatDateTime(p.createdAt)}
                       </span>
                     </div>
-                    <p className="text-sm">{p.purpose}</p>
+                    <Textarea
+                      readOnly
+                      value={p.purpose}
+                      className="resize-none text-sm bg-muted"
+                      rows={2}
+                    />
+                    {p.rejection && (
+                      <div className="rounded-md bg-red-50 border border-red-200 p-2.5 space-y-1">
+                        <p className="text-xs font-semibold text-red-600 uppercase tracking-wide">
+                          Rejection Details
+                        </p>
+                        <div className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5">
+                          <span className="text-xs text-muted-foreground">Rejected by</span>
+                          <span className="text-xs font-medium">
+                            {p.rejection.approverName
+                              ? p.rejection.approverName
+                              : `Step ${p.rejection.stepOrder} Approver (${p.rejection.approverId})`}
+                          </span>
+                          <span className="text-xs text-muted-foreground">Date</span>
+                          <span className="text-xs">{formatDateTime(p.rejection.actionAt)}</span>
+                          {p.rejection.reasonForRejection && (
+                            <>
+                              <span className="text-xs text-muted-foreground">Reason</span>
+                              <span className="text-xs">{p.rejection.reasonForRejection}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

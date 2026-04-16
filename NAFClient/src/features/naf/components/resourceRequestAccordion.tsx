@@ -7,6 +7,7 @@ import {
   BellRing,
   X,
   Check,
+  History,
 } from "lucide-react";
 import {
   AccordionContent,
@@ -42,13 +43,19 @@ import {
 import { cn } from "@/lib/utils";
 import { getDateUrgency } from "@/lib/dateUrgency";
 
-import type { ResourceRequest, PurposeProps } from "@/types/api/naf";
+import type {
+  ResourceRequest,
+  ResourceRequestHistory,
+  PurposeProps,
+} from "@/types/api/naf";
+import { ResourceRequestAction } from "@/types/api/naf";
 
-import { Status } from "@/types/enum/status";
+import { Status, ImplementationStatus } from "@/types/enum/status";
 import { PROGRESS_CONFIG } from "./progressBadge";
 
 import { DeleteConfirmDialog } from "./deleteConfirmDialog";
 import { ResubmitDialog } from "./resubmitDialog";
+import { PurposeHistoryModal } from "./purposeHistoryModal";
 import { Progress } from "@/types/enum/progress";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -78,19 +85,50 @@ function ResourceIcon({ iconUrl, name }: { iconUrl: string; name: string }) {
   );
 }
 
-function ActivityBadge({ status }: { status: Status }) {
+const ACTION_CONFIG: Record<
+  ResourceRequestAction,
+  { label: string; className: string }
+> = {
+  [ResourceRequestAction.APPROVE]: {
+    label: "Approved",
+    className: "bg-emerald-100 text-emerald-700",
+  },
+  [ResourceRequestAction.REJECT]: {
+    label: "Rejected",
+    className: "bg-red-100 text-red-600",
+  },
+  [ResourceRequestAction.DELAY]: {
+    label: "Delayed",
+    className: "bg-yellow-100 text-yellow-700",
+  },
+  [ResourceRequestAction.ACCEPT]: {
+    label: "Accepted",
+    className: "bg-blue-100 text-blue-700",
+  },
+  [ResourceRequestAction.ACCOMPLISH]: {
+    label: "Accomplished",
+    className: "bg-emerald-100 text-emerald-700",
+  },
+  [ResourceRequestAction.EDITED]: {
+    label: "Edited",
+    className: "bg-gray-100 text-gray-600",
+  },
+  [ResourceRequestAction.CANCELLED]: {
+    label: "Cancelled",
+    className: "bg-gray-50 border-gray-200",
+  },
+};
+
+function ActionBadge({ type }: { type: ResourceRequestAction }) {
+  const cfg = ACTION_CONFIG[type];
   return (
     <span
       className={cn(
-        "font-semibold text-sm",
-        status === Status.APPROVED && "text-emerald-600",
-        status === Status.REJECTED && "text-red-500",
-        status !== Status.APPROVED &&
-          status !== Status.REJECTED &&
-          "text-gray-500",
+        "text-xs font-semibold px-2 py-0.5 rounded-full",
+        cfg?.className ?? "bg-gray-100 text-gray-600",
       )}
     >
-      {Status[status] ?? String(status)}
+      {cfg?.label ?? String(type)}
     </span>
   );
 }
@@ -113,16 +151,12 @@ function DateUrgencyBadge({ dateNeeded }: { dateNeeded?: string | null }) {
   );
 }
 
-function HistoryTable({ steps }: { steps: ResourceRequest["steps"] }) {
-  const histories = steps.flatMap((step) =>
-    step.histories.map((h) => ({
-      actionAt: h.actionAt,
-      approverLabel: `Step ${step.stepOrder} Approver`,
-      status: h.status,
-    })),
-  );
-
+function HistoryTable({ histories }: { histories: ResourceRequestHistory[] }) {
   if (histories.length === 0) return null;
+
+  const sorted = [...histories].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
+  );
 
   return (
     <div className="mt-4">
@@ -136,19 +170,21 @@ function HistoryTable({ steps }: { steps: ResourceRequest["steps"] }) {
             <TableHead className="text-xs font-semibold">
               Date and Time
             </TableHead>
-            <TableHead className="text-xs font-semibold">Person</TableHead>
-            <TableHead className="text-xs font-semibold">Activity</TableHead>
+            <TableHead className="text-xs font-semibold">Action</TableHead>
+            <TableHead className="text-xs font-semibold">Details</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {histories.map((h, i) => (
-            <TableRow key={i}>
-              <TableCell className="text-sm text-muted-foreground">
-                {formatDateTime(h.actionAt)}
+          {sorted.map((h) => (
+            <TableRow key={h.id}>
+              <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                {formatDateTime(h.createdAt)}
               </TableCell>
-              <TableCell className="text-sm">{h.approverLabel}</TableCell>
               <TableCell>
-                <ActivityBadge status={h.status} />
+                <ActionBadge type={h.type} />
+              </TableCell>
+              <TableCell className="text-sm text-muted-foreground">
+                {h.description}
               </TableCell>
             </TableRow>
           ))}
@@ -158,8 +194,15 @@ function HistoryTable({ steps }: { steps: ResourceRequest["steps"] }) {
   );
 }
 
-function PurposeBlock({ request }: { request: ResourceRequest }) {
+function PurposeBlock({
+  request,
+  onShowHistory,
+}: {
+  request: ResourceRequest;
+  onShowHistory: () => void;
+}) {
   const purpose = request.purposes?.[request.purposes.length - 1]?.purpose;
+  const hasPurposeHistory = (request.purposes?.length ?? 0) > 1;
 
   return (
     <div className="space-y-3">
@@ -176,9 +219,34 @@ function PurposeBlock({ request }: { request: ResourceRequest }) {
         </div>
       )}
 
+      {request.progress == Progress.ACCOMPLISHED && (
+        <div>
+          <p className="text-xs text-muted-foreground mb-0.5">
+            Accomplished At
+          </p>
+          <p className="text-sm font-medium">
+            {formatDateTime(request.accomplishedAt)}
+          </p>
+        </div>
+      )}
+
       {purpose && (
         <div>
-          <p className="text-sm font-semibold mb-1">Purpose</p>
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-sm font-semibold">Purpose</p>
+            {hasPurposeHistory && (
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                className="gap-1.5 text-xs h-7"
+                onClick={onShowHistory}
+              >
+                <History className="h-3 w-3" />
+                Purpose History
+              </Button>
+            )}
+          </div>
           <Textarea
             readOnly
             value={purpose}
@@ -297,25 +365,14 @@ function DeactivateAction({ onDeactivate }: { onDeactivate: () => void }) {
 function RejectedActions({
   rejectionReason,
   onResubmit,
+  onCancel,
 }: {
   rejectionReason?: string;
   onResubmit: () => void;
+  onCancel: () => void;
 }) {
   return (
     <div className="mt-4 space-y-3">
-      {rejectionReason && (
-        <div>
-          <p className="text-sm font-semibold text-red-500 mb-1">
-            Reason for Rejection
-          </p>
-          <Textarea
-            readOnly
-            value={rejectionReason}
-            className="resize-none text-sm bg-background border-red-200"
-            rows={2}
-          />
-        </div>
-      )}
       <div className="flex justify-end gap-2">
         <Button
           size="sm"
@@ -326,7 +383,28 @@ function RejectedActions({
           Resubmit
           <RotateCcw className="h-3.5 w-3.5" />
         </Button>
+        <Button
+          size="sm"
+          className="bg-red-400 hover:bg-red-500 text-white gap-1.5"
+          onClick={onCancel}
+        >
+          Cancel Request
+          <X className="h-3.5 w-3.5" />
+        </Button>
       </div>
+    </div>
+  );
+}
+
+function CancelledBadge({ cancelledAt }: { cancelledAt: string }) {
+  return (
+    <div className="mt-4 rounded-md bg-gray-50 border border-gray-200 p-3 space-y-0.5">
+      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-gray-200 text-gray-600">
+        Cancelled
+      </span>
+      <p className="text-xs text-muted-foreground pt-1">
+        Cancelled on {formatDateTime(cancelledAt)}
+      </p>
     </div>
   );
 }
@@ -525,6 +603,94 @@ function RejectDialog({
   );
 }
 
+// ─── Implementation block ─────────────────────────────────────────────────────
+
+function ImplementationBlock({
+  impl,
+}: {
+  impl: ResourceRequest["implementation"];
+}) {
+  return (
+    <div className="mt-4 space-y-2">
+      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+        Implementation
+      </p>
+
+      {!impl || impl.status === ImplementationStatus.OPEN ? (
+        <div className="rounded-md border border-dashed p-3 space-y-1">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 font-medium">
+            Unassigned
+          </span>
+          <p className="text-sm text-muted-foreground">
+            Not yet accepted by a technical team member.
+          </p>
+        </div>
+      ) : impl.status === ImplementationStatus.IN_PROGRESS ? (
+        <div className="rounded-md bg-blue-50 border border-blue-100 p-3 space-y-1">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 font-medium">
+            In Progress
+          </span>
+          {impl.employeeId && (
+            <p className="text-sm">
+              Assigned to:{" "}
+              <span className="font-medium">{impl.employeeId}</span>
+            </p>
+          )}
+          {impl.acceptedAt && (
+            <p className="text-xs text-muted-foreground">
+              Accepted: {formatDateTime(impl.acceptedAt)}
+            </p>
+          )}
+        </div>
+      ) : impl.status === ImplementationStatus.DELAYED ? (
+        <div className="rounded-md bg-yellow-50 border border-yellow-200 p-3 space-y-1">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-700 font-medium">
+            Delayed
+          </span>
+          {impl.employeeId && (
+            <p className="text-sm">
+              Assigned to:{" "}
+              <span className="font-medium">{impl.employeeId}</span>
+            </p>
+          )}
+          {impl.delayedAt && (
+            <p className="text-xs text-muted-foreground">
+              Delayed at: {formatDateTime(impl.delayedAt)}
+            </p>
+          )}
+          {impl.delayReason && (
+            <div>
+              <p className="text-xs font-semibold text-yellow-700 mb-0.5">
+                Reason for delay
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {impl.delayReason}
+              </p>
+            </div>
+          )}
+        </div>
+      ) : impl.status === ImplementationStatus.ACCOMPLISHED ? (
+        <div className="rounded-md bg-emerald-50 border border-emerald-100 p-3 space-y-1">
+          <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-medium">
+            Accomplished
+          </span>
+          {impl.employeeId && (
+            <p className="text-sm">
+              Implemented by:{" "}
+              <span className="font-medium">{impl.employeeId}</span>
+            </p>
+          )}
+          {impl.accomplishedAt && (
+            <p className="text-xs text-muted-foreground">
+              Accomplished: {formatDateTime(impl.accomplishedAt)}
+            </p>
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 interface ResourceRequestAccordionItemProps {
   request: ResourceRequest;
   isCurrentApprover: boolean;
@@ -536,7 +702,8 @@ interface ResourceRequestAccordionItemProps {
   onDelete: (requestId: string) => void;
   onRemind: (requestId: string) => void;
   onDeactivate: (requestId: string) => void;
-  onResubmit: (requestId: string) => void;
+  onResubmit: (requestId: string, nafId: string, purpose: PurposeProps) => void;
+  onCancel: (requestId: string) => void;
   // Approver handlers
   onApprove: (requestId: string, remarks: string) => void;
   onReject: (requestId: string, reasonForRejection: string) => void;
@@ -552,24 +719,34 @@ export function ResourceRequestAccordionItem({
   onDelete,
   onRemind,
   onDeactivate,
-  onResubmit: _onResubmit,
+  onResubmit,
+  onCancel,
   onApprove,
   onReject,
 }: ResourceRequestAccordionItemProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [resubmitDialogOpen, setResubmitDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [purposeHistoryOpen, setPurposeHistoryOpen] = useState(false);
 
   const progress = request.progress as unknown as Progress;
 
   const config = PROGRESS_CONFIG[progress];
   const urgency = getDateUrgency(request.dateNeeded);
-  const initialPurpose = request.purposes?.[0]?.purpose ?? "";
+  const purposeIndex = request.purposes ? request.purposes.length - 1 : 0;
+  const initialPurpose = request.purposes?.[purposeIndex]?.purpose ?? "";
+  console.log(isCurrentApprover);
+  // console.log();
 
-  const rejectionReason = request.steps
+  const rejectionHistory = request.steps
     .flatMap((s) => s.histories)
-    .find((h) => h.status === Status.REJECTED)?.reasonForRejection;
+    .filter((h) => h.status === Status.REJECTED)
+    .sort(
+      (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime(),
+    )[0];
+  const rejectionReason = rejectionHistory?.reasonForRejection;
 
   const showHistory = progress !== Progress.OPEN;
   console.log(`${request.resource.name} is ${Progress[request.progress]}`);
@@ -596,7 +773,10 @@ export function ResourceRequestAccordionItem({
             <span className="text-sm font-medium truncate">
               {request.resource.name}
             </span>
-            <DateUrgencyBadge dateNeeded={request.dateNeeded} />
+            {progress != Progress.ACCOMPLISHED &&
+              progress != Progress.NOT_ACCOMPLISHED && (
+                <DateUrgencyBadge dateNeeded={request.dateNeeded} />
+              )}
           </div>
           <span
             className={cn(
@@ -612,18 +792,42 @@ export function ResourceRequestAccordionItem({
         </AccordionTrigger>
 
         <AccordionContent className="px-4 pb-4 pt-2">
-          <PurposeBlock request={request} />
+          <PurposeBlock
+            request={request}
+            onShowHistory={() => setPurposeHistoryOpen(true)}
+          />
 
-          {showHistory && <HistoryTable steps={request.steps} />}
+          {showHistory && <HistoryTable histories={request.histories} />}
+          {progress === Progress.REJECTED && (
+            <div>
+              <p className="text-sm font-semibold text-red-500 mb-1">
+                Reason for Rejection
+              </p>
+              <Textarea
+                readOnly
+                value={rejectionReason}
+                className="resize-none text-sm bg-background border-red-200"
+                rows={2}
+              />
+            </div>
+          )}
+
+          {progress === Progress.IMPLEMENTATION && (
+            <ImplementationBlock impl={request.implementation} />
+          )}
 
           {/* Current Approver action area */}
           {isApprover && isCurrentApprover && (
             <>
-              {progress != Progress.REJECTED && (
+              {(progress === Progress.OPEN ||
+                progress === Progress.IN_PROGRESS) && (
                 <ApproverActions
                   onApprove={() => setApproveDialogOpen(true)}
                   onReject={() => setRejectDialogOpen(true)}
                 />
+              )}
+              {progress === Progress.IMPLEMENTATION && (
+                <ReminderAction onRemind={() => onRemind(request.id)} />
               )}
             </>
           )}
@@ -640,8 +844,6 @@ export function ResourceRequestAccordionItem({
                 />
               )}
 
-              {progress === Progress.IMPLEMENTATION && null}
-
               {progress === Progress.ACCOMPLISHED && isRequestor && (
                 <DeactivateAction
                   onDeactivate={() => onDeactivate(request.id)}
@@ -650,13 +852,17 @@ export function ResourceRequestAccordionItem({
 
               {progress === Progress.ACCOMPLISHED && !isRequestor && null}
 
-              {progress === Progress.REJECTED && (
-                <RejectedActions
-                  rejectionReason={rejectionReason}
-                  onResubmit={() => setEditDialogOpen(true)}
-                />
-              )}
-              {progress === Progress.IN_PROGRESS && (
+              {progress === Progress.REJECTED &&
+                (request.cancelledAt ? (
+                  <CancelledBadge cancelledAt={request.cancelledAt} />
+                ) : (
+                  <RejectedActions
+                    rejectionReason={rejectionReason}
+                    onResubmit={() => setResubmitDialogOpen(true)}
+                    onCancel={() => onCancel(request.id)}
+                  />
+                ))}
+              {progress === Progress.IMPLEMENTATION && (
                 <ReminderAction onRemind={() => onRemind(request.id)} />
               )}
             </>
@@ -664,15 +870,33 @@ export function ResourceRequestAccordionItem({
         </AccordionContent>
       </AccordionItem>
 
+      {/* ── Purpose History Modal ─────────────────────────────────────── */}
+      <PurposeHistoryModal
+        open={purposeHistoryOpen}
+        onOpenChange={setPurposeHistoryOpen}
+        purposes={request.purposes ?? []}
+        steps={request.steps ?? []}
+      />
+
       {/* ── Requestor dialogs ──────────────────────────────────────────── */}
-      <ResubmitDialog
+      {/* <ResubmitDialog
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         initialPurpose={initialPurpose}
         onSubmit={(purpose) => {
           onEdit(request.id, request.nafId, purpose);
-          // onResubmit("asda");
           setEditDialogOpen(false);
+        }}
+      /> */}
+      <ResubmitDialog
+        open={resubmitDialogOpen}
+        onOpenChange={setResubmitDialogOpen}
+        initialPurpose={initialPurpose}
+        onSubmit={(purpose) => {
+          onResubmit(request.id, request.nafId, {
+            ...purpose,
+          });
+          setResubmitDialogOpen(false);
         }}
       />
       <DeleteConfirmDialog

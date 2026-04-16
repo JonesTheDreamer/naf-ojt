@@ -73,19 +73,24 @@ export function ImplementationNAFAccordion({
           <AccordionItem
             key={naf.id}
             value={naf.id}
-            className={cn("border rounded-lg overflow-hidden", hasOverdue && "border-red-300")}
+            className={cn(
+              "border rounded-lg overflow-hidden",
+              hasOverdue && "border-red-300",
+            )}
           >
             <AccordionTrigger className="px-4 py-3 hover:no-underline hover:bg-muted/30 [&[data-state=open]]:bg-muted/20">
               <div className="flex flex-col items-start gap-0.5 text-left">
-                <span className="text-sm font-semibold">{naf.reference}</span>
+                <span className="text-sm font-semibold">{employeeName}</span>
                 <span className="text-xs text-muted-foreground">
-                  {employeeName}
+                  {naf.reference}
                 </span>
                 {nearestUrgency && (
                   <span
                     className={cn(
                       "text-xs font-medium",
-                      nearestUrgency.overdue ? "text-red-600" : "text-amber-600",
+                      nearestUrgency.overdue
+                        ? "text-red-600"
+                        : "text-amber-600",
                     )}
                   >
                     {nearestUrgency.label}

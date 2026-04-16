@@ -5,5 +5,6 @@ namespace NAFServer.src.Application.Interfaces
     public interface IInternetPurposeService
     {
         Task<List<InternetPurposeDTO>> GetAllAsync();
+        Task<InternetPurposeDTO> CreateAsync(CreateInternetPurposeDTO dto);
     }
 }

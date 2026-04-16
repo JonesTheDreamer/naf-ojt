@@ -243,9 +243,11 @@ namespace NAFServer.Migrations
                     CurrentStep = table.Column<int>(type: "int", nullable: false),
                     Progress = table.Column<int>(type: "int", nullable: false),
                     AccomplishedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CancelledAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    DateNeeded = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NAFId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ResourceId = table.Column<int>(type: "int", nullable: false),
-                    ApprovalWorkflowTemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ApprovalWorkflowTemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)

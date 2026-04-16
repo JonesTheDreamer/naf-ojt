@@ -7,6 +7,7 @@
         DELAY,
         ACCEPT,
         ACCOMPLISH,
-        EDITED
+        EDITED,
+        CANCELLED
     }
 }

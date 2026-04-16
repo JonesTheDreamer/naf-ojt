@@ -7,5 +7,6 @@ namespace NAFServer.src.Domain.Interface.Repository
         public Task<List<InternetResource>> GetAllAsync();
         public Task<InternetResource> GetByIdAsync(int id);
         public Task<List<InternetResource>> RecacheAllAsync();
+        public Task<InternetResource> CreateAsync(string name, string url, string? description, int purposeId);
     }
 }

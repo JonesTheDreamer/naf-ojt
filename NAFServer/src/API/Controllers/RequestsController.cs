@@ -86,6 +86,20 @@ namespace NAFServer.src.API.Controllers
             }
         }
 
+        [HttpPut("{id:guid}/cancel")]
+        public async Task<IActionResult> Cancel(Guid id)
+        {
+            try
+            {
+                await _resourceRequestService.CancelAsync(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost("{id:guid}/purpose")]
         public async Task<IActionResult> RevisePurpose(
             Guid id,

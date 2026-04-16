@@ -66,7 +66,7 @@ export const getEmployeeNAFs = async (employeeId: string): Promise<NAF[]> => {
 export const createNAF = async (payload: {
   employeeId: string;
   requestorId: string;
-  resourceIds: number[];
+  hardwareId: number;
   dateNeeded?: string | null;
 }) => {
   const response = await api.post("/NAFs", payload);

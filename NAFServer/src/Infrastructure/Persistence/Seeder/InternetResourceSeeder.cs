@@ -10,7 +10,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
 
             var socialMedia = new InternetPurpose("Social Media", "Use of internet for social media purposes");
             var highBandwidth = new InternetPurpose("High Bandwidths", "Use of high bandwidth internet services");
-            var ai = new InternetPurpose("Social Media", "Use of internet for artificial intelligence");
+            var ai = new InternetPurpose("AI", "Use of internet for artificial intelligence");
 
             context.InternetPurposes.AddRange(socialMedia, highBandwidth, ai);
             await context.SaveChangesAsync();

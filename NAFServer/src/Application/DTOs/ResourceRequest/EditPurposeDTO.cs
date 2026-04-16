@@ -3,7 +3,6 @@
     public record EditPurposeDTO
     (
         //Guid requestId,
-        string purpose,
-        Guid resourceRequestApprovalStepHistoryId
+        string purpose
     );
 }

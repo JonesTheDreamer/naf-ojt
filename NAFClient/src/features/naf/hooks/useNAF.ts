@@ -8,6 +8,7 @@ import {
   createNAF,
   deactivateNAF,
 } from "@/services/EntityAPI/nafService";
+import { toast } from "sonner";
 
 import type { NAF } from "@/types/api/naf";
 import type { PagedResult } from "@/types/common/pagedResult";
@@ -80,16 +81,31 @@ export const useNAF = ({ employeeId, nafId }: UseNAFParams) => {
     mutationFn: (payload: {
       employeeId: string;
       requestorId: string;
-      resourceIds: number[];
+      hardwareId: number;
+      dateNeeded?: string | null;
     }) => createNAF(payload),
-    onSuccess: () => alert("Created"),
-    onError: (error) => console.error(error.message),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
+      queryClient.invalidateQueries({ queryKey: ["employeeNAF"] });
+      toast.success("NAF created successfully");
+    },
+    onError: (error) => {
+      console.error(error.message);
+      toast.error("Failed to create NAF");
+    },
   });
 
   const deactivate = useMutation({
     mutationFn: (id: string) => deactivateNAF(id),
-    onSuccess: () => alert("Deleted"),
-    onError: (error) => console.error(error.message),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
+      queryClient.invalidateQueries({ queryKey: ["employeeNAF"] });
+      toast.success("NAF deactivated");
+    },
+    onError: (error) => {
+      console.error(error.message);
+      toast.error("Failed to deactivate NAF");
+    },
   });
 
   return {

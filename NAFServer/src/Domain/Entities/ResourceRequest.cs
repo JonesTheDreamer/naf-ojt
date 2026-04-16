@@ -9,12 +9,13 @@ namespace NAFServer.src.Domain.Entities
         public int CurrentStep { get; set; }
         public Progress Progress { get; set; }
         public DateTime AccomplishedAt { get; set; }
-        public DateTime? DateNeeded { get; set; }
+        public DateTime? CancelledAt { get; set; }
+        public DateTime DateNeeded { get; set; }
         public Guid NAFId { get; set; }
         public NAF NAF { get; set; }
         public int ResourceId { get; set; }
         public Resource Resource { get; set; }
-        public Guid ApprovalWorkflowTemplateId { get; set; }
+        public Guid? ApprovalWorkflowTemplateId { get; set; }
         public List<ResourceRequestHistory> Histories { get; set; } = new();
         public ApprovalWorkflowTemplate ApprovalWorkflowTemplate { get; set; }
         public List<ResourceRequestPurpose> ResourceRequestPurposes { get; set; } = new();
@@ -26,7 +27,8 @@ namespace NAFServer.src.Domain.Entities
         public ResourceRequest(
             Guid NAFId,
             int ResourceId,
-            Guid ApprovalWorkflowTemplateId,
+            Guid? ApprovalWorkflowTemplateId,
+            DateTime DateNeeded,
             ResourceRequestAdditionalInfo AdditionalInfo,
             Progress Progress
         )
@@ -34,6 +36,7 @@ namespace NAFServer.src.Domain.Entities
             this.NAFId = NAFId;
             this.ResourceId = ResourceId;
             this.ApprovalWorkflowTemplateId = ApprovalWorkflowTemplateId;
+            this.DateNeeded = DateNeeded;
             this.AdditionalInfo = AdditionalInfo;
             this.Progress = Progress;
             CurrentStep = 1;
@@ -96,6 +99,15 @@ namespace NAFServer.src.Domain.Entities
         {
             var purpose = new ResourceRequestPurpose(newPurpose, Id, resourceRequestApprovalStepHistory);
             ResourceRequestPurposes.Add(purpose);
+            return this;
+        }
+
+        public ResourceRequest Cancel()
+        {
+            if (Progress != Progress.REJECTED) throw new DomainException("Only rejected requests can be cancelled");
+            if (CancelledAt.HasValue) throw new DomainException("Already cancelled");
+            Progress = Progress.NOT_ACCOMPLISHED;
+            CancelledAt = DateTime.UtcNow;
             return this;
         }
 

@@ -92,6 +92,8 @@ builder.Services.AddScoped<ISharedFolderService, SharedFolderService>();
 builder.Services.AddScoped<IResourceRequestHandlerRegistry, ResourceRequestHandlerRegistry>();
 builder.Services.AddScoped<IImplementationRepository, ImplementationRepository>();
 builder.Services.AddScoped<IImplementationService, ImplementationService>();
+builder.Services.AddScoped<IResourceGroupRepository, ResourceGroupRepository>();
+builder.Services.AddScoped<IResourceGroupService, ResourceGroupService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();

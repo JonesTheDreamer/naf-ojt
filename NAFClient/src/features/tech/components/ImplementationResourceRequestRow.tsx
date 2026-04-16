@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Info, UserPlus, Clock, CheckCircle } from "lucide-react";
+import { Info, UserPlus, Clock, CheckCircle, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import type { ResourceRequest } from "@/types/api/naf";
 import { handleAdditionalInfoStructured } from "@/types/api/naf";
 import { ImplementationStatus } from "@/types/enum/status";
 import { ResourceRequestInfoModal } from "./ResourceRequestInfoModal";
 import { DelayedReasonModal } from "./DelayedReasonModal";
+import { PurposeHistoryModal } from "@/features/naf/components/purposeHistoryModal";
 import { getDateUrgency } from "@/lib/dateUrgency";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +63,9 @@ export function ImplementationResourceRequestRow({
 }: Props) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [delayOpen, setDelayOpen] = useState(false);
+  const [purposeHistoryOpen, setPurposeHistoryOpen] = useState(false);
+
+  const hasPurposeHistory = (request.purposes?.length ?? 0) > 1;
 
   const impl = request.implementation;
   const isAccomplished = impl?.status === ImplementationStatus.ACCOMPLISHED;
@@ -77,10 +81,12 @@ export function ImplementationResourceRequestRow({
 
   return (
     <>
-      <div className={cn(
-  "flex items-start justify-between gap-3 py-3 border-b last:border-b-0",
-  getDateUrgency(request.dateNeeded)?.overdue && "bg-red-50/40",
-)}>
+      <div
+        className={cn(
+          "flex items-start justify-between gap-3 py-3 border-b last:border-b-0",
+          getDateUrgency(request.dateNeeded)?.overdue && "bg-red-50/40",
+        )}
+      >
         <div className="space-y-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             {request.resource.iconUrl && (
@@ -139,6 +145,18 @@ export function ImplementationResourceRequestRow({
             More Info
           </Button>
 
+          {hasPurposeHistory && (
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-1.5 text-xs h-7"
+              onClick={() => setPurposeHistoryOpen(true)}
+            >
+              <History className="h-3 w-3" />
+              Purpose History
+            </Button>
+          )}
+
           {mode === "for-implementations" && !impl?.employeeId && (
             <Button
               size="sm"
@@ -183,6 +201,13 @@ export function ImplementationResourceRequestRow({
         open={infoOpen}
         onOpenChange={setInfoOpen}
         request={request}
+      />
+
+      <PurposeHistoryModal
+        open={purposeHistoryOpen}
+        onOpenChange={setPurposeHistoryOpen}
+        purposes={request.purposes ?? []}
+        steps={request.steps ?? []}
       />
 
       {mode === "my-tasks" && (

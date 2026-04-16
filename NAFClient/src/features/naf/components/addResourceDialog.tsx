@@ -15,6 +15,7 @@ import { Command } from "cmdk";
 import { X, ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { NAF, InternetRequestInfo, GroupEmailInfo, SharedFolderInfo } from "@/types/api/naf";
+import { Progress } from "@/types/enum/progress";
 import { useResource, useResourceMetadata } from "@/features/resources/hooks/useResource";
 import {
   useAddResource,
@@ -120,6 +121,8 @@ function SearchableCombobox({
 
 // ── Internet Entry Card ────────────────────────────────────────────────────────
 
+const OTHER_SENTINEL = "__other__";
+
 function InternetEntryCard({
   entry,
   allInternetResources,
@@ -150,6 +153,31 @@ function InternetEntryCard({
       !usedInternetResourceIds.includes(r.id),
   );
 
+  const purposeSelectValue = entry.isOther
+    ? OTHER_SENTINEL
+    : (entry.internetPurposeId?.toString() ?? "");
+
+  const handlePurposeChange = (v: string) => {
+    if (v === OTHER_SENTINEL) {
+      onChange({
+        isOther: true,
+        internetPurposeId: null,
+        internetResourceId: null,
+      });
+    } else {
+      onChange({
+        isOther: false,
+        internetPurposeId: Number(v),
+        internetResourceId: null,
+        newPurposeName: "",
+        newPurposeDescription: "",
+        newResourceName: "",
+        newResourceUrl: "",
+        newResourceDescription: "",
+      });
+    }
+  };
+
   return (
     <div className="border rounded-md p-3 space-y-2 relative">
       <button
@@ -159,13 +187,13 @@ function InternetEntryCard({
       >
         <X className="h-4 w-4" />
       </button>
+
+      {/* Purpose Category */}
       <div className="space-y-1">
         <FieldLabel>Purpose Category</FieldLabel>
         <SelectPrimitive.Root
-          value={entry.internetPurposeId?.toString() ?? ""}
-          onValueChange={(v) =>
-            onChange({ internetPurposeId: Number(v), internetResourceId: null })
-          }
+          value={purposeSelectValue}
+          onValueChange={handlePurposeChange}
         >
           <SelectPrimitive.Trigger className="flex h-9 w-full items-center justify-between rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring">
             <SelectPrimitive.Value placeholder="Select purpose category" />
@@ -189,25 +217,98 @@ function InternetEntryCard({
                     </SelectPrimitive.Item>
                   );
                 })}
+                <SelectPrimitive.Separator className="my-1 h-px bg-muted" />
+                <SelectPrimitive.Item
+                  value={OTHER_SENTINEL}
+                  className="relative flex cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent italic text-muted-foreground"
+                >
+                  <SelectPrimitive.ItemText>
+                    Other (add new)
+                  </SelectPrimitive.ItemText>
+                </SelectPrimitive.Item>
               </SelectPrimitive.Viewport>
             </SelectPrimitive.Content>
           </SelectPrimitive.Portal>
         </SelectPrimitive.Root>
       </div>
 
-      <div className="space-y-1">
-        <FieldLabel>Internet Resource</FieldLabel>
-        <SearchableCombobox
-          options={resourcesForPurpose.map((r) => ({
-            value: r.id,
-            label: r.name,
-          }))}
-          value={entry.internetResourceId}
-          onValueChange={(v) => onChange({ internetResourceId: v })}
-          placeholder="Select internet resource"
-          disabled={entry.internetPurposeId === null}
-        />
-      </div>
+      {/* "Other" mode — form to create a new purpose + resource */}
+      {entry.isOther ? (
+        <div className="rounded-md border border-dashed border-amber-300 bg-amber-50/40 p-3 space-y-2">
+          <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide">
+            New Purpose
+          </p>
+          <div className="space-y-1">
+            <FieldLabel>Purpose Name <span className="text-red-500">*</span></FieldLabel>
+            <input
+              type="text"
+              placeholder="e.g. Research"
+              value={entry.newPurposeName}
+              onChange={(e) => onChange({ newPurposeName: e.target.value })}
+              className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+            />
+          </div>
+          <div className="space-y-1">
+            <FieldLabel>Purpose Description</FieldLabel>
+            <input
+              type="text"
+              placeholder="Optional description"
+              value={entry.newPurposeDescription}
+              onChange={(e) => onChange({ newPurposeDescription: e.target.value })}
+              className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+            />
+          </div>
+
+          <p className="text-xs font-semibold text-amber-600 uppercase tracking-wide pt-1">
+            New Internet Resource
+          </p>
+          <div className="space-y-1">
+            <FieldLabel>Resource Name <span className="text-red-500">*</span></FieldLabel>
+            <input
+              type="text"
+              placeholder="e.g. GitHub"
+              value={entry.newResourceName}
+              onChange={(e) => onChange({ newResourceName: e.target.value })}
+              className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+            />
+          </div>
+          <div className="space-y-1">
+            <FieldLabel>URL <span className="text-red-500">*</span></FieldLabel>
+            <input
+              type="url"
+              placeholder="https://..."
+              value={entry.newResourceUrl}
+              onChange={(e) => onChange({ newResourceUrl: e.target.value })}
+              className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+            />
+          </div>
+          <div className="space-y-1">
+            <FieldLabel>Resource Description</FieldLabel>
+            <input
+              type="text"
+              placeholder="Optional description"
+              value={entry.newResourceDescription}
+              onChange={(e) => onChange({ newResourceDescription: e.target.value })}
+              className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
+            />
+          </div>
+        </div>
+      ) : (
+        /* Normal mode — existing resource picker */
+        <div className="space-y-1">
+          <FieldLabel>Internet Resource</FieldLabel>
+          <SearchableCombobox
+            options={resourcesForPurpose.map((r) => ({
+              value: r.id,
+              label: r.name,
+            }))}
+            value={entry.internetResourceId}
+            onValueChange={(v) => onChange({ internetResourceId: v })}
+            placeholder="Select internet resource"
+            disabled={entry.internetPurposeId === null}
+          />
+        </div>
+      )}
 
       <div className="space-y-1">
         <FieldLabel>Purpose of Access</FieldLabel>
@@ -398,15 +499,15 @@ export function AddResourceDialog({
   const existingResourceIds = naf.resourceRequests.map((rr) => rr.resource.id);
 
   const usedInternetResourceIds = naf.resourceRequests
-    .filter((rr) => rr.additionalInfo?.type === 0)
+    .filter((rr) => rr.additionalInfo?.type === 0 && rr.progress === Progress.ACCOMPLISHED)
     .map((rr) => (rr.additionalInfo as InternetRequestInfo).internetResourceId);
 
   const usedGroupEmailIds = naf.resourceRequests
-    .filter((rr) => rr.additionalInfo?.type === 2)
+    .filter((rr) => rr.additionalInfo?.type === 2 && rr.progress === Progress.ACCOMPLISHED)
     .map((rr) => (rr.additionalInfo as GroupEmailInfo).groupEmailId);
 
   const usedSharedFolderIds = naf.resourceRequests
-    .filter((rr) => rr.additionalInfo?.type === 1)
+    .filter((rr) => rr.additionalInfo?.type === 1 && rr.progress === Progress.ACCOMPLISHED)
     .map((rr) => (rr.additionalInfo as SharedFolderInfo).sharedFolderId);
 
   const availableBasic = (getAllResource.data ?? []).filter(
@@ -418,7 +519,19 @@ export function AddResourceDialog({
   const addInternetEntry = () =>
     setInternetEntries((prev) => [
       ...prev,
-      { _id: newEntry(), internetPurposeId: null, internetResourceId: null, purpose: "", dateNeeded: "" },
+      {
+        _id: newEntry(),
+        internetPurposeId: null,
+        internetResourceId: null,
+        purpose: "",
+        dateNeeded: "",
+        isOther: false,
+        newPurposeName: "",
+        newPurposeDescription: "",
+        newResourceName: "",
+        newResourceUrl: "",
+        newResourceDescription: "",
+      },
     ]);
 
   const addGroupEmailEntry = () =>
@@ -451,8 +564,17 @@ export function AddResourceDialog({
       prev.map((e) => (e._id === _id ? { ...e, ...patch } : e)),
     );
 
-  const isInternetEntryComplete = (e: InternetEntry) =>
-    e.internetResourceId !== null && e.purpose.trim().length > 0;
+  const isInternetEntryComplete = (e: InternetEntry) => {
+    if (e.isOther) {
+      return (
+        e.newPurposeName.trim().length > 0 &&
+        e.newResourceName.trim().length > 0 &&
+        e.newResourceUrl.trim().length > 0 &&
+        e.purpose.trim().length > 0
+      );
+    }
+    return e.internetResourceId !== null && e.purpose.trim().length > 0;
+  };
 
   const isGroupEmailEntryComplete = (e: GroupEmailEntry) =>
     e.groupEmailId !== null && e.purpose.trim().length > 0;

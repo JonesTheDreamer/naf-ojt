@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { implementationService } from "@/services/EntityAPI/implementationService";
+import { toast } from "sonner";
 
 export function useForImplementations() {
   const queryClient = useQueryClient();
@@ -15,7 +16,9 @@ export function useForImplementations() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tech", "for-implementations"] });
       queryClient.invalidateQueries({ queryKey: ["tech", "my-tasks"] });
+      toast.success("Assigned to you");
     },
+    onError: () => toast.error("Failed to assign task"),
   });
 
   return { forImplementationsQuery, assignToMeMutation };

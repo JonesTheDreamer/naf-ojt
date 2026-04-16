@@ -35,9 +35,13 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             });
         }
 
-        //public Task<InternetPurpose> GetByIdAsync(int id)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public async Task<InternetPurpose> CreateAsync(string name, string description)
+        {
+            var entity = new InternetPurpose(name, description);
+            _context.InternetPurposes.Add(entity);
+            await _context.SaveChangesAsync();
+            await RecacheAllAsync();
+            return entity;
+        }
     }
 }

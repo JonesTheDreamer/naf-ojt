@@ -81,8 +81,7 @@ namespace NAFServer.src.Application.Services
                 var workflowId = await _approvalWorkflowTemplateRepository
                     .GetActiveWorkflowIdOfResourceAsync(request.resourceId);
 
-                var rr = new ResourceRequest(request.nafId, request.resourceId, workflowId, additionalInfo, Progress.OPEN);
-                rr.DateNeeded = request.dateNeeded;
+                var rr = new ResourceRequest(request.nafId, request.resourceId, workflowId, request.dateNeeded, additionalInfo, Progress.OPEN);
 
                 additionalInfo.ResourceRequest = rr;
                 rr.NAF = naf;
@@ -126,17 +125,16 @@ namespace NAFServer.src.Application.Services
                 {
                     throw new ArgumentException("Invalid Resource. Using Create Basic for special resource.");
                 }
-                //var naf = await _nafRepository.GetByIdAsync(request.nafId);
-                var workflow = await _approvalWorkflowTemplateRepository.GetActiveWorkflowIdOfResourceAsync(request.resourceId);
 
                 var rr = new ResourceRequest(
                     request.nafId,
                     request.resourceId,
-                    workflow,
+                    null,
+                    request.dateNeeded,
                     null,
                     Progress.IMPLEMENTATION
                 );
-                rr.DateNeeded = request.dateNeeded;
+                //rr.DateNeeded = request.dateNeeded;
                 //{
                 //    Resource = resource
                 //    //NAF = naf
@@ -147,7 +145,6 @@ namespace NAFServer.src.Application.Services
                 await _context.SaveChangesAsync();
                 await _context.Implementations.AddAsync(new Domain.Entities.ResourceRequestImplementation(rr.Id));
                 await _context.SaveChangesAsync();
-
                 rr.Resource = resource;
                 return ResourceRequestMapper.ToDTO(rr);
             }
@@ -237,10 +234,18 @@ namespace NAFServer.src.Application.Services
             if (rr.Progress != Progress.OPEN && currentStep.Progress != Progress.REJECTED)
                 throw new InvalidOperationException("Purpose can only be edited if the request is still open / if an approver rejected requested");
 
-            rr.EditPurpose(request.purpose, request.resourceRequestApprovalStepHistoryId);
-            if (rr.Progress == Progress.REJECTED) rr.SetToInProgress();
+            Guid? resourceRequestApprovalStepHistoryId = null;
+            if (currentStep.Progress == Progress.REJECTED)
+            {
+                resourceRequestApprovalStepHistoryId = currentStep.Histories
+                    .OrderByDescending(h => h.ActionAt)
+                    .FirstOrDefault()
+                    .Id;
+                rr.SetToInProgress();
+            }
 
-            var approver = await _employeeRepository.GetByIdAsync(currentStep.ApproverId);
+
+            rr.EditPurpose(request.purpose, resourceRequestApprovalStepHistoryId);
 
             await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
             (
@@ -251,6 +256,20 @@ namespace NAFServer.src.Application.Services
 
             await _context.SaveChangesAsync();
             return ResourceRequestMapper.ToDTO(rr);
+        }
+
+        public async Task CancelAsync(Guid requestId)
+        {
+            var rr = await _resourceRequestRepository.GetByIdAsync(requestId);
+            rr.Cancel();
+            await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
+            (
+                rr.Id,
+                ResourceRequestAction.CANCELLED,
+                "Resource request edited"
+            ));
+
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(Guid requestId)

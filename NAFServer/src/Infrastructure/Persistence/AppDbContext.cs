@@ -30,6 +30,7 @@ namespace NAFServer.src.Infrastructure.Persistence
         public DbSet<User> Users { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<ResourceRequestHistory> ResourceRequestHistories { get; set; }
+        public DbSet<ResourceGroup> ResourceGroups { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using NAFServer.src.Domain.Entities;
+using NAFServer.src.Domain.Enums;
 using NAFServer.src.Domain.Interface;
 using NAFServer.src.Domain.Interface.Repository;
 using System.Linq.Expressions;
@@ -27,6 +28,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
                 .Include(rr => rr.Resource)
                 .Include(rr => rr.ResourceRequestImplementation)
                 .Include(rr => (rr.AdditionalInfo as InternetRequestInfo).InternetResource)
+                    .ThenInclude(ir => ir.Purpose)
                 .Include(rr => (rr.AdditionalInfo as SharedFolderRequestInfo).SharedFolder)
                 .Include(rr => (rr.AdditionalInfo as GroupEmailRequestInfo).GroupEmail)
                 .FirstAsync(rr => rr.Id == id) ?? throw new KeyNotFoundException("Resource Request not found");
@@ -45,6 +47,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
                 .Include(rr => rr.ResourceRequestImplementation)
                 .Include(rr => rr.Resource)
                 .Include(rr => (rr.AdditionalInfo as InternetRequestInfo).InternetResource)
+                    .ThenInclude(ir => ir.Purpose)
                 .Include(rr => (rr.AdditionalInfo as SharedFolderRequestInfo).SharedFolder)
                 .Include(rr => (rr.AdditionalInfo as GroupEmailRequestInfo).GroupEmail)
                 .FirstOrDefaultAsync() ?? throw new KeyNotFoundException("Resource Request not found");
@@ -64,7 +67,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             );
 
             return await _context.ResourceRequests
-                .Where(rr => rr.NAF.Id == nafId)
+                .Where(rr => rr.NAF.Id == nafId && rr.Progress == Progress.ACCOMPLISHED)
                 .Select(rr => rr.AdditionalInfo)
                 .OfType<TAdditionalInfo>()
                 .AnyAsync(predicate);

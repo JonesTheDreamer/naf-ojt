@@ -10,7 +10,9 @@ namespace NAFServer.src.Domain.Entities
         public string? IconUrl { get; set; }
         public bool IsActive { get; set; }
         public bool IsSpecial { get; set; }
-
+        public int ResourceGroupId { get; set; }
+        public bool IsActiveInGroup { get; set; }
+        public ResourceGroup ResourceGroup { get; set; }
         public List<ResourceRequest> ResourceRequests { get; set; } = new();
 
         private Resource() { }
@@ -46,6 +48,19 @@ namespace NAFServer.src.Domain.Entities
         public Resource SetIconUrl(string IconUrl)
         {
             this.IconUrl = IconUrl;
+            return this;
+        }
+
+        public Resource AssignToGroup(int groupId)
+        {
+            ResourceGroupId = groupId;
+            IsActiveInGroup = true;
+            return this;
+        }
+
+        public Resource RemoveFromGroup()
+        {
+            IsActiveInGroup = false;
             return this;
         }
 

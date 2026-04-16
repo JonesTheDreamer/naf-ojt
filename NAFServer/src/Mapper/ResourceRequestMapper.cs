@@ -15,6 +15,7 @@ namespace NAFServer.src.Mapper
                      rr.CurrentStep,
                      rr.Progress,
                      rr.AccomplishedAt,
+                     rr.CancelledAt,
                      rr.DateNeeded,
                      rr.NAFId,
                      rr.ApprovalWorkflowTemplateId,
@@ -47,6 +48,7 @@ namespace NAFServer.src.Mapper
                              s.ResourceRequestId,
                              s.StepOrder,
                              s.ApproverId,
+                             null,
                              s.Progress,
                              s.ApprovedAt,
                              s.Histories

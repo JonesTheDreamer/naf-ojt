@@ -11,5 +11,6 @@ namespace NAFServer.src.Application.Interfaces
         public Task<List<ResourceRequestApprovalStep>> FetchApproversAsync(ResourceRequest request);
         public Task<ResourceRequestDTO> EditPurposeAsync(Guid requestId, EditPurposeDTO request);
         public Task DeleteAsync(Guid id);
+        public Task CancelAsync(Guid id);
     }
 }

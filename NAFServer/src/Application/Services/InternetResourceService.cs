@@ -19,5 +19,11 @@ namespace NAFServer.src.Application.Services
             return items.Select(i => new InternetResourceItemDTO(
                 i.Id, i.Name, i.Url, i.Description, i.PurposeId)).ToList();
         }
+
+        public async Task<InternetResourceItemDTO> CreateAsync(CreateInternetResourceDTO dto)
+        {
+            var entity = await _repo.CreateAsync(dto.Name, dto.Url, dto.Description, dto.PurposeId);
+            return new InternetResourceItemDTO(entity.Id, entity.Name, entity.Url, entity.Description, entity.PurposeId);
+        }
     }
 }

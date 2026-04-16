@@ -157,7 +157,6 @@ interface RequestItemWrapperProps {
   currentUserId: string;
   onRemind: (id: string) => void;
   onDeactivate: (id: string) => void;
-  onResubmit: (id: string) => void;
 }
 
 function RequestItemWrapper({
@@ -166,13 +165,13 @@ function RequestItemWrapper({
   currentUserId,
   onRemind,
   onDeactivate,
-  onResubmit,
 }: RequestItemWrapperProps) {
   const {
     updateResourceRequestAsync,
     deleteResourceRequestAsync,
     approveRequestAsync,
     rejectRequestAsync,
+    cancelRequestAsync,
   } = useResourceRequest(request.id, request.nafId);
 
   const handleEdit = async (
@@ -184,6 +183,22 @@ function RequestItemWrapper({
       await updateResourceRequestAsync(purpose);
     } catch (error) {
       console.error("Failed to update resource request:", error);
+    }
+  };
+
+  // Resubmit carries the rejection history ID that triggered the resubmission
+  // so the backend can link the new purpose to the step history that caused it.
+  const handleResubmit = async (
+    _requestId: string,
+    _nafId: string,
+    purpose: PurposeProps,
+  ) => {
+    try {
+      await updateResourceRequestAsync({
+        purpose: purpose.purpose,
+      });
+    } catch (error) {
+      console.error("Failed to resubmit resource request:", error);
     }
   };
 
@@ -239,6 +254,14 @@ function RequestItemWrapper({
     }
   };
 
+  const handleCancel = async (_id: string) => {
+    try {
+      await cancelRequestAsync();
+    } catch (error) {
+      console.error("Failed to cancel resource request:", error);
+    }
+  };
+
   return (
     <ResourceRequestAccordionItem
       isRequestor={isRequestor}
@@ -249,7 +272,8 @@ function RequestItemWrapper({
       onDelete={handleDelete}
       onRemind={onRemind}
       onDeactivate={onDeactivate}
-      onResubmit={onResubmit}
+      onResubmit={handleResubmit}
+      onCancel={handleCancel}
       onApprove={handleApprove}
       onReject={handleReject}
     />
@@ -278,7 +302,6 @@ function RequestsSection({
   const handleRemind = (id: string) => console.log("TODO remind", id);
   const handleDeactivate = (id: string) =>
     console.log("TODO deactivate resource request", id);
-  const handleResubmit = (id: string) => console.log("TODO resubmit", id);
 
   return (
     <div>
@@ -315,7 +338,6 @@ function RequestsSection({
             currentUserId={currentUserId}
             onRemind={handleRemind}
             onDeactivate={handleDeactivate}
-            onResubmit={handleResubmit}
           />
         ))}
       </Accordion>

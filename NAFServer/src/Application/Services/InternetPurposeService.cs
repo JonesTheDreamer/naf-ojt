@@ -18,5 +18,11 @@ namespace NAFServer.src.Application.Services
             var items = await _repo.GetAllAsync();
             return items.Select(i => new InternetPurposeDTO(i.Id, i.Name, i.Description)).ToList();
         }
+
+        public async Task<InternetPurposeDTO> CreateAsync(CreateInternetPurposeDTO dto)
+        {
+            var entity = await _repo.CreateAsync(dto.Name, dto.Description);
+            return new InternetPurposeDTO(entity.Id, entity.Name, entity.Description);
+        }
     }
 }

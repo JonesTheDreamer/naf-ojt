@@ -42,7 +42,10 @@ namespace NAFServer.src.Application.Services
                 }
                 else
                 {
-                    rr.SetToInProgress();
+                    if (rr.Progress != Progress.IN_PROGRESS)
+                    {
+                        rr.SetToInProgress();
+                    }
                 }
 
                 var approver = await _employeeRepository.GetByIdAsync(step.ApproverId);
@@ -50,7 +53,7 @@ namespace NAFServer.src.Application.Services
                 await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
                 (
                     rr.Id,
-                    ResourceRequestAction.ACCEPT,
+                    ResourceRequestAction.APPROVE,
                     "Employee " + approver.FirstName + " " + approver.LastName + " approved the resource request"
                 ));
 
@@ -76,15 +79,17 @@ namespace NAFServer.src.Application.Services
 
             step.SetToRejected(reasonForRejection);
             rr.SetToRejected();
-            await _context.SaveChangesAsync();
+
             var approver = await _employeeRepository.GetByIdAsync(step.ApproverId);
 
             await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
             (
                 rr.Id,
-                ResourceRequestAction.ACCEPT,
-                "Employee " + approver.FirstName + " " + approver.LastName + " approved the resource request"
+                ResourceRequestAction.REJECT,
+                "Employee " + approver.FirstName + " " + approver.LastName + " rejected the resource request"
             ));
+
+            await _context.SaveChangesAsync();
 
             return step;
         }
