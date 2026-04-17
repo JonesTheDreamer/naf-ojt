@@ -100,20 +100,18 @@ namespace NAFServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Resources",
+                name: "ResourceGroups",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Color = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    IconUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    IsSpecial = table.Column<bool>(type: "bit", nullable: false)
+                    CanOwnMany = table.Column<bool>(type: "bit", nullable: false),
+                    CanChangeWithoutApproval = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Resources", x => x.Id);
+                    table.PrimaryKey("PK_ResourceGroups", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -172,23 +170,27 @@ namespace NAFServer.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ApprovalWorkflowTemplates",
+                name: "Resources",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
-                    ResourceId = table.Column<int>(type: "int", nullable: false),
-                    Version = table.Column<int>(type: "int", nullable: false),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Color = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    IconUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false),
+                    IsSpecial = table.Column<bool>(type: "bit", nullable: false),
+                    ResourceGroupId = table.Column<int>(type: "int", nullable: true),
+                    IsActiveInGroup = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ApprovalWorkflowTemplates", x => x.Id);
+                    table.PrimaryKey("PK_Resources", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ApprovalWorkflowTemplates_Resources_ResourceId",
-                        column: x => x.ResourceId,
-                        principalTable: "Resources",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        name: "FK_Resources_ResourceGroups_ResourceGroupId",
+                        column: x => x.ResourceGroupId,
+                        principalTable: "ResourceGroups",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -210,6 +212,26 @@ namespace NAFServer.Migrations
                         column: x => x.userId,
                         principalTable: "Users",
                         principalColumn: "employeeId",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ApprovalWorkflowTemplates",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
+                    ResourceId = table.Column<int>(type: "int", nullable: false),
+                    Version = table.Column<int>(type: "int", nullable: false),
+                    IsActive = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ApprovalWorkflowTemplates", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ApprovalWorkflowTemplates_Resources_ResourceId",
+                        column: x => x.ResourceId,
+                        principalTable: "Resources",
+                        principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -515,6 +537,11 @@ namespace NAFServer.Migrations
                 column: "ResourceId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Resources_ResourceGroupId",
+                table: "Resources",
+                column: "ResourceGroupId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserRoles_userId",
                 table: "UserRoles",
                 column: "userId");
@@ -579,6 +606,9 @@ namespace NAFServer.Migrations
 
             migrationBuilder.DropTable(
                 name: "Resources");
+
+            migrationBuilder.DropTable(
+                name: "ResourceGroups");
         }
     }
 }

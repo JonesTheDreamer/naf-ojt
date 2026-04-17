@@ -59,6 +59,13 @@ export interface Resource extends Entity<number> {
   isSpecial: boolean;
 }
 
+export interface ResourceGroup extends Entity<number> {
+  name: string;
+  canOwnMany: boolean;
+  canChangeWithoutApproval: boolean;
+  resources: Resource[];
+}
+
 export interface Purpose extends Entity<string> {
   id: string;
   purpose: string;

@@ -70,13 +70,8 @@ namespace NAFServer.src.Application.Services
             return NAFMapper.ToDTO(naf, employee, approverNames);
         }
 
-        // Resource IDs are seeded in a fixed order by ResourceWorkflowSeeder.
-        // Hardware resources: Computer=4, Laptop=5, Common PC=6
-        private static readonly HashSet<int> _hardwareResourceIds = new() { 4, 5, 6 };
-        // Auto-added with hardware: Microsoft 365 E1=11, Basic Internet=9, Active Directory=12, Printer B&W=10
-        private static readonly int[] _withHardwareResources = { 11, 9, 12, 10 };
-        // Auto-added when no hardware: Active Directory=12 only
-        private static readonly int[] _noHardwareResources = { 12 };
+        private static readonly string[] _withHardwareAutoAddNames = { "Microsoft 365 (E1)", "Basic Internet", "Active Directory", "Printer Access (Black and White)" };
+        private static readonly string[] _noHardwareAutoAddNames = { "Active Directory" };
 
         public async Task<NAFDTO> CreateAsync(CreateNAFRequestDTO request)
         {
@@ -84,21 +79,36 @@ namespace NAFServer.src.Application.Services
 
             if (employee.Status != "Active") throw new InvalidOperationException("Employee is not active");
 
-            //TODO: if (current user is not the supervisor / higher ups of thhe employee, return unauthorized)
             var hasNAFForDepartment = await _nafRepository.EmployeeHasNAFForDepartmentAsync(request.EmployeeId, employee.DepartmentId);
 
             if (hasNAFForDepartment) throw new InvalidOperationException("Employee already has a NAF for this department");
 
-            // Determine which resources to add automatically based on hardware selection
+            // Resolve hardware resource IDs from the Computer group in the database
+            var hardwareResourceIds = (await _context.Resources
+                .Where(r => r.IsActive && r.ResourceGroup.Name == "Hardware")
+                .Select(r => r.Id)
+                .ToListAsync()).ToHashSet();
+
+            // Resolve auto-add resource IDs by name from the database
+            var withHardwareIds = await _context.Resources
+                .Where(r => r.IsActive && _withHardwareAutoAddNames.Contains(r.Name))
+                .Select(r => r.Id)
+                .ToListAsync();
+
+            var noHardwareIds = await _context.Resources
+                .Where(r => r.IsActive && _noHardwareAutoAddNames.Contains(r.Name))
+                .Select(r => r.Id)
+                .ToListAsync();
+
             var resourcesToAdd = new List<int>();
-            if (_hardwareResourceIds.Contains(request.HardwareId))
+            if (request.HardwareId != 0 && hardwareResourceIds.Contains(request.HardwareId))
             {
                 resourcesToAdd.Add(request.HardwareId);
-                resourcesToAdd.AddRange(_withHardwareResources);
+                resourcesToAdd.AddRange(withHardwareIds);
             }
             else
             {
-                resourcesToAdd.AddRange(_noHardwareResources);
+                resourcesToAdd.AddRange(noHardwareIds);
             }
 
             using var transaction = await _context.Database.BeginTransactionAsync();

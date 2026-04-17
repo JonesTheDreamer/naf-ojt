@@ -57,7 +57,9 @@ public static class NAFMapper
                         rr.Resource.IconUrl,
                         rr.Resource.IsActive,
                         rr.Resource.IsSpecial,
-                        rr.Resource.Color
+                        rr.Resource.Color,
+                        rr.Resource.ResourceGroupId,
+                        rr.Resource.IsActiveInGroup
                     ),
                      rr.AdditionalInfo != null
                     ? AdditionalInfoMapper.MapAdditionalInfo(rr.AdditionalInfo)

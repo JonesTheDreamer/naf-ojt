@@ -4,7 +4,7 @@ using NAFServer.src.Application.Interfaces;
 
 namespace NAFServer.src.API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/ResourceGroups")]
     [Authorize]
     [ApiController]
     public class ResourceGroupsController : ControllerBase

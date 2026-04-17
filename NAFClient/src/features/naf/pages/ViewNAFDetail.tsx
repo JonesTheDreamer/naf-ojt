@@ -9,15 +9,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { X } from "lucide-react";
-import type { NAF, ResourceRequest, PurposeProps } from "@/types/api/naf";
+import type { NAF, ResourceGroup, ResourceRequest, PurposeProps } from "@/types/api/naf";
 import { ProgressStatus } from "@/types/api/naf";
 import RequestorLayout from "@/components/layout/RequestorLayout";
 import { ResourceRequestAccordionItem } from "@/features/naf/components/resourceRequestAccordion";
 import { useNAF } from "../hooks/useNAF";
 import { useResourceRequest } from "../hooks/useResourceRequest";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AddResourceDialog } from "@/features/naf/components/addResourceDialog";
 import { useAuth } from "@/features/auth/AuthContext";
+import { getResourceGroups } from "@/services/EntityAPI/resourceService";
 
 // ─── Utils ────────────────────────────────────────────────────────────────────
 
@@ -155,6 +157,7 @@ interface RequestItemWrapperProps {
   naf: NAF;
   request: ResourceRequest;
   currentUserId: string;
+  resourceGroups: ResourceGroup[];
   onRemind: (id: string) => void;
   onDeactivate: (id: string) => void;
 }
@@ -163,6 +166,7 @@ function RequestItemWrapper({
   naf,
   request,
   currentUserId,
+  resourceGroups,
   onRemind,
   onDeactivate,
 }: RequestItemWrapperProps) {
@@ -172,6 +176,7 @@ function RequestItemWrapper({
     approveRequestAsync,
     rejectRequestAsync,
     cancelRequestAsync,
+    createRequestAsync,
   } = useResourceRequest(request.id, request.nafId);
 
   const handleEdit = async (
@@ -262,18 +267,43 @@ function RequestItemWrapper({
     }
   };
 
+  const resourceGroup = resourceGroups.find((g) =>
+    g.resources.some((r) => r.id === request.resource.id),
+  );
+
+  const existingResourceIds = new Set(naf.resourceRequests.map((rr) => rr.resource.id));
+  const groupResources = resourceGroup?.resources.filter(
+    (r) => r.isActive && r.id !== request.resource.id && !existingResourceIds.has(r.id),
+  ) ?? [];
+
+  const handleChangeResource = async (_requestId: string, newResourceId: number) => {
+    try {
+      await cancelRequestAsync();
+      await createRequestAsync({
+        nafId: request.nafId,
+        resourceId: newResourceId,
+        purpose: `Replacement for ${request.resource.name}`,
+      });
+    } catch (error) {
+      console.error("Failed to change resource:", error);
+    }
+  };
+
   return (
     <ResourceRequestAccordionItem
       isRequestor={isRequestor}
       request={request}
       isApprover={isApproverForThisRequest}
       isCurrentApprover={isCurrentApprover}
+      resourceGroup={resourceGroup}
+      groupResources={groupResources}
       onEdit={handleEdit}
       onDelete={handleDelete}
       onRemind={onRemind}
       onDeactivate={onDeactivate}
       onResubmit={handleResubmit}
       onCancel={handleCancel}
+      onChangeResource={handleChangeResource}
       onApprove={handleApprove}
       onReject={handleReject}
     />
@@ -290,6 +320,13 @@ function RequestsSection({
   currentUserId: string;
 }) {
   const [addResourceOpen, setAddResourceOpen] = useState(false);
+
+  const resourceGroupsQuery = useQuery({
+    queryKey: ["resourceGroups"],
+    queryFn: getResourceGroups,
+    staleTime: 1000 * 60 * 10,
+  });
+  const resourceGroups = resourceGroupsQuery.data ?? [];
 
   const pendingCount = (naf?.resourceRequests ?? []).filter((r) => {
     const p = r.progress as unknown as ProgressStatus;
@@ -336,6 +373,7 @@ function RequestsSection({
             key={req.id}
             request={req}
             currentUserId={currentUserId}
+            resourceGroups={resourceGroups}
             onRemind={handleRemind}
             onDeactivate={handleDeactivate}
           />

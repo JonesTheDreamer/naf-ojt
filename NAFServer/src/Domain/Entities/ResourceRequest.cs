@@ -104,7 +104,6 @@ namespace NAFServer.src.Domain.Entities
 
         public ResourceRequest Cancel()
         {
-            if (Progress != Progress.REJECTED) throw new DomainException("Only rejected requests can be cancelled");
             if (CancelledAt.HasValue) throw new DomainException("Already cancelled");
             Progress = Progress.NOT_ACCOMPLISHED;
             CancelledAt = DateTime.UtcNow;

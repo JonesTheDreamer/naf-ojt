@@ -10,7 +10,7 @@ namespace NAFServer.src.Domain.Entities
         public string? IconUrl { get; set; }
         public bool IsActive { get; set; }
         public bool IsSpecial { get; set; }
-        public int ResourceGroupId { get; set; }
+        public int? ResourceGroupId { get; set; }
         public bool IsActiveInGroup { get; set; }
         public ResourceGroup ResourceGroup { get; set; }
         public List<ResourceRequest> ResourceRequests { get; set; } = new();
@@ -22,6 +22,7 @@ namespace NAFServer.src.Domain.Entities
             this.Color = Color;
             this.IconUrl = IconUrl;
             this.IsSpecial = IsSpecial;
+            IsActiveInGroup = false;
             IsActive = true;
         }
 

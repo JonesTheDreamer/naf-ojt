@@ -1,6 +1,7 @@
 import {
   approveResourceRequest,
   cancelResourceRequest,
+  createResourceRequest,
   deleteResourceRequest,
   editResourceRequestPurpose,
   rejectResourceRequest,
@@ -85,6 +86,17 @@ export const useResourceRequest = (
     onError: () => toast.error("Failed to cancel request"),
   });
 
+  const createRequest = useMutation({
+    mutationFn: (payload: { nafId: string; resourceId: number; purpose: string; dateNeeded?: string | null }) =>
+      createResourceRequest({ ...payload, additionalInfo: {} }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["naf", NAFId] });
+      queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
+      toast.success("New resource request created");
+    },
+    onError: () => toast.error("Failed to create resource request"),
+  });
+
   return {
     updateResourceRequestAsync: updateResourceRequest.mutateAsync,
     updateError: updateResourceRequest.isError,
@@ -96,5 +108,7 @@ export const useResourceRequest = (
     rejectRequestError: rejectRequest.isError,
     cancelRequestAsync: cancelRequest.mutateAsync,
     cancelRequestError: cancelRequest.isError,
+    createRequestAsync: createRequest.mutateAsync,
+    createRequestError: createRequest.isError,
   };
 };

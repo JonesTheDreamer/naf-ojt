@@ -13,7 +13,9 @@ namespace NAFServer.src.Mapper
                     resource.IconUrl,
                     resource.IsActive,
                     resource.IsSpecial,
-                    resource.Color
+                    resource.Color,
+                    resource.ResourceGroupId,
+                    resource.IsActiveInGroup
             );
         }
     }

@@ -7,6 +7,8 @@
         string? IconUrl,
         bool IsActive,
         bool IsSpecial,
-        string color
+        string color,
+        int? ResourceGroupId,
+        bool IsActiveInGroup
     );
 }

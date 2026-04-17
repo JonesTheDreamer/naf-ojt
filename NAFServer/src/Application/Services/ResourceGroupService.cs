@@ -73,7 +73,7 @@ namespace NAFServer.src.Application.Services
                 group.Id,
                 group.Name,
                 group.CanOwnMany,
-                group.CanChangeWithoutAPproval,
+                group.CanChangeWithoutApproval,
                 group.Resources.Select(ResourceMapper.ToDTO).ToList()
             );
         }

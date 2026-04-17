@@ -1,5 +1,5 @@
 import { api } from "../api";
-import type { Resource } from "@/types/api/naf";
+import type { Resource, ResourceGroup } from "@/types/api/naf";
 
 export const getAllResources = async (): Promise<Resource[]> => {
   try {
@@ -18,5 +18,14 @@ export const getResource = async (
   } catch (error) {
     console.log(error);
     return null;
+  }
+};
+
+export const getResourceGroups = async (): Promise<ResourceGroup[]> => {
+  try {
+    return (await api.get(`/ResourceGroups`)).data;
+  } catch (error) {
+    console.log(error);
+    return [];
   }
 };

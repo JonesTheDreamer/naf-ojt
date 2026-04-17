@@ -8,6 +8,7 @@ import {
   X,
   Check,
   History,
+  ArrowLeftRight,
 } from "lucide-react";
 import {
   AccordionContent,
@@ -44,6 +45,8 @@ import { cn } from "@/lib/utils";
 import { getDateUrgency } from "@/lib/dateUrgency";
 
 import type {
+  Resource,
+  ResourceGroup,
   ResourceRequest,
   ResourceRequestHistory,
   PurposeProps,
@@ -328,6 +331,101 @@ function OpenActions({
         Delete
       </Button>
     </div>
+  );
+}
+
+function ChangeResourceDialog({
+  open,
+  onOpenChange,
+  currentResourceName,
+  availableResources,
+  onConfirm,
+  isSubmitting,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  currentResourceName: string;
+  availableResources: Resource[];
+  onConfirm: (resourceId: number) => void;
+  isSubmitting?: boolean;
+}) {
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+
+  const handleOpenChange = (val: boolean) => {
+    if (!val) setSelectedId(null);
+    onOpenChange(val);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogContent className="sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-amber-600">Change Resource</DialogTitle>
+          <DialogDescription>
+            Replacing:{" "}
+            <span className="font-medium text-foreground">
+              {currentResourceName}
+            </span>
+            . The original request will be cancelled.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="py-2">
+          {availableResources.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No other resources available in this group.
+            </p>
+          ) : (
+            <div className="space-y-1.5">
+              {availableResources.map((r) => (
+                <button
+                  key={r.id}
+                  type="button"
+                  className={cn(
+                    "flex items-center gap-3 w-full rounded-md border px-3 py-2 text-sm transition-colors text-left",
+                    selectedId === r.id
+                      ? "border-amber-400 bg-amber-50 text-amber-800"
+                      : "hover:bg-muted/50",
+                  )}
+                  onClick={() => setSelectedId(r.id)}
+                >
+                  <ResourceIcon iconUrl={r.iconUrl} name={r.name} />
+                  <span>{r.name}</span>
+                  {r.isSpecial && (
+                    <span className="ml-auto text-xs text-amber-600 font-medium">
+                      Requires Approval
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <DialogFooter className="gap-2 sm:gap-0">
+          <Button
+            variant="outline"
+            onClick={() => handleOpenChange(false)}
+            disabled={isSubmitting}
+          >
+            Cancel
+          </Button>
+          <Button
+            className="bg-amber-500 hover:bg-amber-600 text-white gap-1.5"
+            onClick={() => {
+              if (selectedId !== null) {
+                onConfirm(selectedId);
+                setSelectedId(null);
+              }
+            }}
+            disabled={selectedId === null || isSubmitting}
+          >
+            <ArrowLeftRight className="h-4 w-4" />
+            {isSubmitting ? "Changing..." : "Confirm Change"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -697,6 +795,8 @@ interface ResourceRequestAccordionItemProps {
   isRequestor: boolean;
   isApprover: boolean;
   isSubmitting?: boolean;
+  resourceGroup?: ResourceGroup;
+  groupResources?: Resource[];
   // Requestor handlers
   onEdit: (requestId: string, nafId: string, purpose: PurposeProps) => void;
   onDelete: (requestId: string) => void;
@@ -704,6 +804,7 @@ interface ResourceRequestAccordionItemProps {
   onDeactivate: (requestId: string) => void;
   onResubmit: (requestId: string, nafId: string, purpose: PurposeProps) => void;
   onCancel: (requestId: string) => void;
+  onChangeResource: (requestId: string, newResourceId: number) => void;
   // Approver handlers
   onApprove: (requestId: string, remarks: string) => void;
   onReject: (requestId: string, reasonForRejection: string) => void;
@@ -715,12 +816,15 @@ export function ResourceRequestAccordionItem({
   isApprover,
   isRequestor,
   isSubmitting,
+  resourceGroup,
+  groupResources = [],
   onEdit,
   onDelete,
   onRemind,
   onDeactivate,
   onResubmit,
   onCancel,
+  onChangeResource,
   onApprove,
   onReject,
 }: ResourceRequestAccordionItemProps) {
@@ -730,6 +834,8 @@ export function ResourceRequestAccordionItem({
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [purposeHistoryOpen, setPurposeHistoryOpen] = useState(false);
+  const [changeResourceDialogOpen, setChangeResourceDialogOpen] =
+    useState(false);
 
   const progress = request.progress as unknown as Progress;
 
@@ -750,6 +856,19 @@ export function ResourceRequestAccordionItem({
 
   const showHistory = progress !== Progress.OPEN;
   console.log(`${request.resource.name} is ${Progress[request.progress]}`);
+
+  const canChangeResource =
+    !isCurrentApprover &&
+    !isApprover &&
+    (resourceGroup?.canChangeWithoutApproval ?? false) &&
+    groupResources.length > 0;
+
+  console.log(
+    !isCurrentApprover,
+    !isApprover,
+    resourceGroup?.canChangeWithoutApproval ?? false,
+    groupResources.length > 0,
+  );
 
   void (progress === Progress.OPEN || progress === Progress.IN_PROGRESS);
 
@@ -865,6 +984,22 @@ export function ResourceRequestAccordionItem({
               {progress === Progress.IMPLEMENTATION && (
                 <ReminderAction onRemind={() => onRemind(request.id)} />
               )}
+
+              {canChangeResource &&
+                progress !== Progress.ACCOMPLISHED &&
+                progress !== Progress.NOT_ACCOMPLISHED &&
+                !request.cancelledAt && (
+                  <div className="flex justify-end mt-4">
+                    <Button
+                      size="sm"
+                      className="bg-amber-400 hover:bg-amber-500 text-white gap-1.5"
+                      onClick={() => setChangeResourceDialogOpen(true)}
+                    >
+                      <ArrowLeftRight className="h-3.5 w-3.5" />
+                      Change Resource
+                    </Button>
+                  </div>
+                )}
             </>
           )}
         </AccordionContent>
@@ -925,6 +1060,19 @@ export function ResourceRequestAccordionItem({
         onConfirm={(reason) => {
           onReject(request.id, reason);
           setRejectDialogOpen(false);
+        }}
+        isSubmitting={isSubmitting}
+      />
+
+      {/* ── Change Resource dialog ─────────────────────────────────────── */}
+      <ChangeResourceDialog
+        open={changeResourceDialogOpen}
+        onOpenChange={setChangeResourceDialogOpen}
+        currentResourceName={request.resource.name}
+        availableResources={groupResources}
+        onConfirm={(newResourceId) => {
+          onChangeResource(request.id, newResourceId);
+          setChangeResourceDialogOpen(false);
         }}
         isSubmitting={isSubmitting}
       />

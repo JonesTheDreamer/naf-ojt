@@ -12,7 +12,7 @@ using NAFServer.src.Infrastructure.Persistence;
 namespace NAFServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260416054300_InitialCreate")]
+    [Migration("20260417081727_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -295,7 +295,38 @@ namespace NAFServer.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsActiveInGroup")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsSpecial")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("ResourceGroupId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ResourceGroupId");
+
+                    b.ToTable("Resources");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.ResourceGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("CanChangeWithoutApproval")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("CanOwnMany")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
@@ -304,7 +335,7 @@ namespace NAFServer.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Resources");
+                    b.ToTable("ResourceGroups");
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.ResourceRequest", b =>
@@ -692,6 +723,15 @@ namespace NAFServer.Migrations
                     b.Navigation("Purpose");
                 });
 
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.Resource", b =>
+                {
+                    b.HasOne("NAFServer.src.Domain.Entities.ResourceGroup", "ResourceGroup")
+                        .WithMany("Resources")
+                        .HasForeignKey("ResourceGroupId");
+
+                    b.Navigation("ResourceGroup");
+                });
+
             modelBuilder.Entity("NAFServer.src.Domain.Entities.ResourceRequest", b =>
                 {
                     b.HasOne("NAFServer.src.Domain.Entities.ApprovalWorkflowTemplate", "ApprovalWorkflowTemplate")
@@ -844,6 +884,11 @@ namespace NAFServer.Migrations
             modelBuilder.Entity("NAFServer.src.Domain.Entities.Resource", b =>
                 {
                     b.Navigation("ResourceRequests");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.ResourceGroup", b =>
+                {
+                    b.Navigation("Resources");
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.ResourceRequest", b =>

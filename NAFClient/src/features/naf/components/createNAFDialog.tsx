@@ -15,23 +15,24 @@ import search from "@/assets/images/search.svg";
 import SearchBar from "../../../components/common/searchbar";
 import type { Employee } from "@/types/api/employee";
 import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { searchEmployees } from "@/services/EntityAPI/employeeService";
+import { getResourceGroups } from "@/services/EntityAPI/resourceService";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { useNAF } from "../hooks/useNAF";
 import { SelectComponent } from "@/global/component/select";
-import { Hardware } from "@/types/enum/hardware";
 import { FieldLabel } from "@/components/ui/field";
 import { useAuth } from "@/features/auth/AuthContext";
 
-const WITH_HARDWARE_RESOURCES = [
+const WITH_HARDWARE_AUTO_ADD = [
   "Microsoft 365 (E1)",
-  "Basic Internet Access",
+  "Basic Internet",
   "Active Directory",
   "Printer Access (Black and White)",
 ];
 
-const NO_HARDWARE_RESOURCES = ["Active Directory"];
+const NO_HARDWARE_AUTO_ADD = ["Active Directory"];
 
 export function CreateNAFDialog() {
   const { user } = useAuth();
@@ -41,9 +42,7 @@ export function CreateNAFDialog() {
   const [open, setOpen] = useState<boolean>(false);
   const [showEmployeeHasNAFAlert, setShowEmployeeHasNAFAlert] =
     useState<boolean>(false);
-  const [selectedHardware, setSelectedHardware] = useState<Hardware>(
-    Hardware.None,
-  );
+  const [hardwareId, setHardwareId] = useState<number>(0);
   const [dateNeeded, setDateNeeded] = useState<string>("");
 
   const {
@@ -52,14 +51,30 @@ export function CreateNAFDialog() {
     isLoading: employeeLoading,
   } = useNAF({ employeeId: selectedEmployee?.id });
 
-  const hasHardware =
-    selectedHardware === Hardware.Computer ||
-    selectedHardware === Hardware.Laptop ||
-    selectedHardware === Hardware["Common PC"];
+  const resourceGroupsQuery = useQuery({
+    queryKey: ["resourceGroups"],
+    queryFn: getResourceGroups,
+    staleTime: 1000 * 60 * 10,
+  });
 
-  const autoAddedResources = hasHardware
-    ? WITH_HARDWARE_RESOURCES
-    : NO_HARDWARE_RESOURCES;
+  const hardwareResources =
+    resourceGroupsQuery.data
+      ?.find((g) => g.name === "Hardware")
+      ?.resources.filter((r) => r.isActive) ?? [];
+
+  console.log(hardwareResources);
+
+  const selectedHardware =
+    hardwareResources.find((r) => r.id === hardwareId) ?? null;
+
+  const autoAddedNames = selectedHardware
+    ? WITH_HARDWARE_AUTO_ADD
+    : NO_HARDWARE_AUTO_ADD;
+
+  const hardwareOptions = [
+    { value: 0, display: "None" },
+    ...hardwareResources.map((r) => ({ value: r.id, display: r.name })),
+  ];
 
   const fetchEmployee = async (query: string): Promise<Employee[]> => {
     try {
@@ -70,86 +85,23 @@ export function CreateNAFDialog() {
     }
   };
 
-  function EmployeeHasNAFAlert() {
-    return (
-      selectedEmployee && (
-        <Alert variant="destructive" className="max-w-md">
-          <AlertCircleIcon />
-          <AlertTitle>Can't proceed on creating NAF</AlertTitle>
-          <AlertDescription>
-            Employee {selectedEmployee.id} already has NAF for
-            <br />
-            {selectedEmployee.departmentDesc
-              ? selectedEmployee.departmentDesc
-              : "department"}
-            <br />
-          </AlertDescription>
-        </Alert>
-      )
-    );
-  }
-
-  function HardwareSelect() {
-    return (
-      <SelectComponent<Hardware>
-        label="Hardwares"
-        placeholder="None"
-        value={selectedHardware}
-        onValueChange={setSelectedHardware}
-        options={[
-          { value: Hardware.None, display: "None" },
-          { value: Hardware.Computer, display: "Computer" },
-          { value: Hardware.Laptop, display: "Laptop" },
-          { value: Hardware["Common PC"], display: "Common PC" },
-        ]}
-      />
-    );
-  }
-
-  function AutoAddedResourcesInfo() {
-    return (
-      <div className="flex flex-col gap-1 rounded-md border border-amber-200 bg-amber-50 p-3">
-        <p className="text-sm font-semibold text-amber-700">
-          The following resources will be added automatically:
-        </p>
-        {hasHardware && (
-          <p className="text-sm text-amber-600">
-            •{" "}
-            {selectedHardware === Hardware.Computer
-              ? "Computer"
-              : selectedHardware === Hardware.Laptop
-                ? "Laptop"
-                : "Common PC"}
-          </p>
-        )}
-        {autoAddedResources.map((name) => (
-          <p key={name} className="text-sm text-amber-600">
-            • {name}
-          </p>
-        ))}
-      </div>
-    );
-  }
-
   const reset = () => {
     setSelectedEmployee(null);
     setShowEmployeeHasNAFAlert(false);
-    setSelectedHardware(Hardware.None);
+    setHardwareId(0);
     setDateNeeded("");
   };
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
-
     if (!selectedEmployee || !user) return;
-    const payload = {
-      employeeId: selectedEmployee.id,
-      requestorId: user.employeeId,
-      hardwareId: Number(selectedHardware),
-      dateNeeded: dateNeeded || null,
-    };
     try {
-      await createNAFAsync(payload);
+      await createNAFAsync({
+        employeeId: selectedEmployee.id,
+        requestorId: user.employeeId,
+        hardwareId,
+        dateNeeded: dateNeeded || null,
+      });
       reset();
     } catch (error) {
       console.log(error);
@@ -157,17 +109,13 @@ export function CreateNAFDialog() {
   }
 
   useEffect(() => {
-    if (employeeNAFs.data && employeeNAFs.data.length > 0) {
-      setShowEmployeeHasNAFAlert(true);
-    } else {
-      setShowEmployeeHasNAFAlert(false);
-    }
+    setShowEmployeeHasNAFAlert(
+      !!(employeeNAFs.data && employeeNAFs.data.length > 0),
+    );
   }, [employeeNAFs.data]);
 
   useEffect(() => {
-    if (!open) {
-      reset();
-    }
+    if (!open) reset();
   }, [open]);
 
   return (
@@ -188,17 +136,11 @@ export function CreateNAFDialog() {
             </DialogTitle>
             <DialogDescription>Confidential Information</DialogDescription>
           </DialogHeader>
-          <div className="flex flex-col md:flex-row justify-between md:items-center">
-            {selectedEmployee ? (
-              <p className="text-2xl text-amber-600 font-bold">
-                Employee Details
-              </p>
-            ) : (
-              <p className="text-2xl text-amber-600 font-bold">
-                Select Employee
-              </p>
-            )}
 
+          <div className="flex flex-col md:flex-row justify-between md:items-center">
+            <p className="text-2xl text-amber-600 font-bold">
+              {selectedEmployee ? "Employee Details" : "Select Employee"}
+            </p>
             <SearchBar<Employee>
               fetchResults={fetchEmployee}
               placeholder="Search for employee"
@@ -215,6 +157,7 @@ export function CreateNAFDialog() {
           </div>
 
           <div className="flex flex-col md:flex-row gap-4 justify-around flex-1 overflow-y-auto">
+            {/* Employee info panel */}
             <div className="flex flex-col p-4 w-full border overflow-y-auto justify-center">
               {!selectedEmployee ? (
                 <div className="w-full max-w-full grid place-items-center overflow-hidden">
@@ -228,7 +171,7 @@ export function CreateNAFDialog() {
                 <>
                   <p className="font-bold">Employee Number</p>
                   <p>{selectedEmployee.id}</p>
-                  <p className="font-bold">Name: </p>
+                  <p className="font-bold">Name:</p>
                   <p>{`${selectedEmployee.lastName}, ${selectedEmployee.firstName} ${selectedEmployee.middleName}`}</p>
                   <p className="font-bold">Company</p>
                   <p>{selectedEmployee.company}</p>
@@ -239,14 +182,32 @@ export function CreateNAFDialog() {
                 </>
               )}
             </div>
+
+            {/* Resources panel */}
             {!employeeLoading && selectedEmployee && (
               <div className="w-full flex flex-col gap-4 border p-4 justify-center">
                 {showEmployeeHasNAFAlert ? (
-                  <EmployeeHasNAFAlert />
+                  <Alert variant="destructive" className="max-w-md">
+                    <AlertCircleIcon />
+                    <AlertTitle>Can't proceed on creating NAF</AlertTitle>
+                    <AlertDescription>
+                      Employee {selectedEmployee.id} already has NAF for
+                      <br />
+                      {selectedEmployee.departmentDesc ?? "department"}
+                    </AlertDescription>
+                  </Alert>
                 ) : (
                   <div className="flex flex-col gap-2 overflow-y-auto">
                     <p className="font-bold text-amber-500">Resources</p>
-                    <HardwareSelect />
+
+                    <SelectComponent<number>
+                      label="Hardware"
+                      placeholder="None"
+                      value={hardwareId}
+                      onValueChange={(val) => setHardwareId(Number(val))}
+                      options={hardwareOptions}
+                    />
+
                     <div className="flex flex-col gap-1">
                       <FieldLabel htmlFor="date-needed">Date Needed</FieldLabel>
                       <input
@@ -258,12 +219,28 @@ export function CreateNAFDialog() {
                         className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
                       />
                     </div>
-                    <AutoAddedResourcesInfo />
+
+                    <div className="flex flex-col gap-1 rounded-md border border-amber-200 bg-amber-50 p-3">
+                      <p className="text-sm font-semibold text-amber-700">
+                        The following resources will be added automatically:
+                      </p>
+                      {selectedHardware && (
+                        <p className="text-sm text-amber-600">
+                          • {selectedHardware.name}
+                        </p>
+                      )}
+                      {autoAddedNames.map((name) => (
+                        <p key={name} className="text-sm text-amber-600">
+                          • {name}
+                        </p>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
             )}
           </div>
+
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
