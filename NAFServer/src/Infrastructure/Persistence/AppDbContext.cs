@@ -27,10 +27,14 @@ namespace NAFServer.src.Infrastructure.Persistence
         public DbSet<ResourceRequestImplementation> Implementations { get; set; }
         public DbSet<Employee> Employees { get; set; }
         public DbSet<Department> Departments { get; set; }
+        public DbSet<Role> Roles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
+        public DbSet<UserLocation> UserLocations { get; set; }
+        public DbSet<UserDepartment> UserDepartments { get; set; }
         public DbSet<ResourceRequestHistory> ResourceRequestHistories { get; set; }
         public DbSet<ResourceGroup> ResourceGroups { get; set; }
+        public DbSet<Location> Locations { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -99,11 +103,68 @@ namespace NAFServer.src.Infrastructure.Persistence
                 .HasForeignKey(h => h.ResourceRequestApprovalStepId)
                 .IsRequired();
 
+            modelBuilder.Entity<ApprovalWorkflowStepsTemplate>()
+                .Property(s => s.StepAction)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<ApprovalWorkflowStepsTemplate>()
+                .Property(s => s.ApproverRole)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<NAF>()
+                .Property(n => n.Progress)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<ResourceRequest>()
+                .Property(rr => rr.Progress)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<ResourceRequestApprovalStep>()
+                .Property(rras => rras.Progress)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<ResourceRequestApprovalStepHistory>()
+                .Property(rras => rras.Status)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<ResourceRequestHistory>()
+                .Property(rrh => rrh.Type)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<ResourceRequestImplementation>()
+                .Property(rri => rri.Status)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Role>()
+                .Property(r => r.Name)
+                .HasConversion<string>();
+
+            modelBuilder.Entity<Employee>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.ToView("vw_EmployeeLinkPeopleCore");
+            });
+
             modelBuilder.Entity<User>()
-                .HasMany(u => u.roles)
-                .WithOne()
-                .HasForeignKey(ur => ur.userId)
-                .HasPrincipalKey(u => u.employeeId);
+                .HasOne(u => u.Employee)
+                .WithMany()
+                .HasForeignKey(u => u.EmployeeNumber)
+                .HasPrincipalKey(e => e.Id);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.UserRoles)
+                .WithOne(ur => ur.User)
+                .HasForeignKey(ur => ur.UserId);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.UserDepartments)
+                .WithOne(ud => ud.User)
+                .HasForeignKey(ud => ud.UserId);
+
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.UserLocations)
+                .WithOne(ul => ul.User)
+                .HasForeignKey(ul => ul.UserId);
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
