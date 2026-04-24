@@ -1,4 +1,4 @@
-import type { NAF } from "@/types/api/naf";
+import type { NAF } from "@/shared/types/api/naf";
 import { api } from "../api";
 import type { ForImplementationItemDTO } from "@/features/tech/types";
 

@@ -7,7 +7,7 @@ import {
   editResourceRequestPurpose,
   rejectResourceRequest,
 } from "@/services/EntityAPI/resourceRequestService";
-import type { NAF, PurposeProps } from "@/types/api/naf";
+import type { NAF, PurposeProps } from "@/shared/types/api/naf";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 

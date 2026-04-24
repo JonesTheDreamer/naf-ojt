@@ -1,7 +1,7 @@
 "use client";
 
-import type { NAF } from "@/types/api/naf";
-import type { Employee } from "@/types/api/employee";
+import type { NAF } from "@/shared/types/api/naf";
+import type { Employee } from "@/shared/types/api/employee";
 
 import { DataTable } from "@/components/ui/datatable";
 import { columns } from "./nafColumns";

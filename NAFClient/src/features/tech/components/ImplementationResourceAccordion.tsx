@@ -6,7 +6,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import type { NAF, ResourceRequest } from "@/types/api/naf";
+import type { NAF, ResourceRequest } from "@/shared/types/api/naf";
 import { ImplementationResourceRequestRow } from "./ImplementationResourceRequestRow";
 import { getDateUrgency } from "@/shared/utils/dateUrgency";
 

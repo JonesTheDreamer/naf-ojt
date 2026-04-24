@@ -22,8 +22,8 @@ import type {
   InternetRequestInfo,
   GroupEmailInfo,
   SharedFolderInfo,
-} from "@/types/api/naf";
-import { Progress } from "@/types/enum/progress";
+} from "@/shared/types/api/naf";
+import { Progress } from "@/shared/types/enum/progress";
 import {
   useResource,
   useResourceMetadata,

@@ -2,10 +2,10 @@ import { useState, useCallback } from "react";
 import { useEmployeeNAF } from "../hooks/useNAF";
 import RequestorLayout from "@/components/layout/RequestorLayout";
 import { CreateNAFDialog } from "../components/createNAFDialog";
-import type { Employee } from "@/types/api/employee";
+import type { Employee } from "@/shared/types/api/employee";
 import NAFListPage from "../components/nafList";
-import type { PagedResult } from "@/types/common/pagedResult";
-import type { NAF } from "@/types/api/naf";
+import type { PagedResult } from "@/shared/types/common/pagedResult";
+import type { NAF } from "@/shared/types/api/naf";
 import { useAuth } from "@/features/auth/AuthContext";
 
 type NAFProps = PagedResult<NAF> & { isLoading: boolean };

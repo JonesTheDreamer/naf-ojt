@@ -9,7 +9,7 @@ import {
   CommandList,
 } from "@/components/ui/command";
 import { Button } from "@/components/ui/button";
-// import type { Employee } from "@/types/api/employee";
+// import type { Employee } from "@/shared/types/api/employee";
 
 interface SearchBarProps<T> {
   placeholder?: string;

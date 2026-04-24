@@ -11,7 +11,7 @@ import type {
   GroupEmailItem,
   SharedFolderItem,
   Resource,
-} from "@/types/api/naf";
+} from "@/shared/types/api/naf";
 import { useQuery } from "@tanstack/react-query";
 
 const STALE_24H = 24 * 60 * 60 * 1000;

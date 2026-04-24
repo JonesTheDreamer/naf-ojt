@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import type { PurposeProps } from "@/types/api/naf";
+import type { PurposeProps } from "@/shared/types/api/naf";
 import { Pencil } from "lucide-react";
 import { useState } from "react";
 

@@ -13,7 +13,7 @@ import {
 import search from "@/assets/images/search.svg";
 
 import SearchBar from "@/components/common/searchbar";
-import type { Employee } from "@/types/api/employee";
+import type { Employee } from "@/shared/types/api/employee";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchEmployees } from "@/services/EntityAPI/employeeService";

@@ -1,5 +1,5 @@
 import { api } from "../api";
-import type { Employee } from "@/types/api/employee";
+import type { Employee } from "@/shared/types/api/employee";
 
 export const searchEmployees = async (match: string): Promise<Employee[]> => {
   try {

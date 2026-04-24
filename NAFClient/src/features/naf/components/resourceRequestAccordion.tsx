@@ -50,16 +50,16 @@ import type {
   ResourceRequest,
   ResourceRequestHistory,
   PurposeProps,
-} from "@/types/api/naf";
-import { ResourceRequestAction } from "@/types/api/naf";
+} from "@/shared/types/api/naf";
+import { ResourceRequestAction } from "@/shared/types/api/naf";
 
-import { Status, ImplementationStatus } from "@/types/enum/status";
+import { Status, ImplementationStatus } from "@/shared/types/enum/status";
 import { PROGRESS_CONFIG } from "./progressBadge";
 
 import { DeleteConfirmDialog } from "./deleteConfirmDialog";
 import { ResubmitDialog } from "./resubmitDialog";
 import { PurposeHistoryModal } from "./purposeHistoryModal";
-import { Progress } from "@/types/enum/progress";
+import { Progress } from "@/shared/types/enum/progress";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 

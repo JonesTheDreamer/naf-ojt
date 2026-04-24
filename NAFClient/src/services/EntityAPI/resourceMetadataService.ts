@@ -5,7 +5,7 @@ import type {
   GroupEmailItem,
   SharedFolderItem,
   AddBasicResourceResult,
-} from "@/types/api/naf";
+} from "@/shared/types/api/naf";
 
 export const getInternetPurposes = async (): Promise<InternetPurposeItem[]> => {
   return (await api.get("/InternetPurposes")).data;

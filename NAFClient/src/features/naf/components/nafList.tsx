@@ -5,9 +5,9 @@ import { X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import type { PagedResult } from "@/types/common/pagedResult";
-import type { NAF } from "@/types/api/naf";
-import type { Employee } from "@/types/api/employee";
+import type { PagedResult } from "@/shared/types/common/pagedResult";
+import type { NAF } from "@/shared/types/api/naf";
+import type { Employee } from "@/shared/types/api/employee";
 import type { ApprovalFilter } from "@/features/naf/components/approvalFilter";
 import { NAFTableContainer } from "@/features/naf/components/nafTableContainer";
 

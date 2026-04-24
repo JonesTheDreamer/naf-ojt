@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Info, UserPlus, Clock, CheckCircle, History } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import type { ResourceRequest } from "@/types/api/naf";
-import { handleAdditionalInfoStructured } from "@/types/api/naf";
-import { ImplementationStatus } from "@/types/enum/status";
+import type { ResourceRequest } from "@/shared/types/api/naf";
+import { handleAdditionalInfoStructured } from "@/shared/types/api/naf";
+import { ImplementationStatus } from "@/shared/types/enum/status";
 import { ResourceRequestInfoModal } from "./ResourceRequestInfoModal";
 import { DelayedReasonModal } from "./DelayedReasonModal";
 import { PurposeHistoryModal } from "@/features/naf/components/purposeHistoryModal";

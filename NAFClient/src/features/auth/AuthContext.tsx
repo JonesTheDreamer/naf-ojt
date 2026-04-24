@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
-import type { AuthUser } from "@/types/api/auth";
+import type { AuthUser } from "@/shared/types/api/auth";
 import { authService } from "@/services/EntityAPI/authService";
 
 interface AuthContextValue {

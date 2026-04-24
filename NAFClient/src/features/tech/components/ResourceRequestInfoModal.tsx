@@ -13,8 +13,8 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
-import type { ResourceRequest } from "@/types/api/naf";
-import { Status } from "@/types/enum/status";
+import type { ResourceRequest } from "@/shared/types/api/naf";
+import { Status } from "@/shared/types/enum/status";
 import { cn } from "@/shared/utils/utils";
 
 interface Props {

@@ -1,6 +1,6 @@
 import { api } from "../api";
-import type { NAF } from "@/types/api/naf";
-import type { PagedResult } from "@/types/common/pagedResult";
+import type { NAF } from "@/shared/types/api/naf";
+import type { PagedResult } from "@/shared/types/common/pagedResult";
 
 export const getSubordinateNAFs = async (
   employee: string,

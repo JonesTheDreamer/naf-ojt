@@ -1,5 +1,5 @@
 import { api } from "../api";
-import type { AuthUser, LoginRequest } from "../../types/api/auth";
+import type { AuthUser, LoginRequest } from "@/shared/types/api/auth";
 
 export const authService = {
   loginAdmin: (data: LoginRequest) =>

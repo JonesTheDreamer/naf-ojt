@@ -1,6 +1,6 @@
 
 import { cn } from "@/shared/utils/utils";
-import { Progress } from "@/types/enum/progress";
+import { Progress } from "@/shared/types/enum/progress";
 
 export const PROGRESS_CONFIG: Record<
   Progress,

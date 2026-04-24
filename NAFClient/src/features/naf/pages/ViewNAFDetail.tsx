@@ -14,8 +14,8 @@ import type {
   ResourceGroup,
   ResourceRequest,
   PurposeProps,
-} from "@/types/api/naf";
-import { ProgressStatus } from "@/types/api/naf";
+} from "@/shared/types/api/naf";
+import { ProgressStatus } from "@/shared/types/api/naf";
 import RequestorLayout from "@/components/layout/RequestorLayout";
 import { ResourceRequestAccordionItem } from "@/features/naf/components/resourceRequestAccordion";
 import { useNAF } from "../hooks/useNAF";

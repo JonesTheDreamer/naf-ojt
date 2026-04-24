@@ -1,7 +1,7 @@
 "use client";
 
-import type { NAF, ResourceRequest } from "@/types/api/naf";
-import { Progress } from "@/types/enum/progress";
+import type { NAF, ResourceRequest } from "@/shared/types/api/naf";
+import { Progress } from "@/shared/types/enum/progress";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/shared/utils/utils";
 import type { ColumnDef } from "@tanstack/react-table";
