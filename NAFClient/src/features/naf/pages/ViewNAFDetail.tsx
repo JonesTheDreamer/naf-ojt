@@ -17,7 +17,7 @@ import type {
 } from "@/shared/types/api/naf";
 import { ProgressStatus } from "@/shared/types/api/naf";
 import RequestorLayout from "@/components/layout/RequestorLayout";
-import { ResourceRequestAccordionItem } from "@/features/naf/components/resourceRequestAccordion";
+import { ResourceRequestAccordionItem } from "@/features/naf/components/resource-request";
 import { useNAF } from "../hooks/useNAF";
 import { useResourceRequest } from "../hooks/useResourceRequest";
 import { useState } from "react";
