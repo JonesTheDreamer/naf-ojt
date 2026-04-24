@@ -27,7 +27,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
                     ?? throw new KeyNotFoundException("NAF not found");
         }
 
-        public async Task<bool> EmployeeHasNAFForDepartmentAsync(string employeeId, string departmentId)
+        public async Task<bool> EmployeeHasNAFForDepartmentAsync(string employeeId, int departmentId)
         {
             return await _context.NAFs
                 .AnyAsync(n => n.EmployeeId == employeeId
@@ -219,5 +219,56 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
                 TotalPages = totalPages
             };
         }
+
+        //public async Task<PagedResult<NAFDTO>> GetNAFPerLocation(string loc, int page)
+        //{
+        //    int pageSize = 6;
+
+        //    //var employeeIds = employees.Select(e => e.Id).ToList();
+
+        //    // Base query (IMPORTANT: no Skip/Take here)
+        //    var query = _context.NAFs
+        //        .Where(n => employeeIds.Contains(n.EmployeeId));
+
+        //    // 1. Get total count (efficient SQL COUNT(*))
+        //    var totalCount = await query.CountAsync();
+
+        //    // 2. Apply pagination
+        //    int skip = (page - 1) * pageSize;
+
+        //    var nafs = await query
+        //        .OrderByDescending(n => n.SubmittedAt)
+        //        .IncludeResourceRequestsWithAdditionalInfo()
+        //        .Skip(skip)
+        //        .Take(pageSize)
+        //        .AsNoTracking()
+        //        .ToListAsync();
+
+        //    // 3. Mapping
+        //    var employeeLookup = employees.ToDictionary(e => e.Id);
+
+        //    var nafDTOs = new List<NAFDTO>();
+
+        //    foreach (var naf in nafs)
+        //    {
+        //        if (!employeeLookup.TryGetValue(naf.EmployeeId, out var employee))
+        //            continue;
+
+        //        var dto = NAFMapper.ToDTO(naf, employee);
+        //        nafDTOs.Add(dto);
+        //    }
+
+        //    // 4. Compute total pages
+        //    var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+        //    return new PagedResult<NAFDTO>
+        //    {
+        //        Data = nafDTOs,
+        //        TotalCount = totalCount,
+        //        PageSize = pageSize,
+        //        CurrentPage = page,
+        //        TotalPages = totalPages
+        //    };
+        //}
     }
 }

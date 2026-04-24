@@ -3,8 +3,8 @@
     public enum Roles
     {
         REQUESTOR_APPROVER,
-        TECHNICAL_TEAM,
-        TECHNICAL_HEAD,
-        ADMIN
+        MANAGEMENT,
+        ADMIN,
+        HR
     }
 }

@@ -286,6 +286,9 @@ namespace NAFServer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("HasAdditionalInfo")
+                        .HasColumnType("bit");
+
                     b.Property<string>("IconUrl")
                         .HasColumnType("nvarchar(max)");
 

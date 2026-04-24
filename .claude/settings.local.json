@@ -5,7 +5,13 @@
       "Bash(npm run:*)",
       "Bash(cat docs/superpowers/specs/*.md)",
       "Bash(npm install:*)",
-      "Bash(dotnet ef:*)"
+      "Bash(dotnet ef:*)",
+      "PowerShell(head *)",
+      "PowerShell(dotnet build *)",
+      "PowerShell(\\(Get-Content \"C:\\\\Users\\\\rgheradura\\\\Desktop\\\\naf-ojt\\\\NAFClient\\\\src\\\\features\\\\tech\\\\components\\\\ImplementationNAFAccordion.tsx\" | Measure-Object -Line\\).Lines)",
+      "PowerShell(\\(Get-Content \"C:\\\\Users\\\\rgheradura\\\\Desktop\\\\naf-ojt\\\\NAFClient\\\\src\\\\features\\\\tech\\\\components\\\\ImplementationResourceAccordion.tsx\" | Measure-Object -Line\\).Lines)",
+      "PowerShell(git checkout *)",
+      "PowerShell(git *)"
     ]
   }
 }

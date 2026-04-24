@@ -180,6 +180,7 @@ namespace NAFServer.Migrations
                     IconUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IsActive = table.Column<bool>(type: "bit", nullable: false),
                     IsSpecial = table.Column<bool>(type: "bit", nullable: false),
+                    HasAdditionalInfo = table.Column<bool>(type: "bit", nullable: false),
                     ResourceGroupId = table.Column<int>(type: "int", nullable: true),
                     IsActiveInGroup = table.Column<bool>(type: "bit", nullable: false)
                 },

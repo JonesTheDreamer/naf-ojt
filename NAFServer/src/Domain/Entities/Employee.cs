@@ -3,6 +3,7 @@ namespace NAFServer.src.Domain.Entities
     public class Employee
     {
         public string Id { get; set; }
+        public string EmployeeNumber { get; set; }
         public string FirstName { get; set; }
         public string? MiddleName { get; set; }
         public string LastName { get; set; }
@@ -17,13 +18,14 @@ namespace NAFServer.src.Domain.Entities
         public string? SupervisorId { get; set; }
         public string? DepartmentHeadId { get; set; }
 
-        public string DepartmentId { get; set; }
-        public string DepartmentDesc { get; set; }
+        //public string DepartmentId { get; set; }
+        //public string DepartmentDesc { get; set; }
         private Employee() { }
 
         public Employee
         (
             string Id,
+            //string EmployeeNumber,
             string FirstName,
             string? MiddleName,
             string LastName,
@@ -32,11 +34,13 @@ namespace NAFServer.src.Domain.Entities
             string Company,
             string Position,
             string Location,
-            string DepartmentId,
-            string? DepartmentHeadId,
-            string DepartmentDesc)
+            string? DepartmentHeadId
+        //string DepartmentId,
+        //string DepartmentDesc
+        )
         {
             this.Id = Id;
+            //this.EmployeeNumber = EmployeeNumber;
             this.FirstName = FirstName;
             this.MiddleName = MiddleName;
             this.LastName = LastName;
@@ -45,9 +49,9 @@ namespace NAFServer.src.Domain.Entities
             this.Company = Company;
             this.Position = Position;
             this.Location = Location;
-            this.DepartmentId = DepartmentId;
             this.DepartmentHeadId = DepartmentHeadId;
-            this.DepartmentDesc = DepartmentDesc;
+            //this.DepartmentId = DepartmentId;
+            //this.DepartmentDesc = DepartmentDesc;
         }
     }
 }

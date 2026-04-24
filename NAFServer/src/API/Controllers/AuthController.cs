@@ -23,10 +23,6 @@ namespace NAFServer.src.API.Controllers
         public async Task<IActionResult> LoginAdmin([FromBody] LoginRequestDTO request)
             => await LoginWithRole(request.EmployeeId, Roles.ADMIN);
 
-        [HttpPost("login/technical-team")]
-        public async Task<IActionResult> LoginTechnicalTeam([FromBody] LoginRequestDTO request)
-            => await LoginWithRole(request.EmployeeId, Roles.TECHNICAL_TEAM);
-
         [HttpPost("login/requestor-approver")]
         public async Task<IActionResult> LoginRequestorApprover([FromBody] LoginRequestDTO request)
             => await LoginWithRole(request.EmployeeId, Roles.REQUESTOR_APPROVER);

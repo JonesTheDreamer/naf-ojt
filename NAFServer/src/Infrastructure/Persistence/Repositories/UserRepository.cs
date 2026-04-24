@@ -8,23 +8,13 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly AppDbContext _context;
+        //private readonly CacheService _cacheService;
+        //private readonly string cacheKey = "user_";
 
         public UserRepository(AppDbContext context)
         {
             _context = context;
-        }
-
-        public async Task<User> GetUserById(string employeeId)
-        {
-            return await _context.Users.Where(u => u.employeeId == employeeId).FirstAsync();
-        }
-
-        public async Task<bool> HasRoleAsync(string employeeId, Roles role)
-        {
-            return await _context.UserRoles.AnyAsync(ur =>
-                ur.userId == employeeId &&
-                ur.role == role &&
-                ur.date_removed == null);
+            //_cacheService = cacheService;
         }
 
         public async Task<List<User>> GetAllAsync()
@@ -32,53 +22,82 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             return await _context.Users.ToListAsync();
         }
 
-        public async Task<List<UserRole>> GetRolesByEmployeeIdAsync(string employeeId)
+        public async Task<List<User>> GetAllUsersInLocationAsync(int locationId)
         {
-            return await _context.UserRoles
-                .Where(ur => ur.userId == employeeId)
+            return await _context.Users
+                .Include(u => u.Employee)
+                .Where(u => u.UserLocations.Any(ul => ul.LocationId == locationId && ul.IsActive))
                 .ToListAsync();
         }
 
-        public async Task AddAsync(User user, UserRole userRole)
-        {
-            await _context.Users.AddAsync(user);
-            await _context.UserRoles.AddAsync(userRole);
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<User> GetNetworkAdminOfLocation(string location)
+        public async Task<User> GetUserById(int userId)
         {
             return await _context.Users
-                .Where(u => u.location == location &&
-                            u.roles.Any(r => r.role == Roles.TECHNICAL_HEAD && r.date_removed == null))
+                .Include(u => u.Employee)
+                .FirstOrDefaultAsync(u => u.Id == userId)
+                ?? throw new KeyNotFoundException("User not found");
+        }
+
+        public async Task<User> GetUserByEmployeeId(string employeeId)
+        {
+            return await _context.Users
+                .Include(u => u.Employee)
+                .FirstOrDefaultAsync(u => u.EmployeeNumber == employeeId)
+                ?? throw new KeyNotFoundException("User not found");
+        }
+
+        public async Task<User> SetUserToInactive(int userId)
+        {
+            var user = await _context.Users
+                .Include(u => u.Employee)
+                .FirstOrDefaultAsync(u => u.Id == userId)
+                ?? throw new KeyNotFoundException($"User {userId} not found");
+
+            user.SetUserToInactive();
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<User> SetUserToActive(int userId)
+        {
+            var user = await _context.Users
+                .Include(u => u.Employee)
+                .FirstOrDefaultAsync(u => u.Id == userId)
+                ?? throw new KeyNotFoundException($"User {userId} not found");
+
+            user.SetUserToActive();
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        public async Task<User> AddAsync(User user)
+        {
+            await _context.Users.AddAsync(user);
+            await _context.SaveChangesAsync();
+            return user;
+        }
+
+        //public async Task<User>
+
+        public async Task<User> GetNetworkAdminOfLocation(int locationId)
+        {
+            return await _context.Users
+                .Include(u => u.Employee)
+                .Where
+                (
+                    u =>
+                    u.UserLocations.Any(l => l.LocationId == locationId) &&
+                    u.UserRoles.Any(r => r.Role.Name == Roles.ADMIN && r.DateRemoved == null)
+                )
                 .FirstAsync();
         }
 
-        public async Task RemoveRoleAsync(string employeeId, Roles role)
-        {
-            var userRole = await _context.UserRoles.FirstOrDefaultAsync(ur =>
-                ur.userId == employeeId &&
-                ur.role == role &&
-                ur.date_removed == null)
-                ?? throw new KeyNotFoundException($"Active role {role} not found for employee {employeeId}");
-            userRole.date_removed = DateTime.UtcNow;
-            await _context.SaveChangesAsync();
-        }
-
-        public async Task<List<string>> GetLocationsAsync()
+        public async Task<User> ResolveUserByEmployeeId(string employeeNumber)
         {
             return await _context.Users
-                .Select(u => u.location)
-                .Distinct()
-                .ToListAsync();
-        }
-
-        public async Task AssignLocationAsync(string employeeId, string location)
-        {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.employeeId == employeeId)
-                ?? throw new KeyNotFoundException($"User {employeeId} not found");
-            user.location = location;
-            await _context.SaveChangesAsync();
+                .Include(u => u.Employee)
+                .FirstOrDefaultAsync(u => u.EmployeeNumber == employeeNumber)
+                ?? throw new KeyNotFoundException($"User not found");
         }
     }
 }

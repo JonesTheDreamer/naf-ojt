@@ -2,17 +2,34 @@
 {
     public class User
     {
-        public int id { get; set; }
-        public string employeeId { get; set; }
-        public string location { get; set; }
-        public DateTime date_added { get; set; }
-        public string? date_removed { get; set; }
-        public List<UserRole> roles { get; set; }
-        public User(string employeeId, string location)
+        public int Id { get; set; }
+        public string EmployeeNumber { get; set; }
+        //public int LocationId { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime DateAdded { get; set; }
+        public DateTime? DateRemoved { get; set; }
+        public List<UserRole> UserRoles { get; set; }
+        public List<UserLocation> UserLocations { get; set; }
+        public List<UserDepartment> UserDepartments { get; set; }
+        public Employee Employee { get; set; }
+        public User(string EmployeeNumber)
         {
-            this.employeeId = employeeId;
-            this.location = location;
-            date_added = DateTime.Now;
+            this.EmployeeNumber = EmployeeNumber;
+            DateAdded = DateTime.Now;
+            IsActive = true;
         }
+        public User SetUserToInactive()
+        {
+            IsActive = false;
+            DateRemoved = DateTime.Now;
+            return this;
+        }
+        public User SetUserToActive()
+        {
+            IsActive = true;
+            DateRemoved = null;
+            return this;
+        }
+
     }
 }

@@ -12,7 +12,7 @@ using NAFServer.src.Infrastructure.Persistence;
 namespace NAFServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260417081727_InitialCreate")]
+    [Migration("20260421021139_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -288,6 +288,9 @@ namespace NAFServer.Migrations
                     b.Property<string>("Color")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("HasAdditionalInfo")
+                        .HasColumnType("bit");
 
                     b.Property<string>("IconUrl")
                         .HasColumnType("nvarchar(max)");

@@ -12,7 +12,7 @@ namespace NAFServer.src.Application.Handlers.ResourceRequestHandler
     {
         private readonly IResourceRequestRepository _resourceRequestRepository;
         private readonly AppDbContext _context;
-        public int ResourceId => 3;
+        public int ResourceId => 13;
 
         public SharedFolderRequestHandler(IResourceRequestRepository resourceRequestRepository, AppDbContext context)
         {

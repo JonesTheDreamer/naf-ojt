@@ -1,20 +1,37 @@
-﻿using NAFServer.src.Domain.Enums;
-
-namespace NAFServer.src.Domain.Entities
+﻿namespace NAFServer.src.Domain.Entities
 {
     public class UserRole
     {
-        public int id { get; set; }
-        public string userId { get; set; }
-        public Roles role { get; set; }
-        public DateTime date_added { get; set; }
-        public DateTime? date_removed { get; set; }
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public int RoleId { get; set; }
+        public bool IsActive { get; set; }
+        public User User { get; set; }
+        public Role Role { get; set; }
+        public DateTime DateAdded { get; set; }
+        public DateTime? DateRemoved { get; set; }
 
-        public UserRole(string userId, Roles role)
+        private UserRole() { }
+        public UserRole(int UserId, int RoleId)
         {
-            this.userId = userId;
-            this.role = role;
-            date_added = DateTime.Now;
+            this.UserId = UserId;
+            this.RoleId = RoleId;
+            IsActive = true;
+            DateAdded = DateTime.Now;
+        }
+
+        public UserRole SetToInactive()
+        {
+            IsActive = false;
+            DateRemoved = DateTime.Now;
+            return this;
+        }
+
+        public UserRole SetToActive()
+        {
+            IsActive = true;
+            DateRemoved = null;
+            return this;
         }
     }
 }

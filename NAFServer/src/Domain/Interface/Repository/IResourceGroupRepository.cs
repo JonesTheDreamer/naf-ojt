@@ -6,6 +6,5 @@ namespace NAFServer.src.Domain.Interface.Repository
     {
         Task<List<ResourceGroup>> GetAllGroupsAsync();
         Task<ResourceGroup?> GetGroupByIdAsync(int id);
-        void InvalidateCache();
     }
 }

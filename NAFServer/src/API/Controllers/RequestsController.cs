@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using NAFServer.src.Application.DTOs.ResourceRequest;
 using NAFServer.src.Application.Interfaces;
 
@@ -9,7 +8,7 @@ using NAFServer.src.Application.Interfaces;
 namespace NAFServer.src.API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize]
+    //[Authorize]
     [ApiController]
     public class RequestsController : ControllerBase
     {
@@ -48,6 +47,30 @@ namespace NAFServer.src.API.Controllers
             try
             {
                 var rr = await _resourceRequestService.CreateSpecialAsync(request);
+                return CreatedAtAction(
+                    nameof(Get),
+                    new { id = rr.Id },
+                    new
+                    {
+                        success = true,
+                        message = "Resource request created successfully",
+                        data = rr
+                    }
+                    );
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+        // POST api/<RequestsController>
+        [HttpPost("change-resource/{requestId:guid}")]
+        public async Task<IActionResult> ChangeResource(Guid requestId, [FromBody] int newResource)
+        {
+            try
+            {
+                var rr = await _resourceRequestService.ChangeResourceAsync(requestId, newResource);
                 return CreatedAtAction(
                     nameof(Get),
                     new { id = rr.Id },

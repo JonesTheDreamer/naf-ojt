@@ -10,18 +10,20 @@ namespace NAFServer.src.Domain.Entities
         public string? IconUrl { get; set; }
         public bool IsActive { get; set; }
         public bool IsSpecial { get; set; }
+        public bool HasAdditionalInfo { get; set; }
         public int? ResourceGroupId { get; set; }
         public bool IsActiveInGroup { get; set; }
         public ResourceGroup ResourceGroup { get; set; }
         public List<ResourceRequest> ResourceRequests { get; set; } = new();
 
         private Resource() { }
-        public Resource(string Name, string Color, string? IconUrl, bool IsSpecial)
+        public Resource(string Name, string Color, string? IconUrl, bool IsSpecial, bool HasAdditionalInfo)
         {
             this.Name = Name;
             this.Color = Color;
             this.IconUrl = IconUrl;
             this.IsSpecial = IsSpecial;
+            this.HasAdditionalInfo = HasAdditionalInfo;
             IsActiveInGroup = false;
             IsActive = true;
         }

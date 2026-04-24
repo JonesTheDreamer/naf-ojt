@@ -7,7 +7,7 @@ namespace NAFServer.src.API.Controllers
 {
     [Route("api/implementations")]
     [ApiController]
-    [Authorize(Roles = "TECHNICAL_TEAM")]
+    [Authorize(Roles = "ADMIN")]
     public class ImplementationController : ControllerBase
     {
         private readonly IImplementationService _implementationService;

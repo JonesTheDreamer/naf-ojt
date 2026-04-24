@@ -12,7 +12,7 @@ namespace NAFServer.src.Application.Handlers.ResourceRequestHandler
     {
         private readonly IResourceRequestRepository _resourceRequestRepository;
         private readonly AppDbContext _context;
-        public int ResourceId => 2;
+        public int ResourceId => 12;
 
         public GroupEmailRequestHandler(IResourceRequestRepository resourceRequestRepository, AppDbContext context)
         {

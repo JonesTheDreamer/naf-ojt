@@ -9,22 +9,25 @@ namespace NAFServer.src.Domain.Entities
         public string Reference { get; set; }
         public string RequestorId { get; set; }
         public string EmployeeId { get; set; }
+        public int LocationId { get; set; }
         public DateTime? AccomplishedAt { get; set; }
         public DateTime SubmittedAt { get; set; }
         public Progress Progress { get; set; }
+        public Location Location { get; set; }
 
-        public string DepartmentId { get; set; }
+        public int DepartmentId { get; set; }
         public bool IsActive { get; set; }
-
+        public Department Department { get; set; }
         public List<ResourceRequest> ResourceRequests { get; set; } = new();
 
         private NAF() { }
-        public NAF(string Reference, string RequestorId, string EmployeeId, string DepartmentId)
+        public NAF(string Reference, string RequestorId, string EmployeeId, int DepartmentId, int LocationId)
         {
             this.Reference = Reference;
             this.RequestorId = RequestorId;
             this.EmployeeId = EmployeeId;
             this.DepartmentId = DepartmentId;
+            this.LocationId = LocationId;
             SubmittedAt = DateTime.UtcNow;
             Progress = Progress.OPEN;
             IsActive = true;

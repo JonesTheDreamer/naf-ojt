@@ -8,14 +8,8 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
     {
         public static async Task SeedAsync(AppDbContext context)
         {
-            if (context.Users.Any() || context.UserRoles.Any() || context.Locations.Any())
+            if (context.Users.Any() || context.UserRoles.Any()
                 return;
-
-            context.Locations.AddRange(
-                new Location("Makati HO"),
-                new Location("Calaca Powerplant"),
-                new Location("Antique Powerplant")
-            );
 
             context.Roles.AddRange(
                 new Role(Roles.ADMIN),

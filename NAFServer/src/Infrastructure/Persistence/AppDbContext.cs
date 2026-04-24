@@ -139,11 +139,11 @@ namespace NAFServer.src.Infrastructure.Persistence
                 .Property(r => r.Name)
                 .HasConversion<string>();
 
-            modelBuilder.Entity<Employee>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.ToView("vw_EmployeeLinkPeopleCore");
-            });
+            //modelBuilder.Entity<Employee>(entity =>
+            //{
+            //    entity.HasKey(e => e.Id);
+            //    entity.ToView("vw_EmployeeLinkPeopleCore");
+            //});
 
             modelBuilder.Entity<User>()
                 .HasOne(u => u.Employee)

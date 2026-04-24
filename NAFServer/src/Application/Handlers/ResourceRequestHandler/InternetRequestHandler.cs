@@ -13,7 +13,7 @@ namespace NAFServer.src.Application.Handlers.ResourceRequestHandler
         private readonly IResourceRequestRepository _resourceRequestRepository;
         private readonly IInternetResourceRepository _internetResourceRepository;
         private readonly AppDbContext _context;
-        public int ResourceId => 1;
+        public int ResourceId => 7;
 
         public InternetRequestHandler(IResourceRequestRepository resourceRequestRepository, IInternetResourceRepository internetResourceRepository, AppDbContext context)
         {
