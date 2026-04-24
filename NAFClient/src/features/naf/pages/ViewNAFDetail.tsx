@@ -22,7 +22,7 @@ import { useNAF } from "../hooks/useNAF";
 import { useResourceRequest } from "../hooks/useResourceRequest";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AddResourceDialog } from "@/features/naf/components/addResourceDialog";
+import { AddResourceDialog } from "@/features/naf/components/add-resource";
 import { useAuth } from "@/features/auth/AuthContext";
 import { getResourceGroups } from "@/shared/api/resourceService";
 
