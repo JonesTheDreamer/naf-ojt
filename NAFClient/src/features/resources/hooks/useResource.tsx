@@ -3,8 +3,8 @@ import {
   getInternetResources,
   getGroupEmails,
   getSharedFolders,
-} from "@/services/EntityAPI/resourceMetadataService";
-import { getAllResources } from "@/services/EntityAPI/resourceService";
+} from "@/shared/api/resourceMetadataService";
+import { getAllResources } from "@/shared/api/resourceService";
 import type {
   InternetPurposeItem,
   InternetResourceItem,

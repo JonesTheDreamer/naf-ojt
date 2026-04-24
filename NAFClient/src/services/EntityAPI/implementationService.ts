@@ -1,5 +1,5 @@
 import type { NAF } from "@/shared/types/api/naf";
-import { api } from "../api";
+import { api } from "@/shared/api/client";
 import type { ForImplementationItemDTO } from "@/features/tech/types";
 
 export const implementationService = {

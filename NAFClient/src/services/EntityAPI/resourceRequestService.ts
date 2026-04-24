@@ -1,5 +1,5 @@
 import type { PurposeProps, ResourceRequest } from "@/shared/types/api/naf";
-import { api } from "../api";
+import { api } from "@/shared/api/client";
 
 export const createResourceRequest = async (payload: {
   nafId: string;

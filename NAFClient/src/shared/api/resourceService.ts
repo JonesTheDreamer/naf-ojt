@@ -1,4 +1,4 @@
-import { api } from "../api";
+import { api } from "./client";
 import type { Resource, ResourceGroup } from "@/shared/types/api/naf";
 
 export const getAllResources = async (): Promise<Resource[]> => {

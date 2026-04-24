@@ -24,7 +24,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AddResourceDialog } from "@/features/naf/components/addResourceDialog";
 import { useAuth } from "@/features/auth/AuthContext";
-import { getResourceGroups } from "@/services/EntityAPI/resourceService";
+import { getResourceGroups } from "@/shared/api/resourceService";
 
 // ─── Utils ────────────────────────────────────────────────────────────────────
 

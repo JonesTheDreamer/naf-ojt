@@ -3,7 +3,7 @@ import {
   addBasicResourcesToNAF,
   createInternetPurpose,
   createInternetResource,
-} from "@/services/EntityAPI/resourceMetadataService";
+} from "@/shared/api/resourceMetadataService";
 import { createResourceRequest } from "@/services/EntityAPI/resourceRequestService";
 import { toast } from "sonner";
 

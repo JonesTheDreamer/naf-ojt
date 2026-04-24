@@ -1,4 +1,4 @@
-import { api } from "../api";
+import { api } from "@/shared/api/client";
 import type { NAF } from "@/shared/types/api/naf";
 import type { PagedResult } from "@/shared/types/common/pagedResult";
 
