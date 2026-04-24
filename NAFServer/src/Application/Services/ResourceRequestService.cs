@@ -3,6 +3,7 @@ using NAFServer.src.Application.Handlers.Interface;
 using NAFServer.src.Application.Interfaces;
 using NAFServer.src.Domain.Entities;
 using NAFServer.src.Domain.Enums;
+using NAFServer.src.Domain.Interface;
 using NAFServer.src.Domain.Interface.Repository;
 using NAFServer.src.Infrastructure.Persistence;
 using NAFServer.src.Mapper;
@@ -22,6 +23,7 @@ namespace NAFServer.src.Application.Services
         private readonly IApprovalWorkflowTemplateRepository _approvalWorkflowTemplateRepository;
         private readonly IResourceRequestHandlerRegistry _resourceRequestHandlerRegistry;
         private readonly IUserRepository _userRepository;
+        private readonly IUserLocationRepository _userLocationRepository;
 
         public ResourceRequestService(
             IResourceRequestRepository resourceRequestRepository,
@@ -33,6 +35,7 @@ namespace NAFServer.src.Application.Services
             IApprovalWorkflowTemplateRepository approvalWorkflowTemplateRepository,
             IResourceRequestHandlerRegistry resourceRequestHandlerRegistry,
             IUserRepository userRepository,
+            IUserLocationRepository userLocationRepository,
             AppDbContext context
         )
         {
@@ -45,55 +48,84 @@ namespace NAFServer.src.Application.Services
             _approvalWorkflowTemplateRepository = approvalWorkflowTemplateRepository;
             _resourceRequestHandlerRegistry = resourceRequestHandlerRegistry;
             _userRepository = userRepository;
+            _userLocationRepository = userLocationRepository;
             _context = context;
         }
 
         public async Task<ResourceRequestDTO> CreateSpecialAsync(CreateResourceRequestDTO request)
         {
-            if (request.additionalInfo is not JsonElement element)
-                throw new Exception("Additional Info is required.");
-
-            var handler = _resourceRequestHandlerRegistry.GetHandler(request.resourceId);
-
-            var additionalInfo = await handler.CreateAdditionalInfo(element);
-            additionalInfo.Id = Guid.NewGuid();
-
-            // Validate for duplicates before opening any transaction
-            bool isValid = await handler.Validate(additionalInfo, request.nafId);
-            if (!isValid)
-                throw new ApplicationException(
-                    $"Duplicate resource request: this resource is already requested in this NAF.");
-
             var resource = await _resourceRepository.GetResourceByIdAsync(request.resourceId);
+
             if (!resource.IsSpecial)
-            {
-                throw new ArgumentException("Invalid Resource. Using Create Special for basic resource.");
-            }
-            await using var transaction = await _context.Database.BeginTransactionAsync();
+                throw new ArgumentException("Invalid Resource. Using CreateSpecialAsync for a basic resource.");
+
+            var hasOuterTransaction = _context.Database.CurrentTransaction != null;
+
+            await using var transaction = hasOuterTransaction
+                ? null
+                : await _context.Database.BeginTransactionAsync();
 
             try
             {
                 var naf = await _nafRepository.GetByIdAsync(request.nafId);
 
-                //_context.Resources.Attach(resource);
-                //_context.NAFs.Attach(naf);
+                ResourceRequestAdditionalInfo? additionalInfo = null;
+
+                // Only process additional info when required by resource
+                if (resource.HasAdditionalInfo)
+                {
+                    if (request.additionalInfo is not JsonElement element)
+                        throw new ApplicationException("Additional Info is required.");
+
+                    var handler = _resourceRequestHandlerRegistry.GetHandler(request.resourceId);
+
+                    additionalInfo = await handler.CreateAdditionalInfo(element);
+                    additionalInfo.Id = Guid.NewGuid();
+
+                    // Validate duplicates / business rules
+                    bool isValid = await handler.Validate(additionalInfo, request.nafId);
+
+                    if (!isValid)
+                    {
+                        throw new ApplicationException(
+                            "Duplicate resource request: this resource is already requested in this NAF.");
+                    }
+                }
 
                 var workflowId = await _approvalWorkflowTemplateRepository
                     .GetActiveWorkflowIdOfResourceAsync(request.resourceId);
 
-                var rr = new ResourceRequest(request.nafId, request.resourceId, workflowId, request.dateNeeded, additionalInfo, Progress.OPEN);
+                var rr = new ResourceRequest(
+                    request.nafId,
+                    request.resourceId,
+                    workflowId,
+                    request.dateNeeded,
+                    additionalInfo,
+                    Progress.OPEN
+                );
 
-                additionalInfo.ResourceRequest = rr;
                 rr.NAF = naf;
+
+                // Only assign navigation if additional info exists
+                if (additionalInfo != null)
+                {
+                    additionalInfo.ResourceRequest = rr;
+                }
 
                 _context.ResourceRequests.Add(rr);
 
                 await _context.SaveChangesAsync();
 
-                var purpose = new ResourceRequestPurpose(request.purpose, rr.Id, null);
+                var purpose = new ResourceRequestPurpose(
+                    request.purpose,
+                    rr.Id,
+                    null
+                );
+
                 await _context.ResourceRequestPurposes.AddAsync(purpose);
 
                 var approvers = await FetchApproversAsync(rr);
+
                 if (approvers.Count > 0)
                 {
                     await _context.ResourceRequestApprovalSteps.AddRangeAsync(approvers);
@@ -104,9 +136,13 @@ namespace NAFServer.src.Application.Services
                 }
 
                 await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
+                if (!hasOuterTransaction)
+                {
+                    await transaction.CommitAsync();
+                }
 
                 var saved = await _resourceRequestRepository.GetByIdAsync(rr.Id);
+
                 return ResourceRequestMapper.ToDTO(saved);
             }
             catch
@@ -193,11 +229,12 @@ namespace NAFServer.src.Application.Services
                     //    };
                     //    break;
                     case ApproverRole.TECHNICAL_HEAD:
-                        var user = await _userRepository.GetUserById(employee.Id);
-                        var approver = await _userRepository.GetNetworkAdminOfLocation(user.location);
+                        var user = await _userRepository.GetUserByEmployeeId(employee.Id);
+                        var activeLocation = await _userLocationRepository.GetUserActiveLocation(user.Id);
+                        var approver = await _userRepository.GetNetworkAdminOfLocation(activeLocation.LocationId);
                         approverId = step.ApproverEntity switch
                         {
-                            "EMPLOYEE" => approver.employeeId
+                            "EMPLOYEE" => approver.EmployeeNumber
                         };
                         break;
                 }
@@ -258,6 +295,56 @@ namespace NAFServer.src.Application.Services
             return ResourceRequestMapper.ToDTO(rr);
         }
 
+        public async Task<ResourceRequestDTO> ChangeResourceAsync(Guid requestId, int newResource)
+        {
+            var rr = await _resourceRequestRepository.GetByIdAsync(requestId);
+            var resource = await _resourceRepository.GetResourceByIdAsync(newResource);
+
+            if (!resource.IsActive)
+            {
+                throw new InvalidOperationException("Resource is inactive");
+            }
+
+            if (resource.HasAdditionalInfo)
+            {
+                throw new InvalidOperationException("Resources with additional information are not allowed to be changed or replace.");
+            }
+
+            if (rr.Resource.ResourceGroupId != resource.ResourceGroupId)
+            {
+                throw new InvalidOperationException("Can't change resource for request. Changing resource of a request requires the request to be on same group");
+            }
+
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+
+            try
+            {
+                var dto = new CreateResourceRequestDTO
+                (
+                    rr.NAFId,
+                    newResource,
+                    $"Change from {rr.Resource.Name} to {resource.Name}",
+                    null,
+                    rr.DateNeeded
+                );
+
+                await DeleteAsync(requestId);
+                ResourceRequestDTO toReturn = resource.IsSpecial
+                    ? await CreateSpecialAsync(dto)
+                    : await CreateBasicAsync(dto);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                return toReturn;
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new Exception(ex.Message);
+            }
+        }
+
         public async Task CancelAsync(Guid requestId)
         {
             var rr = await _resourceRequestRepository.GetByIdAsync(requestId);
@@ -275,10 +362,10 @@ namespace NAFServer.src.Application.Services
         public async Task DeleteAsync(Guid requestId)
         {
             var rr = await _resourceRequestRepository.GetByIdAsync(requestId);
-            if (rr.Progress != Progress.OPEN)
-            {
-                throw new ArgumentException("Resource request can't be deleted");
-            }
+            //if (rr.Progress != Progress.OPEN)
+            //{
+            //    throw new ArgumentException("Resource request can't be deleted");
+            //}
 
             // Remove dependent entities first if cascade delete is not configured
             _context.ResourceRequestApprovalSteps.RemoveRange(rr.ResourceRequestsApprovalSteps);

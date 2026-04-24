@@ -21,6 +21,9 @@ namespace NAFServer.src.Application.Services
         private readonly IResourceRequestService _resourceRequestService;
         private readonly IResourceRepository _resourceRepository;
         private readonly IResourceRequestHandlerRegistry _resourceRequestHandlerRegistry;
+        private readonly IUserRepository _userRepository;
+        private readonly IUserLocationRepository _userLocationRepository;
+        private readonly IUserDepartmentRepository _userDepartmentRepository;
         public NAFService
         (
             AppDbContext context,
@@ -31,7 +34,10 @@ namespace NAFServer.src.Application.Services
             IDepartmentRepository departmentRepository,
             IResourceRequestService resourceRequestService,
             IResourceRepository resourceRepository,
-            IResourceRequestHandlerRegistry resourceRequestHandlerRegistry
+            IResourceRequestHandlerRegistry resourceRequestHandlerRegistry,
+            IUserRepository userRepository,
+            IUserLocationRepository userLocationRepository,
+            IUserDepartmentRepository userDepartmentRepository
         )
         {
             _context = context;
@@ -43,6 +49,9 @@ namespace NAFServer.src.Application.Services
             _resourceRequestService = resourceRequestService;
             _resourceRepository = resourceRepository;
             _resourceRequestHandlerRegistry = resourceRequestHandlerRegistry;
+            _userRepository = userRepository;
+            _userLocationRepository = userLocationRepository;
+            _userDepartmentRepository = userDepartmentRepository;
         }
 
         public async Task<NAFDTO> GetNAFByIdAsync(Guid id)
@@ -75,11 +84,16 @@ namespace NAFServer.src.Application.Services
 
         public async Task<NAFDTO> CreateAsync(CreateNAFRequestDTO request)
         {
+            //fetch from peoplecore
             var employee = await _employeeRepository.GetByIdAsync(request.EmployeeId);
+            //fetch from users table
+            var employeeUser = await _userRepository.GetUserByEmployeeId(request.EmployeeId);
+
+            var employeeActiveDepartment = await _userDepartmentRepository.GetUserActiveDepartment(employeeUser.Id);
 
             if (employee.Status != "Active") throw new InvalidOperationException("Employee is not active");
 
-            var hasNAFForDepartment = await _nafRepository.EmployeeHasNAFForDepartmentAsync(request.EmployeeId, employee.DepartmentId);
+            var hasNAFForDepartment = await _nafRepository.EmployeeHasNAFForDepartmentAsync(request.EmployeeId, employeeActiveDepartment.DepartmentId);
 
             if (hasNAFForDepartment) throw new InvalidOperationException("Employee already has a NAF for this department");
 
@@ -115,8 +129,8 @@ namespace NAFServer.src.Application.Services
             try
             {
                 string reference = $"NAF-{DateTime.UtcNow:yyyyMMddHHmmss}-{employee.Id}-{Guid.NewGuid().ToString("N").Substring(0, 6)}";
-
-                var naf = new NAF(reference, request.RequestorId, request.EmployeeId, employee.DepartmentId);
+                var employeeActiveLocation = await _userLocationRepository.GetUserActiveLocation(employeeUser.Id);
+                var naf = new NAF(reference, request.RequestorId, request.EmployeeId, employeeActiveDepartment.DepartmentId, employeeActiveLocation.LocationId);
                 await _context.NAFs.AddAsync(naf);
                 await _context.SaveChangesAsync();
 
@@ -173,7 +187,7 @@ namespace NAFServer.src.Application.Services
             return NAFMapper.ToDTO(naf, employee);
         }
 
-        public Task<bool> EmployeeHasNAFForDepartmentAsync(string employeeId, string departmentId)
+        public Task<bool> EmployeeHasNAFForDepartmentAsync(string employeeId, int departmentId)
         {
             var hasNAF = _nafRepository.EmployeeHasNAFForDepartmentAsync(employeeId, departmentId);
             return hasNAF;
@@ -184,6 +198,11 @@ namespace NAFServer.src.Application.Services
             var nafs = await _nafRepository.GetByEmployeeIdAsync(employeeId);
             return nafs;
         }
+        //public async Task<List<NAFDTO>> GetNAFByLocationIdAsync(int departmentId)
+        //{
+        //    var nafs = await _nafRepository.GetByDepartmentIdAsync(departmentId);
+        //    return nafs;
+        //}
 
         public async Task<List<AddBasicResourceResultDTO>> AddBasicResourcesToNAFAsync(Guid nafId, List<BasicResourceWithDateDTO> resources)
         {
@@ -217,5 +236,9 @@ namespace NAFServer.src.Application.Services
             return results;
         }
 
+        public Task<List<NAFDTO>> GetNAFByLocationAsync(int locationId)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

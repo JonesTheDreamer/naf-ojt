@@ -38,8 +38,6 @@ namespace NAFServer.src.Application.Services
             resource.AssignToGroup(groupId);
             await _context.SaveChangesAsync();
 
-            _resourceGroupRepository.InvalidateCache();
-
             var updated = await _resourceGroupRepository.GetGroupByIdAsync(groupId)
                 ?? throw new KeyNotFoundException($"Resource group {groupId} not found after update.");
 
@@ -58,8 +56,6 @@ namespace NAFServer.src.Application.Services
 
             resource.RemoveFromGroup();
             await _context.SaveChangesAsync();
-
-            _resourceGroupRepository.InvalidateCache();
 
             var updated = await _resourceGroupRepository.GetGroupByIdAsync(groupId)
                 ?? throw new KeyNotFoundException($"Resource group {groupId} not found after update.");

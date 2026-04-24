@@ -30,15 +30,15 @@ public static class NAFMapper
                 emp.Location,
                 emp.SupervisorId,
                 emp.DepartmentHeadId,
-                emp.DepartmentId,
-                emp.DepartmentDesc
+                "",
+                ""
             ),
             naf.AccomplishedAt,
             naf.SubmittedAt,
             naf.Progress,
             naf.CreatedAt,
             naf.UpdatedAt,
-            naf.DepartmentId,
+            naf.DepartmentId.ToString(),
             naf.ResourceRequests.Select(rr =>
             {
 
