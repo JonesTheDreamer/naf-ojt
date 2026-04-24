@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { authService } from "@/services/EntityAPI/authService";
+import { authApi } from "../api";
 import { useAuth } from "../AuthContext";
 
 export default function RequestorLoginPage() {
@@ -19,7 +19,7 @@ export default function RequestorLoginPage() {
     setError("");
     setIsLoading(true);
     try {
-      const user = await authService.loginRequestorApprover({ employeeId });
+      const user = await authApi.loginRequestorApprover({ employeeId });
       setUser(user);
       navigate("/NAF");
     } catch {

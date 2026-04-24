@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import type { AuthUser } from "@/shared/types/api/auth";
-import { authService } from "@/services/EntityAPI/authService";
+import { authApi } from "./api";
 
 interface AuthContextValue {
   user: AuthUser | null;
@@ -17,7 +17,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    authService
+    authApi
       .me()
       .then(setUser)
       .catch(() => setUser(null))
@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user]);
 
   const logout = async () => {
-    await authService.logout();
+    await authApi.logout();
     setUser(null);
   };
 

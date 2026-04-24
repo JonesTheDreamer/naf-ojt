@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { authService } from "@/services/EntityAPI/authService";
+import { authApi } from "../api";
 import { useAuth } from "../AuthContext";
 
 export default function TechTeamLoginPage() {
@@ -19,7 +19,7 @@ export default function TechTeamLoginPage() {
     setError("");
     setIsLoading(true);
     try {
-      const user = await authService.loginTechnicalTeam({ employeeId });
+      const user = await authApi.loginTechnicalTeam({ employeeId });
       setUser(user);
       navigate("/tech");
     } catch {

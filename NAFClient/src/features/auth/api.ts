@@ -1,7 +1,7 @@
 import { api } from "@/shared/api/client";
 import type { AuthUser, LoginRequest } from "@/shared/types/api/auth";
 
-export const authService = {
+export const authApi = {
   loginAdmin: (data: LoginRequest) =>
     api.post<AuthUser>("/auth/login/admin", data).then((r) => r.data),
 
