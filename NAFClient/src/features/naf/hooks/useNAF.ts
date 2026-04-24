@@ -7,7 +7,7 @@ import {
   getEmployeeNAFs,
   createNAF,
   deactivateNAF,
-} from "@/services/EntityAPI/nafService";
+} from "../api";
 import { toast } from "sonner";
 
 import type { NAF } from "@/shared/types/api/naf";

@@ -4,7 +4,7 @@ import {
   createInternetPurpose,
   createInternetResource,
 } from "@/shared/api/resourceMetadataService";
-import { createResourceRequest } from "@/services/EntityAPI/resourceRequestService";
+import { createResourceRequest } from "../api";
 import { toast } from "sonner";
 
 export type InternetEntry = {
