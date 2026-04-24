@@ -25,6 +25,7 @@
     "noUncheckedSideEffectImports": true,
     // "baseUrl": ".",
     "paths": {
+      "@/components/*": ["./src/shared/components/*"],
       "@/*": [
         "./src/*"
       ]

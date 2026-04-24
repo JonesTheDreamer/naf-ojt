@@ -20,6 +20,17 @@ export const editResourceRequestPurpose = async (
   return res.data;
 };
 
+export const changeResource = async (
+  resourceRequestId: string,
+  resourceId: number,
+): Promise<ResourceRequest> => {
+  const res = await api.post(
+    `/Requests/change-resource/${resourceRequestId}`,
+    resourceId,
+  );
+  return res.data;
+};
+
 export const deleteResourceRequest = async (
   resourceRequest: string,
 ): Promise<void> => {

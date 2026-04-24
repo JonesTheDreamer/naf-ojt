@@ -1,6 +1,7 @@
 import {
   approveResourceRequest,
   cancelResourceRequest,
+  changeResource,
   createResourceRequest,
   deleteResourceRequest,
   editResourceRequestPurpose,
@@ -15,6 +16,7 @@ export const useResourceRequest = (
   NAFId?: string,
 ) => {
   const queryClient = useQueryClient();
+
   const updateResourceRequest = useMutation({
     mutationFn: (purpose: PurposeProps) =>
       editResourceRequestPurpose(resourceRequestId, purpose),
@@ -41,6 +43,16 @@ export const useResourceRequest = (
       queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
       queryClient.invalidateQueries({ queryKey: ["approverNAFs"] });
       toast.success("Resource removed");
+    },
+    onError: () => toast.error("Failed to remove resource"),
+  });
+
+  const changeResourceRequest = useMutation({
+    mutationFn: (resourceId: number) =>
+      changeResource(resourceRequestId, resourceId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["naf", NAFId] });
+      toast.success("Resource request changed!");
     },
     onError: () => toast.error("Failed to remove resource"),
   });
@@ -87,8 +99,12 @@ export const useResourceRequest = (
   });
 
   const createRequest = useMutation({
-    mutationFn: (payload: { nafId: string; resourceId: number; purpose: string; dateNeeded?: string | null }) =>
-      createResourceRequest({ ...payload, additionalInfo: {} }),
+    mutationFn: (payload: {
+      nafId: string;
+      resourceId: number;
+      purpose: string;
+      dateNeeded?: string | null;
+    }) => createResourceRequest({ ...payload, additionalInfo: {} }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["naf", NAFId] });
       queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
@@ -110,5 +126,7 @@ export const useResourceRequest = (
     cancelRequestError: cancelRequest.isError,
     createRequestAsync: createRequest.mutateAsync,
     createRequestError: createRequest.isError,
+    changeResourceAsync: changeResourceRequest.mutateAsync,
+    changeResourceError: changeResourceRequest.isError,
   };
 };

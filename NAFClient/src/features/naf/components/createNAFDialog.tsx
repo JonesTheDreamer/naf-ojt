@@ -12,7 +12,7 @@ import {
 
 import search from "@/assets/images/search.svg";
 
-import SearchBar from "../../../components/common/searchbar";
+import SearchBar from "@/components/common/searchbar";
 import type { Employee } from "@/types/api/employee";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -21,7 +21,7 @@ import { getResourceGroups } from "@/services/EntityAPI/resourceService";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircleIcon } from "lucide-react";
 import { useNAF } from "../hooks/useNAF";
-import { SelectComponent } from "@/global/component/select";
+import { SelectComponent } from "@/shared/components/common/select";
 import { FieldLabel } from "@/components/ui/field";
 import { useAuth } from "@/features/auth/AuthContext";
 

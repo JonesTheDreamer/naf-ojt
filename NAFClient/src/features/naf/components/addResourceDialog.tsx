@@ -10,13 +10,24 @@ import {
 } from "@/components/ui/dialog";
 import { FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import { Select as SelectPrimitive, Popover as PopoverPrimitive } from "radix-ui";
+import {
+  Select as SelectPrimitive,
+  Popover as PopoverPrimitive,
+} from "radix-ui";
 import { Command } from "cmdk";
 import { X, ChevronsUpDown, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { NAF, InternetRequestInfo, GroupEmailInfo, SharedFolderInfo } from "@/types/api/naf";
+import type {
+  NAF,
+  InternetRequestInfo,
+  GroupEmailInfo,
+  SharedFolderInfo,
+} from "@/types/api/naf";
 import { Progress } from "@/types/enum/progress";
-import { useResource, useResourceMetadata } from "@/features/resources/hooks/useResource";
+import {
+  useResource,
+  useResourceMetadata,
+} from "@/features/resources/hooks/useResource";
 import {
   useAddResource,
   type InternetEntry,
@@ -239,7 +250,9 @@ function InternetEntryCard({
             New Purpose
           </p>
           <div className="space-y-1">
-            <FieldLabel>Purpose Name <span className="text-red-500">*</span></FieldLabel>
+            <FieldLabel>
+              Purpose Name <span className="text-red-500">*</span>
+            </FieldLabel>
             <input
               type="text"
               placeholder="e.g. Research"
@@ -254,7 +267,9 @@ function InternetEntryCard({
               type="text"
               placeholder="Optional description"
               value={entry.newPurposeDescription}
-              onChange={(e) => onChange({ newPurposeDescription: e.target.value })}
+              onChange={(e) =>
+                onChange({ newPurposeDescription: e.target.value })
+              }
               className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
             />
           </div>
@@ -263,7 +278,9 @@ function InternetEntryCard({
             New Internet Resource
           </p>
           <div className="space-y-1">
-            <FieldLabel>Resource Name <span className="text-red-500">*</span></FieldLabel>
+            <FieldLabel>
+              Resource Name <span className="text-red-500">*</span>
+            </FieldLabel>
             <input
               type="text"
               placeholder="e.g. GitHub"
@@ -273,7 +290,9 @@ function InternetEntryCard({
             />
           </div>
           <div className="space-y-1">
-            <FieldLabel>URL <span className="text-red-500">*</span></FieldLabel>
+            <FieldLabel>
+              URL <span className="text-red-500">*</span>
+            </FieldLabel>
             <input
               type="url"
               placeholder="https://..."
@@ -288,7 +307,9 @@ function InternetEntryCard({
               type="text"
               placeholder="Optional description"
               value={entry.newResourceDescription}
-              onChange={(e) => onChange({ newResourceDescription: e.target.value })}
+              onChange={(e) =>
+                onChange({ newResourceDescription: e.target.value })
+              }
               className="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
             />
           </div>
@@ -410,7 +431,12 @@ function SharedFolderEntryCard({
   onRemove,
 }: {
   entry: SharedFolderEntry;
-  allSharedFolders: { id: number; name: string; departmentId: string; remarks: string }[];
+  allSharedFolders: {
+    id: number;
+    name: string;
+    departmentId: string;
+    remarks: string;
+  }[];
   usedSharedFolderIds: number[];
   onChange: (patch: Partial<SharedFolderEntry>) => void;
   onRemove: () => void;
@@ -479,7 +505,9 @@ export function AddResourceDialog({
   open,
   onOpenChange,
 }: AddResourceDialogProps) {
-  const [basicResources, setBasicResources] = useState<BasicResourceWithDate[]>([]);
+  const [basicResources, setBasicResources] = useState<BasicResourceWithDate[]>(
+    [],
+  );
   const [internetEntries, setInternetEntries] = useState<InternetEntry[]>([]);
   const [groupEmailEntries, setGroupEmailEntries] = useState<GroupEmailEntry[]>(
     [],
@@ -499,15 +527,24 @@ export function AddResourceDialog({
   const existingResourceIds = naf.resourceRequests.map((rr) => rr.resource.id);
 
   const usedInternetResourceIds = naf.resourceRequests
-    .filter((rr) => rr.additionalInfo?.type === 0 && rr.progress === Progress.ACCOMPLISHED)
+    .filter(
+      (rr) =>
+        rr.additionalInfo?.type === 0 && rr.progress === Progress.ACCOMPLISHED,
+    )
     .map((rr) => (rr.additionalInfo as InternetRequestInfo).internetResourceId);
 
   const usedGroupEmailIds = naf.resourceRequests
-    .filter((rr) => rr.additionalInfo?.type === 2 && rr.progress === Progress.ACCOMPLISHED)
+    .filter(
+      (rr) =>
+        rr.additionalInfo?.type === 2 && rr.progress === Progress.ACCOMPLISHED,
+    )
     .map((rr) => (rr.additionalInfo as GroupEmailInfo).groupEmailId);
 
   const usedSharedFolderIds = naf.resourceRequests
-    .filter((rr) => rr.additionalInfo?.type === 1 && rr.progress === Progress.ACCOMPLISHED)
+    .filter(
+      (rr) =>
+        rr.additionalInfo?.type === 1 && rr.progress === Progress.ACCOMPLISHED,
+    )
     .map((rr) => (rr.additionalInfo as SharedFolderInfo).sharedFolderId);
 
   const availableBasic = (getAllResource.data ?? []).filter(
@@ -607,7 +644,8 @@ export function AddResourceDialog({
     e.preventDefault();
     setIsSubmitting(true);
     setSubmitErrors([]);
-
+    console.log(basicResources);
+    console.log("internet entries", internetEntries);
     const result = await submit({
       nafId: naf.id,
       basicResources,
@@ -625,6 +663,8 @@ export function AddResourceDialog({
       setSubmitErrors(result.errors);
     }
   };
+
+  console.log(getAllResource.data);
 
   return (
     <Dialog
@@ -657,20 +697,30 @@ export function AddResourceDialog({
                   const entry = basicResources.find((b) => b.id === r.id);
                   const isChecked = !!entry;
                   return (
-                    <div key={r.id} className="border rounded-md p-2 space-y-1.5">
+                    <div
+                      key={r.id}
+                      className="border rounded-md p-2 space-y-1.5"
+                    >
                       <div className="flex items-center gap-2">
                         <Checkbox
                           id={`basic-${r.id}`}
                           checked={isChecked}
                           onCheckedChange={(checked) => {
                             if (checked) {
-                              setBasicResources((prev) => [...prev, { id: r.id, dateNeeded: "" }]);
+                              setBasicResources((prev) => [
+                                ...prev,
+                                { id: r.id, dateNeeded: "" },
+                              ]);
                             } else {
-                              setBasicResources((prev) => prev.filter((b) => b.id !== r.id));
+                              setBasicResources((prev) =>
+                                prev.filter((b) => b.id !== r.id),
+                              );
                             }
                           }}
                         />
-                        <FieldLabel htmlFor={`basic-${r.id}`}>{r.name}</FieldLabel>
+                        <FieldLabel htmlFor={`basic-${r.id}`}>
+                          {r.name}
+                        </FieldLabel>
                       </div>
                       {isChecked && (
                         <input
@@ -680,7 +730,9 @@ export function AddResourceDialog({
                           onChange={(e) =>
                             setBasicResources((prev) =>
                               prev.map((b) =>
-                                b.id === r.id ? { ...b, dateNeeded: e.target.value } : b,
+                                b.id === r.id
+                                  ? { ...b, dateNeeded: e.target.value }
+                                  : b,
                               ),
                             )
                           }

@@ -461,7 +461,6 @@ function DeactivateAction({ onDeactivate }: { onDeactivate: () => void }) {
 }
 
 function RejectedActions({
-  rejectionReason,
   onResubmit,
   onCancel,
 }: {
@@ -818,7 +817,6 @@ export function ResourceRequestAccordionItem({
   isSubmitting,
   resourceGroup,
   groupResources = [],
-  onEdit,
   onDelete,
   onRemind,
   onDeactivate,
@@ -828,7 +826,7 @@ export function ResourceRequestAccordionItem({
   onApprove,
   onReject,
 }: ResourceRequestAccordionItemProps) {
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [_editDialogOpen, setEditDialogOpen] = useState(false);
   const [resubmitDialogOpen, setResubmitDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);

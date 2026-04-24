@@ -9,7 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { X } from "lucide-react";
-import type { NAF, ResourceGroup, ResourceRequest, PurposeProps } from "@/types/api/naf";
+import type {
+  NAF,
+  ResourceGroup,
+  ResourceRequest,
+  PurposeProps,
+} from "@/types/api/naf";
 import { ProgressStatus } from "@/types/api/naf";
 import RequestorLayout from "@/components/layout/RequestorLayout";
 import { ResourceRequestAccordionItem } from "@/features/naf/components/resourceRequestAccordion";
@@ -176,7 +181,7 @@ function RequestItemWrapper({
     approveRequestAsync,
     rejectRequestAsync,
     cancelRequestAsync,
-    createRequestAsync,
+    changeResourceAsync,
   } = useResourceRequest(request.id, request.nafId);
 
   const handleEdit = async (
@@ -271,19 +276,23 @@ function RequestItemWrapper({
     g.resources.some((r) => r.id === request.resource.id),
   );
 
-  const existingResourceIds = new Set(naf.resourceRequests.map((rr) => rr.resource.id));
-  const groupResources = resourceGroup?.resources.filter(
-    (r) => r.isActive && r.id !== request.resource.id && !existingResourceIds.has(r.id),
-  ) ?? [];
+  const existingResourceIds = new Set(
+    naf.resourceRequests.map((rr) => rr.resource.id),
+  );
+  const groupResources =
+    resourceGroup?.resources.filter(
+      (r) =>
+        r.isActive &&
+        r.id !== request.resource.id &&
+        !existingResourceIds.has(r.id),
+    ) ?? [];
 
-  const handleChangeResource = async (_requestId: string, newResourceId: number) => {
+  const handleChangeResource = async (
+    _requestId: string,
+    newResourceId: number,
+  ) => {
     try {
-      await cancelRequestAsync();
-      await createRequestAsync({
-        nafId: request.nafId,
-        resourceId: newResourceId,
-        purpose: `Replacement for ${request.resource.name}`,
-      });
+      await changeResourceAsync(newResourceId);
     } catch (error) {
       console.error("Failed to change resource:", error);
     }

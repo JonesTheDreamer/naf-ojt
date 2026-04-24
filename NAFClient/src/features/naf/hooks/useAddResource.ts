@@ -102,12 +102,14 @@ export const useAddResource = () => {
               );
               resourceId = newResource.id;
               queryClient.invalidateQueries({ queryKey: ["internetPurposes"] });
-              queryClient.invalidateQueries({ queryKey: ["internetResources"] });
+              queryClient.invalidateQueries({
+                queryKey: ["internetResources"],
+              });
             }
 
             await createResourceRequest({
               nafId: params.nafId,
-              resourceId: 1,
+              resourceId: 7,
               purpose: entry.purpose,
               additionalInfo: { InternetResourceId: resourceId! },
               dateNeeded: entry.dateNeeded || null,
@@ -125,7 +127,7 @@ export const useAddResource = () => {
       specialTasks.push(
         createResourceRequest({
           nafId: params.nafId,
-          resourceId: 2,
+          resourceId: 12,
           purpose: entry.purpose,
           additionalInfo: { GroupEmailId: entry.groupEmailId! },
           dateNeeded: entry.dateNeeded || null,
@@ -144,7 +146,7 @@ export const useAddResource = () => {
       specialTasks.push(
         createResourceRequest({
           nafId: params.nafId,
-          resourceId: 3,
+          resourceId: 13,
           purpose: entry.purpose,
           additionalInfo: { SharedFolderId: entry.sharedFolderId! },
           dateNeeded: entry.dateNeeded || null,

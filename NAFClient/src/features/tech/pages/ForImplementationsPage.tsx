@@ -1,13 +1,16 @@
 import { useState } from "react";
-import TechTeamLayout from "@/components/layout/TechTeamLayout";
 import { useForImplementations } from "../hooks/useForImplementations";
 import { ImplementationViewToggle } from "../components/ImplementationViewToggle";
 import { ImplementationNAFAccordion } from "../components/ImplementationNAFAccordion";
 import { ImplementationResourceAccordion } from "../components/ImplementationResourceAccordion";
+import AdminLayout from "@/components/layout/AdminLayout";
 
 export default function ForImplementationsPage() {
-  const [viewMode, setViewMode] = useState<"per-naf" | "per-resource">("per-naf");
-  const { forImplementationsQuery, assignToMeMutation } = useForImplementations();
+  const [viewMode, setViewMode] = useState<"per-naf" | "per-resource">(
+    "per-naf",
+  );
+  const { forImplementationsQuery, assignToMeMutation } =
+    useForImplementations();
 
   const nafs = forImplementationsQuery.data ?? [];
 
@@ -22,9 +25,11 @@ export default function ForImplementationsPage() {
   };
 
   return (
-    <TechTeamLayout>
+    <AdminLayout>
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-amber-500">For Implementations</h1>
+        <h1 className="text-2xl font-bold text-amber-500">
+          For Implementations
+        </h1>
         <ImplementationViewToggle value={viewMode} onChange={setViewMode} />
       </div>
 
@@ -53,6 +58,6 @@ export default function ForImplementationsPage() {
           isSubmitting={assignToMeMutation.isPending}
         />
       )}
-    </TechTeamLayout>
+    </AdminLayout>
   );
 }
