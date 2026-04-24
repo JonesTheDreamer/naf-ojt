@@ -27,7 +27,7 @@ import { Progress } from "@/shared/types/enum/progress";
 import {
   useResource,
   useResourceMetadata,
-} from "@/features/resources/hooks/useResource";
+} from "@/shared/hooks/useResource";
 import {
   useAddResource,
   type InternetEntry,
