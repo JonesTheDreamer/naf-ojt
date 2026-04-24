@@ -101,6 +101,14 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAdminService, AdminService>();
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
+builder.Services.AddScoped<IUserRoleRepository, UserRoleRepository>();
+builder.Services.AddScoped<IUserLocationRepository, UserLocationRepository>();
+builder.Services.AddScoped<IUserDepartmentRepository, UserDepartmentRepository>();
+builder.Services.AddScoped<ILocationRepository, LocationRepository>();
+builder.Services.AddScoped<IUserLocationService, UserLocationService>();
+builder.Services.AddScoped<IUserDepartmentService, UserDepartmentService>();
+builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 
 var app = builder.Build();
 
