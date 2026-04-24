@@ -16,7 +16,7 @@ import {
 } from "radix-ui";
 import { Command } from "cmdk";
 import { X, ChevronsUpDown, Check } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/utils/utils";
 import type {
   NAF,
   InternetRequestInfo,

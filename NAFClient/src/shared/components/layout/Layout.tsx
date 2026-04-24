@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/utils/utils";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
 import type { NavItem } from "./Sidebar";

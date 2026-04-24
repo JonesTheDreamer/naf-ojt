@@ -41,8 +41,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { cn } from "@/lib/utils";
-import { getDateUrgency } from "@/lib/dateUrgency";
+import { cn } from "@/shared/utils/utils";
+import { getDateUrgency } from "@/shared/utils/dateUrgency";
 
 import type {
   Resource,

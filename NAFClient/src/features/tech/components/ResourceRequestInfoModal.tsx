@@ -15,7 +15,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import type { ResourceRequest } from "@/types/api/naf";
 import { Status } from "@/types/enum/status";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/utils/utils";
 
 interface Props {
   open: boolean;

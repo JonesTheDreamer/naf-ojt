@@ -8,8 +8,8 @@ import {
 import { Button } from "@/components/ui/button";
 import type { NAF } from "@/types/api/naf";
 import { ImplementationResourceRequestRow } from "./ImplementationResourceRequestRow";
-import { getDateUrgency } from "@/lib/dateUrgency";
-import { cn } from "@/lib/utils";
+import { getDateUrgency } from "@/shared/utils/dateUrgency";
+import { cn } from "@/shared/utils/utils";
 
 interface Props {
   nafs: NAF[];

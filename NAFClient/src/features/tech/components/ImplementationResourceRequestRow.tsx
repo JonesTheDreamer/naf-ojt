@@ -7,8 +7,8 @@ import { ImplementationStatus } from "@/types/enum/status";
 import { ResourceRequestInfoModal } from "./ResourceRequestInfoModal";
 import { DelayedReasonModal } from "./DelayedReasonModal";
 import { PurposeHistoryModal } from "@/features/naf/components/purposeHistoryModal";
-import { getDateUrgency } from "@/lib/dateUrgency";
-import { cn } from "@/lib/utils";
+import { getDateUrgency } from "@/shared/utils/dateUrgency";
+import { cn } from "@/shared/utils/utils";
 
 interface Props {
   request: ResourceRequest;

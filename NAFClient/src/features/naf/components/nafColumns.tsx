@@ -3,7 +3,7 @@
 import type { NAF, ResourceRequest } from "@/types/api/naf";
 import { Progress } from "@/types/enum/progress";
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/utils/utils";
 import type { ColumnDef } from "@tanstack/react-table";
 import { CheckCircle2, Clock } from "lucide-react";
 

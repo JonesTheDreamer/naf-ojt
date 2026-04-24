@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import type { NAF, ResourceRequest } from "@/types/api/naf";
 import { ImplementationResourceRequestRow } from "./ImplementationResourceRequestRow";
-import { getDateUrgency } from "@/lib/dateUrgency";
+import { getDateUrgency } from "@/shared/utils/dateUrgency";
 
 type EnrichedRequest = ResourceRequest & {
   nafReference: string;
