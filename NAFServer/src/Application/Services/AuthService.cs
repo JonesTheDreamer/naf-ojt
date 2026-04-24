@@ -1,11 +1,11 @@
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using NAFServer.src.Application.DTOs.Auth;
 using NAFServer.src.Application.Interfaces;
 using NAFServer.src.Domain.Enums;
 using NAFServer.src.Domain.Interface.Repository;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace NAFServer.src.Application.Services
 {
@@ -14,20 +14,36 @@ namespace NAFServer.src.Application.Services
         private readonly IConfiguration _config;
         private readonly IUserRepository _userRepository;
         private readonly IEmployeeRepository _employeeRepository;
+        private readonly IUserRoleRepository _userRoleRepository;
+        private readonly IRoleRepository _roleRepository;
 
         public AuthService(
             IConfiguration config,
             IUserRepository userRepository,
-            IEmployeeRepository employeeRepository)
+            IEmployeeRepository employeeRepository,
+            IUserRoleRepository userRoleRepository,
+            IRoleRepository roleRepository)
         {
             _config = config;
             _userRepository = userRepository;
             _employeeRepository = employeeRepository;
+            _userRoleRepository = userRoleRepository;
+            _roleRepository = roleRepository;
         }
 
         public async Task<bool> ValidateRoleAsync(string employeeId, Roles role)
         {
-            return await _userRepository.HasRoleAsync(employeeId, role);
+            try
+            {
+                var user = await _userRepository.GetUserByEmployeeId(employeeId);
+                var roleEntity = await _roleRepository.GetByNameAsync(role);
+                if (roleEntity == null) return false;
+                return await _userRoleRepository.UserHasRoleAsync(user.Id, roleEntity.Id);
+            }
+            catch (KeyNotFoundException)
+            {
+                return false;
+            }
         }
 
         public Task<string> GenerateTokenAsync(string employeeId, Roles role)
@@ -57,12 +73,24 @@ namespace NAFServer.src.Application.Services
         {
             var employee = await _employeeRepository.GetByIdAsync(employeeId)
                 ?? throw new KeyNotFoundException($"Employee {employeeId} not found");
-            var roles = await _userRepository.GetRolesByEmployeeIdAsync(employeeId);
-            var activeRole = roles.FirstOrDefault(r => r.date_removed == null);
+
+            var user = await _userRepository.GetUserByEmployeeId(employeeId);
+
+            List<Domain.Entities.UserRole> activeRoles;
+            try
+            {
+                activeRoles = await _userRoleRepository.GetUserActiveRolesAsync(user.Id);
+            }
+            catch (KeyNotFoundException)
+            {
+                activeRoles = new List<Domain.Entities.UserRole>();
+            }
+
+            var primaryRole = activeRoles.FirstOrDefault()?.Role.Name.ToString() ?? "";
 
             return new AuthUserDTO(
                 employeeId,
-                activeRole?.role.ToString() ?? "",
+                primaryRole,
                 $"{employee.FirstName} {employee.LastName}"
             );
         }
