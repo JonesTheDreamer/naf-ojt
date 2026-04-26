@@ -1,5 +1,5 @@
 import { useState } from "react";
-import TechTeamLayout from "@/components/layout/TechTeamLayout";
+import AdminLayout from "@/shared/components/layout/AdminLayout";
 import { useMyTasks } from "../hooks/useMyTasks";
 import { ImplementationViewToggle } from "../components/ImplementationViewToggle";
 import { ImplementationNAFAccordion } from "../components/ImplementationNAFAccordion";
@@ -24,7 +24,7 @@ export default function MyTasksPage() {
     setToDelayedMutation.isPending || setToAccomplishedMutation.isPending;
 
   return (
-    <TechTeamLayout>
+    <AdminLayout>
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-2xl font-bold text-amber-500">My Tasks</h1>
         <ImplementationViewToggle value={viewMode} onChange={setViewMode} />
@@ -55,6 +55,6 @@ export default function MyTasksPage() {
           isSubmitting={isSubmitting}
         />
       )}
-    </TechTeamLayout>
+    </AdminLayout>
   );
 }

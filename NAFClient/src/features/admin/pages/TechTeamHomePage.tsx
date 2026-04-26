@@ -1,4 +1,4 @@
-import TechTeamLayout from "@/components/layout/TechTeamLayout";
+import AdminLayout from "@/shared/components/layout/AdminLayout";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useMyTasks } from "../hooks/useMyTasks";
 import { useForImplementations } from "../hooks/useForImplementations";
@@ -9,7 +9,7 @@ export default function TechTeamHomePage() {
   const { forImplementationsQuery } = useForImplementations();
 
   return (
-    <TechTeamLayout>
+    <AdminLayout>
       <h1 className="text-2xl font-bold text-amber-500">Technical Team Dashboard</h1>
       <p className="text-muted-foreground">Welcome, {user?.name}.</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
@@ -26,6 +26,6 @@ export default function TechTeamHomePage() {
           </p>
         </div>
       </div>
-    </TechTeamLayout>
+    </AdminLayout>
   );
 }

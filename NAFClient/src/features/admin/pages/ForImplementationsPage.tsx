@@ -3,7 +3,7 @@ import { useForImplementations } from "../hooks/useForImplementations";
 import { ImplementationViewToggle } from "../components/ImplementationViewToggle";
 import { ImplementationNAFAccordion } from "../components/ImplementationNAFAccordion";
 import { ImplementationResourceAccordion } from "../components/ImplementationResourceAccordion";
-import AdminLayout from "@/components/layout/AdminLayout";
+import AdminLayout from "@/shared/components/layout/AdminLayout";
 
 export default function ForImplementationsPage() {
   const [viewMode, setViewMode] = useState<"per-naf" | "per-resource">(

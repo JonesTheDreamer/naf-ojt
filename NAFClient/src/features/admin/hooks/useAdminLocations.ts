@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { adminService, type AssignLocationDTO } from "@/services/EntityAPI/adminService";
+import { adminApi, type AssignLocationDTO } from "../api";
 import { toast } from "sonner";
 
 export function useAdminLocations() {
@@ -7,11 +7,11 @@ export function useAdminLocations() {
 
   const locationsQuery = useQuery({
     queryKey: ["admin", "locations"],
-    queryFn: adminService.getLocations,
+    queryFn: adminApi.getLocations,
   });
 
   const assignLocationMutation = useMutation({
-    mutationFn: (data: AssignLocationDTO) => adminService.assignLocation(data),
+    mutationFn: (data: AssignLocationDTO) => adminApi.assignLocation(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "locations"] });
       toast.success("Location assigned");

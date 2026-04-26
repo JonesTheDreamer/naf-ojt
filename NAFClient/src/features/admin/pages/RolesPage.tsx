@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useAdminUsers } from "../hooks/useAdminUsers";
-import type { AddUserDTO } from "@/services/EntityAPI/adminService";
+import type { AddUserDTO } from "../api";
 
 const ROLES = ["ADMIN", "TECHNICAL_TEAM", "REQUESTOR_APPROVER"];
 

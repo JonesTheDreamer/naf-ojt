@@ -22,7 +22,7 @@ const LocationsPage = lazy(
 );
 
 const ForImplementationsPage = lazy(
-  () => import("@/features/tech/pages/ForImplementationsPage"),
+  () => import("@/features/admin/pages/ForImplementationsPage"),
 );
 
 export function AppRouter() {

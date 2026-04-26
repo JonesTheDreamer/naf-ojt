@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAdminLocations } from "../hooks/useAdminLocations";
 import { useAdminUsers } from "../hooks/useAdminUsers";
-import type { AssignLocationDTO } from "@/services/EntityAPI/adminService";
+import type { AssignLocationDTO } from "../api";
 
 export default function LocationsPage() {
   const { locationsQuery } = useAdminLocations();
