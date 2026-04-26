@@ -1,48 +1,36 @@
 import { api } from "@/shared/api/client";
 import type { NAF } from "@/shared/types/api/naf";
-import type { ForImplementationItemDTO } from "./types";
-
-export interface UserRoleDTO {
-  id: number;
-  employeeId: string;
-  role: string;
-  dateAdded: string;
-  dateRemoved: string | null;
-}
-
-export interface UserWithRolesDTO {
-  employeeId: string;
-  location: string;
-  roles: UserRoleDTO[];
-}
-
-export interface AddUserDTO {
-  employeeId: string;
-  role: string;
-  location: string;
-}
-
-export interface AssignLocationDTO {
-  employeeId: string;
-  location: string;
-}
+import type {
+  AddUserDTO,
+  ForImplementationItemDTO,
+  LocationDTO,
+  UserDTO,
+  UserRoleDetailDTO,
+} from "./types";
 
 export const adminApi = {
-  getUsers: () =>
-    api.get<UserWithRolesDTO[]>("/admin/users").then((r) => r.data),
+  // Admin user management
+  getUsers: (locationId: number) =>
+    api.get<UserDTO[]>(`/admin/users?locationId=${locationId}`).then((r) => r.data),
 
   addUser: (data: AddUserDTO) =>
     api.post("/admin/users", data).then((r) => r.data),
 
-  removeRole: (employeeId: string, role: string) =>
-    api.patch(`/admin/users/${employeeId}/roles/${role}/remove`).then((r) => r.data),
-
+  // Location management (moved to /user-locations)
   getLocations: () =>
-    api.get<string[]>("/admin/locations").then((r) => r.data),
+    api.get<LocationDTO[]>("/user-locations").then((r) => r.data),
 
-  assignLocation: (data: AssignLocationDTO) =>
-    api.post("/admin/locations/assign", data).then((r) => r.data),
+  assignLocation: (userId: number, locationId: number) =>
+    api.post(`/user-locations/${userId}/assign`, locationId).then((r) => r.data),
 
+  // Role management (moved to /user-roles)
+  getUserActiveRoles: (userId: number) =>
+    api.get<UserRoleDetailDTO[]>(`/user-roles/${userId}/active`).then((r) => r.data),
+
+  removeRole: (userId: number, roleId: number) =>
+    api.delete(`/user-roles/${userId}/remove/${roleId}`).then((r) => r.data),
+
+  // Implementation endpoints (unchanged)
   getMyTasks: () =>
     api.get<NAF[]>("/implementations/my-tasks").then((r) => r.data),
 
@@ -58,7 +46,9 @@ export const adminApi = {
     api.patch(`/implementations/${implementationId}/in-progress`).then((r) => r.data),
 
   setToDelayed: (implementationId: string, delayReason: string) =>
-    api.patch(`/implementations/${implementationId}/delayed`, JSON.stringify(delayReason)).then((r) => r.data),
+    api
+      .patch(`/implementations/${implementationId}/delayed`, JSON.stringify(delayReason))
+      .then((r) => r.data),
 
   setToAccomplished: (implementationId: string) =>
     api.patch(`/implementations/${implementationId}/accomplished`).then((r) => r.data),

@@ -216,7 +216,7 @@ namespace NAFServer.src.Application.Services
                         approverId = step.ApproverEntity switch
                         {
                             "EMPLOYEE" => employee.DepartmentHeadId,
-                            _ => (await _departmentRepository.GetByIdAsync(step.ApproverEntity))
+                            _ => (await _departmentRepository.GetByIdAsync(int.Parse(step.ApproverEntity)))
                             .DepartmentHeadId
                         };
                         break;

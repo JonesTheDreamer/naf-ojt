@@ -8,7 +8,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
     {
         public static async Task SeedAsync(AppDbContext context)
         {
-            if (context.Users.Any() || context.UserRoles.Any()
+            if (context.Users.Any() || context.UserRoles.Any())
                 return;
 
             context.Roles.AddRange(

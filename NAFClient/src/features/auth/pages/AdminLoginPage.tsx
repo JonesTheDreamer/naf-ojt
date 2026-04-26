@@ -19,8 +19,9 @@ export default function AdminLoginPage() {
     setError("");
     setIsLoading(true);
     try {
-      const user = await authApi.loginAdmin({ employeeId });
-      setUser(user);
+      await authApi.loginAdmin({ employeeId });
+      const me = await authApi.me();
+      setUser(me);
       navigate("/admin");
     } catch {
       setError("Invalid employee ID or unauthorized.");

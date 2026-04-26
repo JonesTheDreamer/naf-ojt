@@ -16,19 +16,22 @@ namespace NAFServer.src.Application.Services
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IUserRoleRepository _userRoleRepository;
         private readonly IRoleRepository _roleRepository;
+        private readonly IUserLocationRepository _userLocationRepository;
 
         public AuthService(
             IConfiguration config,
             IUserRepository userRepository,
             IEmployeeRepository employeeRepository,
             IUserRoleRepository userRoleRepository,
-            IRoleRepository roleRepository)
+            IRoleRepository roleRepository,
+            IUserLocationRepository userLocationRepository)
         {
             _config = config;
             _userRepository = userRepository;
             _employeeRepository = employeeRepository;
             _userRoleRepository = userRoleRepository;
             _roleRepository = roleRepository;
+            _userLocationRepository = userLocationRepository;
         }
 
         public async Task<bool> ValidateRoleAsync(string employeeId, Roles role)
@@ -88,10 +91,22 @@ namespace NAFServer.src.Application.Services
 
             var primaryRole = activeRoles.FirstOrDefault()?.Role.Name.ToString() ?? "";
 
+            int locationId = 0;
+            string location = "";
+            try
+            {
+                var userLocation = await _userLocationRepository.GetUserActiveLocation(user.Id);
+                locationId = userLocation.LocationId;
+                location = userLocation.Location?.Name ?? "";
+            }
+            catch (KeyNotFoundException) { }
+
             return new AuthUserDTO(
                 employeeId,
                 primaryRole,
-                $"{employee.FirstName} {employee.LastName}"
+                $"{employee.FirstName} {employee.LastName}",
+                locationId,
+                location
             );
         }
     }

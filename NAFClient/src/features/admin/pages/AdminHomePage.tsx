@@ -4,7 +4,7 @@ import { useAdminUsers } from "../hooks/useAdminUsers";
 
 export default function AdminHomePage() {
   const { user } = useAuth();
-  const { usersQuery } = useAdminUsers();
+  const { users, isLoading } = useAdminUsers(user?.locationId ?? null);
 
   return (
     <AdminLayout>
@@ -14,7 +14,7 @@ export default function AdminHomePage() {
         <div className="border rounded-lg p-4">
           <p className="text-sm text-muted-foreground">Total Users</p>
           <p className="text-3xl font-bold">
-            {usersQuery.isLoading ? "..." : (usersQuery.data?.length ?? 0)}
+            {isLoading ? "..." : users.length}
           </p>
         </div>
       </div>

@@ -1,26 +1,32 @@
 import { useState } from "react";
 import AdminLayout from "@/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/features/auth/AuthContext";
 import { useAdminLocations } from "../hooks/useAdminLocations";
 import { useAdminUsers } from "../hooks/useAdminUsers";
-import type { AssignLocationDTO } from "../api";
 
 export default function LocationsPage() {
-  const { locationsQuery } = useAdminLocations();
-  const { usersQuery, addUserMutation: _ } = useAdminUsers();
-  const { assignLocationMutation } = useAdminLocations();
-  const [form, setForm] = useState<AssignLocationDTO>({ employeeId: "", location: "" });
+  const { user } = useAuth();
+  const [viewAll, setViewAll] = useState(false);
+  const locationId = viewAll ? null : (user?.locationId ?? null);
+
+  const { locationsQuery, assignLocationMutation } = useAdminLocations();
+  const { users, isLoading } = useAdminUsers(locationId);
+
+  const [selectedUserId, setSelectedUserId] = useState<number | "">("");
+  const [selectedLocationId, setSelectedLocationId] = useState<number | "">("");
   const [formError, setFormError] = useState("");
 
   const handleAssign = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (selectedUserId === "" || selectedLocationId === "") return;
     setFormError("");
     try {
-      await assignLocationMutation.mutateAsync(form);
-      setForm({ employeeId: "", location: "" });
+      await assignLocationMutation.mutateAsync({ userId: selectedUserId, locationId: selectedLocationId });
+      setSelectedUserId("");
+      setSelectedLocationId("");
     } catch {
       setFormError("Failed to assign location.");
     }
@@ -28,34 +34,44 @@ export default function LocationsPage() {
 
   return (
     <AdminLayout>
-      <h1 className="text-2xl font-bold text-amber-500">Locations Management</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-amber-500">Locations Management</h1>
+        <Button variant="outline" size="sm" onClick={() => setViewAll((v) => !v)}>
+          {viewAll ? "My Location" : "View All"}
+        </Button>
+      </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Assign Location to Employee</CardTitle>
+          <CardTitle>Assign Location to User</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleAssign} className="flex flex-col gap-3 sm:flex-row sm:items-end">
             <div className="flex flex-col gap-1">
-              <Label>Employee ID</Label>
-              <Input
-                value={form.employeeId}
-                onChange={(e) => setForm((f) => ({ ...f, employeeId: e.target.value }))}
-                placeholder="Employee ID"
+              <Label>Employee</Label>
+              <select
+                className="border rounded px-3 py-2 text-sm"
+                value={selectedUserId}
+                onChange={(e) => setSelectedUserId(e.target.value === "" ? "" : Number(e.target.value))}
                 required
-              />
+              >
+                <option value="">Select employee</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>{u.firstName} {u.lastName} ({u.employeeId})</option>
+                ))}
+              </select>
             </div>
             <div className="flex flex-col gap-1">
               <Label>Location</Label>
               <select
                 className="border rounded px-3 py-2 text-sm"
-                value={form.location}
-                onChange={(e) => setForm((f) => ({ ...f, location: e.target.value }))}
+                value={selectedLocationId}
+                onChange={(e) => setSelectedLocationId(e.target.value === "" ? "" : Number(e.target.value))}
                 required
               >
                 <option value="">Select location</option>
                 {locationsQuery.data?.map((loc) => (
-                  <option key={loc} value={loc}>{loc}</option>
+                  <option key={loc.id} value={loc.id}>{loc.name}</option>
                 ))}
               </select>
             </div>
@@ -72,18 +88,18 @@ export default function LocationsPage() {
         {locationsQuery.isLoading && <p className="text-muted-foreground">Loading...</p>}
         <div className="flex flex-wrap gap-2">
           {locationsQuery.data?.map((loc) => (
-            <span key={loc} className="border rounded px-3 py-1 text-sm">{loc}</span>
+            <span key={loc.id} className="border rounded px-3 py-1 text-sm">{loc.name}</span>
           ))}
         </div>
       </div>
 
-      <div>
-        <h2 className="font-semibold mb-3">Users by Location</h2>
-        {usersQuery.isLoading && <p className="text-muted-foreground">Loading...</p>}
-        {usersQuery.data?.map((user) => (
-          <div key={user.employeeId} className="flex items-center justify-between border-b py-2 text-sm">
-            <span className="font-medium">{user.employeeId}</span>
-            <span className="text-muted-foreground">{user.location || "—"}</span>
+      <div className="mt-4">
+        <h2 className="font-semibold mb-3">Users</h2>
+        {isLoading && <p className="text-muted-foreground">Loading...</p>}
+        {users.map((u) => (
+          <div key={u.id} className="flex items-center justify-between border-b py-2 text-sm">
+            <span className="font-medium">{u.firstName} {u.lastName}</span>
+            <span className="text-muted-foreground">{u.employeeId} · {u.location || "—"}</span>
           </div>
         ))}
       </div>
