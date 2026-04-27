@@ -11,6 +11,8 @@ export enum RoutesEnum {
   ADMIN = "/admin",
   ADMIN_FOR_IMPLEMENTATIONS = "/admin/for-implementations",
   ADMIN_NAF = "/admin/NAF",
+  ADMIN_NAF_DETAIL = "/admin/NAF/:nafId",
+  ADMIN_IMPLEMENTATION_DETAIL = "/admin/for-implementations/:nafId",
   ADMIN_USERS = "/admin/users",
   ADMIN_ROLES = "/admin/roles",
   ADMIN_LOCATIONS = "/admin/locations",

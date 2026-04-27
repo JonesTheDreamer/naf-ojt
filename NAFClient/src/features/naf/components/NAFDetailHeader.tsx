@@ -14,7 +14,7 @@ function DetailField({ label, value, placeholder = "—" }: { label: string; val
 
 interface NAFDetailHeaderProps {
   naf: NAF;
-  onDeactivate: () => void;
+  onDeactivate?: () => void;
 }
 
 export function NAFDetailHeader({ naf, onDeactivate }: NAFDetailHeaderProps) {
@@ -35,9 +35,11 @@ export function NAFDetailHeader({ naf, onDeactivate }: NAFDetailHeaderProps) {
     <Card>
       <CardHeader className="flex flex-row items-center justify-between pb-3 gap-4 flex-wrap">
         <CardTitle className="text-lg font-bold">Employee Details</CardTitle>
-        <Button size="sm" className="bg-red-400 hover:bg-red-500 text-white gap-1.5 shrink-0" onClick={onDeactivate}>
-          Deactivate Access <X className="h-3.5 w-3.5" />
-        </Button>
+        {onDeactivate && (
+          <Button size="sm" className="bg-red-400 hover:bg-red-500 text-white gap-1.5 shrink-0" onClick={onDeactivate}>
+            Deactivate Access <X className="h-3.5 w-3.5" />
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-12 gap-y-4">

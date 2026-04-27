@@ -20,9 +20,17 @@ const RolesPage = lazy(() => import("@/features/admin/pages/RolesPage"));
 const LocationsPage = lazy(
   () => import("@/features/admin/pages/LocationsPage"),
 );
-
+const AdminNAFListPage = lazy(
+  () => import("@/features/admin/pages/AdminNAFListPage"),
+);
+const AdminNAFDetailPage = lazy(
+  () => import("@/features/admin/pages/AdminNAFDetailPage"),
+);
 const ForImplementationsPage = lazy(
   () => import("@/features/admin/pages/ForImplementationsPage"),
+);
+const AdminImplementationDetailPage = lazy(
+  () => import("@/features/admin/pages/AdminImplementationDetailPage"),
 );
 
 export function AppRouter() {
@@ -31,7 +39,6 @@ export function AppRouter() {
       <Routes>
         {/* Login routes */}
         <Route path={RoutesEnum.LOGIN_ADMIN} element={<AdminLoginPage />} />
-        {/* <Route path={RoutesEnum.LOGIN_TECH} element={<TechTeamLoginPage />} /> */}
         <Route
           path={RoutesEnum.LOGIN_REQUESTOR}
           element={<RequestorLoginPage />}
@@ -73,27 +80,47 @@ export function AppRouter() {
             </ProtectedRoute>
           }
         />
-
-        <Route
-          path={RoutesEnum.ADMIN_FOR_IMPLEMENTATIONS}
-          element={
-            <ProtectedRoute
-              requiredRole="ADMIN"
-              loginPath={RoutesEnum.LOGIN_TECH}
-            >
-              <ForImplementationsPage />
-            </ProtectedRoute>
-          }
-        />
-
         <Route
           path={RoutesEnum.ADMIN_NAF}
           element={
             <ProtectedRoute
               requiredRole="ADMIN"
-              loginPath={RoutesEnum.LOGIN_TECH}
+              loginPath={RoutesEnum.LOGIN_ADMIN}
+            >
+              <AdminNAFListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={RoutesEnum.ADMIN_NAF_DETAIL}
+          element={
+            <ProtectedRoute
+              requiredRole="ADMIN"
+              loginPath={RoutesEnum.LOGIN_ADMIN}
+            >
+              <AdminNAFDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={RoutesEnum.ADMIN_FOR_IMPLEMENTATIONS}
+          element={
+            <ProtectedRoute
+              requiredRole="ADMIN"
+              loginPath={RoutesEnum.LOGIN_ADMIN}
             >
               <ForImplementationsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={RoutesEnum.ADMIN_IMPLEMENTATION_DETAIL}
+          element={
+            <ProtectedRoute
+              requiredRole="ADMIN"
+              loginPath={RoutesEnum.LOGIN_ADMIN}
+            >
+              <AdminImplementationDetailPage />
             </ProtectedRoute>
           }
         />
@@ -119,30 +146,6 @@ export function AppRouter() {
             </ProtectedRoute>
           }
         />
-
-        {/* Technical Team routes
-        <Route
-          path={RoutesEnum.TECH}
-          element={
-            <ProtectedRoute
-              requiredRole="TECHNICAL_TEAM"
-              loginPath={RoutesEnum.LOGIN_TECH}
-            >
-              <TechTeamHomePage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path={RoutesEnum.TECH_MY_TASKS}
-          element={
-            <ProtectedRoute
-              requiredRole="TECHNICAL_TEAM"
-              loginPath={RoutesEnum.LOGIN_TECH}
-            >
-              <MyTasksPage />
-            </ProtectedRoute>
-          }
-        /> */}
 
         <Route
           path="*"
