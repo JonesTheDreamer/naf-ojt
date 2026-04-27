@@ -20,10 +20,10 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
                 ?? throw new KeyNotFoundException("Implementation not found");
         }
 
-        public async Task<List<NAF>> GetForImplementationsAsync()
+        public async Task<List<NAF>> GetForImplementationsAsync(int locationId)
         {
             var nafs = await _context.NAFs
-                .Where(n => n.ResourceRequests.Any(rr => rr.Progress == Progress.IMPLEMENTATION))
+                .Where(n => n.LocationId == locationId && n.ResourceRequests.Any(rr => rr.Progress == Progress.IMPLEMENTATION))
                 .Include(n => n.ResourceRequests.Where(rr => rr.Progress == Progress.IMPLEMENTATION))
                     .ThenInclude(rr => rr.Resource)
                 .Include(n => n.ResourceRequests.Where(rr => rr.Progress == Progress.IMPLEMENTATION))

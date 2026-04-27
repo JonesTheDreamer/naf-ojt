@@ -71,9 +71,9 @@ namespace NAFServer.src.Application.Services
             return ResourceRequestImplementationMapper.ToDTO(implementation);
         }
 
-        public async Task<List<NAFDTO>> GetForImplementationsAsync()
+        public async Task<List<NAFDTO>> GetForImplementationsAsync(int locationId)
         {
-            var nafs = await _implementationRepository.GetForImplementationsAsync();
+            var nafs = await _implementationRepository.GetForImplementationsAsync(locationId);
             return await MapNAFsToDTO(nafs);
         }
 

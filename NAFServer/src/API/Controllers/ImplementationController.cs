@@ -26,9 +26,9 @@ namespace NAFServer.src.API.Controllers
         }
 
         [HttpGet("for-implementations")]
-        public async Task<IActionResult> GetForImplementations()
+        public async Task<IActionResult> GetForImplementations([FromQuery] int locationId)
         {
-            return Ok(await _implementationService.GetForImplementationsAsync());
+            return Ok(await _implementationService.GetForImplementationsAsync(locationId));
         }
 
         [HttpPost("resource-requests/{resourceRequestId}/assign")]

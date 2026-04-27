@@ -9,7 +9,7 @@ namespace NAFServer.src.Application.Interfaces
         Task<ResourceRequestImplementationDTO> SetToDelayed(string request, string delayReason);
         Task<ResourceRequestImplementationDTO> SetToAccomplished(string request);
         Task<List<NAFDTO>> GetMyTasksAsync(string employeeId);
-        Task<List<NAFDTO>> GetForImplementationsAsync();
+        Task<List<NAFDTO>> GetForImplementationsAsync(int locationId);
         Task<ForImplementationItemDTO> AssignToMeAsync(Guid resourceRequestId, string employeeId);
     }
 }
