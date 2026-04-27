@@ -1,5 +1,6 @@
 import { api } from "@/shared/api/client";
 import type { NAF } from "@/shared/types/api/naf";
+import type { PagedResult } from "@/shared/types/common/pagedResult";
 import type {
   AddUserDTO,
   ForImplementationItemDTO,
@@ -16,26 +17,34 @@ export const adminApi = {
   addUser: (data: AddUserDTO) =>
     api.post("/admin/users", data).then((r) => r.data),
 
-  // Location management (moved to /user-locations)
+  // Location management
   getLocations: () =>
     api.get<LocationDTO[]>("/user-locations").then((r) => r.data),
 
   assignLocation: (userId: number, locationId: number) =>
     api.post(`/user-locations/${userId}/assign`, locationId).then((r) => r.data),
 
-  // Role management (moved to /user-roles)
+  // Role management
   getUserActiveRoles: (userId: number) =>
     api.get<UserRoleDetailDTO[]>(`/user-roles/${userId}/active`).then((r) => r.data),
 
   removeRole: (userId: number, roleId: number) =>
     api.delete(`/user-roles/${userId}/remove/${roleId}`).then((r) => r.data),
 
-  // Implementation endpoints (unchanged)
+  // Admin NAF list (new)
+  getAdminNAFs: (locationId: number, status: string, page: number) =>
+    api
+      .get<PagedResult<NAF>>("/admin/nafs", { params: { locationId, status, page } })
+      .then((r) => r.data),
+
+  // Implementation endpoints
   getMyTasks: () =>
     api.get<NAF[]>("/implementations/my-tasks").then((r) => r.data),
 
-  getForImplementations: () =>
-    api.get<NAF[]>("/implementations/for-implementations").then((r) => r.data),
+  getForImplementations: (locationId: number) =>
+    api
+      .get<NAF[]>("/implementations/for-implementations", { params: { locationId } })
+      .then((r) => r.data),
 
   assignToMe: (resourceRequestId: string) =>
     api
