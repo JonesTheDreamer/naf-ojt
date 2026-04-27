@@ -6,7 +6,7 @@ import { useForImplementations } from "../hooks/useForImplementations";
 export default function TechTeamHomePage() {
   const { user } = useAuth();
   const { myTasksQuery } = useMyTasks();
-  const { forImplementationsQuery } = useForImplementations();
+  const { forImplementationsQuery } = useForImplementations(null);
 
   return (
     <AdminLayout>

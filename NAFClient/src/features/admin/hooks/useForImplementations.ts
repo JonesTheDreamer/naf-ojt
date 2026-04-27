@@ -2,24 +2,66 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminApi } from "../api";
 import { toast } from "sonner";
 
-export function useForImplementations() {
+export function useForImplementations(locationId: number | null) {
   const queryClient = useQueryClient();
+  const queryKey = ["admin", "for-implementations", locationId];
 
   const forImplementationsQuery = useQuery({
-    queryKey: ["tech", "for-implementations"],
-    queryFn: adminApi.getForImplementations,
+    queryKey,
+    queryFn: () => adminApi.getForImplementations(locationId!),
+    enabled: locationId != null,
   });
 
-  const assignToMeMutation = useMutation({
+  const acceptMutation = useMutation({
     mutationFn: (resourceRequestId: string) =>
       adminApi.assignToMe(resourceRequestId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["tech", "for-implementations"] });
-      queryClient.invalidateQueries({ queryKey: ["tech", "my-tasks"] });
-      toast.success("Assigned to you");
+      queryClient.invalidateQueries({ queryKey });
+      toast.success("Task accepted");
     },
-    onError: () => toast.error("Failed to assign task"),
+    onError: () => toast.error("Failed to accept task"),
   });
 
-  return { forImplementationsQuery, assignToMeMutation };
+  const setToInProgressMutation = useMutation({
+    mutationFn: (implementationId: string) =>
+      adminApi.setToInProgress(implementationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      toast.success("Set to In Progress");
+    },
+    onError: () => toast.error("Failed to update status"),
+  });
+
+  const setToDelayedMutation = useMutation({
+    mutationFn: ({
+      implementationId,
+      delayReason,
+    }: {
+      implementationId: string;
+      delayReason: string;
+    }) => adminApi.setToDelayed(implementationId, delayReason),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      toast.success("Marked as Delayed");
+    },
+    onError: () => toast.error("Failed to update status"),
+  });
+
+  const setToAccomplishedMutation = useMutation({
+    mutationFn: (implementationId: string) =>
+      adminApi.setToAccomplished(implementationId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey });
+      toast.success("Marked as Accomplished");
+    },
+    onError: () => toast.error("Failed to update status"),
+  });
+
+  return {
+    forImplementationsQuery,
+    acceptMutation,
+    setToInProgressMutation,
+    setToDelayedMutation,
+    setToAccomplishedMutation,
+  };
 }

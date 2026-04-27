@@ -1,63 +1,51 @@
-import { useState } from "react";
-import { useForImplementations } from "../hooks/useForImplementations";
-import { ImplementationViewToggle } from "../components/ImplementationViewToggle";
-import { ImplementationNAFAccordion } from "../components/ImplementationNAFAccordion";
-import { ImplementationResourceAccordion } from "../components/ImplementationResourceAccordion";
+import { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import AdminLayout from "@/shared/components/layout/AdminLayout";
+import { DataTable } from "@/shared/components/ui/datatable";
+import { useForImplementations } from "../hooks/useForImplementations";
+import { useAuth } from "@/features/auth/AuthContext";
+import {
+  implementationColumns,
+  getClosestDateNeeded,
+} from "../components/implementationColumns";
+import { RoutesEnum } from "@/app/routesEnum";
+import type { NAF } from "@/shared/types/api/naf";
 
 export default function ForImplementationsPage() {
-  const [viewMode, setViewMode] = useState<"per-naf" | "per-resource">(
-    "per-naf",
-  );
-  const { forImplementationsQuery, assignToMeMutation } =
-    useForImplementations();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const locationId = user?.locationId ?? null;
 
-  const nafs = forImplementationsQuery.data ?? [];
+  const { forImplementationsQuery } = useForImplementations(locationId);
 
-  const handleAssign = (requestId: string) => {
-    assignToMeMutation.mutate(requestId);
-  };
+  const nafs = useMemo(() => {
+    const data = forImplementationsQuery.data ?? [];
+    return [...data].sort((a, b) => {
+      const aDate = getClosestDateNeeded(a);
+      const bDate = getClosestDateNeeded(b);
+      if (!aDate && !bDate) return 0;
+      if (!aDate) return 1;
+      if (!bDate) return -1;
+      return new Date(aDate).getTime() - new Date(bDate).getTime();
+    });
+  }, [forImplementationsQuery.data]);
 
-  const handleAssignAll = (requestIds: string[]) => {
-    for (const id of requestIds) {
-      assignToMeMutation.mutate(id);
-    }
+  const handleRowClick = (naf: NAF) => {
+    navigate(`${RoutesEnum.ADMIN_FOR_IMPLEMENTATIONS}/${naf.id}`);
   };
 
   return (
     <AdminLayout>
-      <div className="flex items-center justify-between flex-wrap gap-3">
-        <h1 className="text-2xl font-bold text-amber-500">
-          For Implementations
-        </h1>
-        <ImplementationViewToggle value={viewMode} onChange={setViewMode} />
+      <div className="space-y-4">
+        <h1 className="text-2xl font-bold text-amber-500">For Implementation</h1>
+        <DataTable
+          columns={implementationColumns}
+          data={nafs}
+          isLoading={forImplementationsQuery.isLoading}
+          onRowClick={handleRowClick}
+          emptyMessage="No items for implementation."
+        />
       </div>
-
-      {forImplementationsQuery.isLoading && (
-        <p className="text-muted-foreground">Loading...</p>
-      )}
-
-      {!forImplementationsQuery.isLoading && nafs.length === 0 && (
-        <p className="text-muted-foreground">No items for implementation.</p>
-      )}
-
-      {viewMode === "per-naf" ? (
-        <ImplementationNAFAccordion
-          nafs={nafs}
-          mode="for-implementations"
-          onAssign={handleAssign}
-          onAssignAll={handleAssignAll}
-          isSubmitting={assignToMeMutation.isPending}
-        />
-      ) : (
-        <ImplementationResourceAccordion
-          nafs={nafs}
-          mode="for-implementations"
-          onAssign={handleAssign}
-          onAssignAll={handleAssignAll}
-          isSubmitting={assignToMeMutation.isPending}
-        />
-      )}
     </AdminLayout>
   );
 }
