@@ -11,10 +11,12 @@ namespace NAFServer.src.API.Controllers
     public class AdminController : ControllerBase
     {
         private readonly IAdminService _adminService;
+        private readonly INAFService _nafService;
 
-        public AdminController(IAdminService adminService)
+        public AdminController(IAdminService adminService, INAFService nafService)
         {
             _adminService = adminService;
+            _nafService = nafService;
         }
 
         [HttpGet("users")]
@@ -39,6 +41,15 @@ namespace NAFServer.src.API.Controllers
             {
                 return NotFound(ex.Message);
             }
+        }
+
+        [HttpGet("nafs")]
+        public async Task<IActionResult> GetAdminNAFs(
+            [FromQuery] int locationId,
+            [FromQuery] string status = "all",
+            [FromQuery] int page = 1)
+        {
+            return Ok(await _nafService.GetNAFsByLocationPagedAsync(locationId, status, page));
         }
     }
 }

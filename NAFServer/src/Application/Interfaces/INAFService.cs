@@ -15,5 +15,6 @@ namespace NAFServer.src.Application.Interfaces
         public Task<List<NAFDTO>> GetNAFByEmployeeIdAsync(string employeeId);
         public Task<List<NAFDTO>> GetNAFByLocationAsync(int locationId);
         Task<List<AddBasicResourceResultDTO>> AddBasicResourcesToNAFAsync(Guid nafId, List<BasicResourceWithDateDTO> resources);
+        Task<PagedResult<NAFDTO>> GetNAFsByLocationPagedAsync(int locationId, string status, int page);
     }
 }

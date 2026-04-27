@@ -240,5 +240,10 @@ namespace NAFServer.src.Application.Services
         {
             throw new NotImplementedException();
         }
+
+        public async Task<PagedResult<NAFDTO>> GetNAFsByLocationPagedAsync(int locationId, string status, int page)
+        {
+            return await _nafRepository.GetNAFsByLocationPagedAsync(locationId, status, page);
+        }
     }
 }
