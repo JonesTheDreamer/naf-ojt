@@ -11,7 +11,12 @@
       "PowerShell(\\(Get-Content \"C:\\\\Users\\\\rgheradura\\\\Desktop\\\\naf-ojt\\\\NAFClient\\\\src\\\\features\\\\tech\\\\components\\\\ImplementationNAFAccordion.tsx\" | Measure-Object -Line\\).Lines)",
       "PowerShell(\\(Get-Content \"C:\\\\Users\\\\rgheradura\\\\Desktop\\\\naf-ojt\\\\NAFClient\\\\src\\\\features\\\\tech\\\\components\\\\ImplementationResourceAccordion.tsx\" | Measure-Object -Line\\).Lines)",
       "PowerShell(git checkout *)",
-      "PowerShell(git *)"
+      "PowerShell(git *)",
+      "PowerShell(New-Item *)",
+      "Bash(\"/c/Program Files/nodejs/npm\" --version)",
+      "Bash(\"/c/Users/Jones H/AppData/Roaming/npm/npm\" --version)",
+      "Bash(cmd *)",
+      "Bash(git rm *)"
     ]
   }
 }

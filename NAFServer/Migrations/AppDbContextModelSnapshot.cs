@@ -36,11 +36,13 @@ namespace NAFServer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ApproverRole")
-                        .HasColumnType("int");
+                    b.Property<string>("ApproverRole")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("StepAction")
-                        .HasColumnType("int");
+                    b.Property<string>("StepAction")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("StepOrder")
                         .HasColumnType("int");
@@ -77,18 +79,35 @@ namespace NAFServer.Migrations
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.Department", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                    b.Property<string>("DepartmentDesc")
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DepartmentHeadId")
                         .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LocationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartmentHeadId");
+
+                    b.HasIndex("LocationId");
 
                     b.ToTable("Departments");
                 });
@@ -102,15 +121,7 @@ namespace NAFServer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("DepartmentDesc")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("DepartmentHeadId")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("DepartmentId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
@@ -228,6 +239,26 @@ namespace NAFServer.Migrations
                     b.ToTable("InternetResources");
                 });
 
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.Location", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Locations");
+                });
+
             modelBuilder.Entity("NAFServer.src.Domain.Entities.NAF", b =>
                 {
                     b.Property<Guid>("Id")
@@ -241,9 +272,8 @@ namespace NAFServer.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("DepartmentId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
 
                     b.Property<string>("EmployeeId")
                         .IsRequired()
@@ -252,8 +282,12 @@ namespace NAFServer.Migrations
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
-                    b.Property<int>("Progress")
+                    b.Property<int>("LocationId")
                         .HasColumnType("int");
+
+                    b.Property<string>("Progress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Reference")
                         .IsRequired()
@@ -270,6 +304,10 @@ namespace NAFServer.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("LocationId");
 
                     b.ToTable("NAFs");
                 });
@@ -369,8 +407,9 @@ namespace NAFServer.Migrations
                     b.Property<Guid>("NAFId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Progress")
-                        .HasColumnType("int");
+                    b.Property<string>("Progress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("ResourceId")
                         .HasColumnType("int");
@@ -403,8 +442,9 @@ namespace NAFServer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("Progress")
-                        .HasColumnType("int");
+                    b.Property<string>("Progress")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("ResourceRequestId")
                         .HasColumnType("uniqueidentifier");
@@ -438,8 +478,9 @@ namespace NAFServer.Migrations
                     b.Property<Guid>("ResourceRequestApprovalStepId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -465,8 +506,9 @@ namespace NAFServer.Migrations
                     b.Property<Guid>("ResourceRequestId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Type")
-                        .HasColumnType("int");
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
@@ -503,8 +545,9 @@ namespace NAFServer.Migrations
                     b.Property<Guid>("ResourceRequestId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -547,6 +590,26 @@ namespace NAFServer.Migrations
                     b.ToTable("ResourceRequestPurposes");
                 });
 
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.Role", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+                });
+
             modelBuilder.Entity("NAFServer.src.Domain.Entities.SharedFolder", b =>
                 {
                     b.Property<int>("Id")
@@ -574,55 +637,134 @@ namespace NAFServer.Migrations
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.User", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("date_added")
+                    b.Property<DateTime>("DateAdded")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("date_removed")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTime?>("DateRemoved")
+                        .HasColumnType("datetime2");
 
-                    b.Property<string>("employeeId")
+                    b.Property<string>("EmployeeNumber")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("location")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
-                    b.HasKey("id");
+                    b.Property<int?>("LocationId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RoleId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeNumber");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("RoleId");
 
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("NAFServer.src.Domain.Entities.UserRole", b =>
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.UserDepartment", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("date_added")
+                    b.Property<DateTime>("DateAdded")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("date_removed")
+                    b.Property<DateTime?>("DateRemoved")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("role")
+                    b.Property<int>("DepartmentId")
                         .HasColumnType("int");
 
-                    b.Property<string>("userId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
-                    b.HasKey("id");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                    b.HasIndex("userId");
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserDepartments");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.UserLocation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateRemoved")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("LocationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserLocations");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.UserRole", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateRemoved")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("UserRoles");
                 });
@@ -712,6 +854,25 @@ namespace NAFServer.Migrations
                     b.Navigation("Resource");
                 });
 
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.Department", b =>
+                {
+                    b.HasOne("NAFServer.src.Domain.Entities.Employee", "DepartmentHead")
+                        .WithMany()
+                        .HasForeignKey("DepartmentHeadId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("NAFServer.src.Domain.Entities.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DepartmentHead");
+
+                    b.Navigation("Location");
+                });
+
             modelBuilder.Entity("NAFServer.src.Domain.Entities.InternetResource", b =>
                 {
                     b.HasOne("NAFServer.src.Domain.Entities.InternetPurpose", "Purpose")
@@ -721,6 +882,25 @@ namespace NAFServer.Migrations
                         .IsRequired();
 
                     b.Navigation("Purpose");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.NAF", b =>
+                {
+                    b.HasOne("NAFServer.src.Domain.Entities.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NAFServer.src.Domain.Entities.Location", "Location")
+                        .WithMany("NAFs")
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+
+                    b.Navigation("Location");
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.Resource", b =>
@@ -817,14 +997,80 @@ namespace NAFServer.Migrations
                     b.Navigation("ResourceRequestApprovalStepHistory");
                 });
 
-            modelBuilder.Entity("NAFServer.src.Domain.Entities.UserRole", b =>
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.User", b =>
                 {
-                    b.HasOne("NAFServer.src.Domain.Entities.User", null)
-                        .WithMany("roles")
-                        .HasForeignKey("userId")
-                        .HasPrincipalKey("employeeId")
+                    b.HasOne("NAFServer.src.Domain.Entities.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeNumber")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("NAFServer.src.Domain.Entities.Location", null)
+                        .WithMany("Users")
+                        .HasForeignKey("LocationId");
+
+                    b.HasOne("NAFServer.src.Domain.Entities.Role", null)
+                        .WithMany("Users")
+                        .HasForeignKey("RoleId");
+
+                    b.Navigation("Employee");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.UserDepartment", b =>
+                {
+                    b.HasOne("NAFServer.src.Domain.Entities.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NAFServer.src.Domain.Entities.User", "User")
+                        .WithMany("UserDepartments")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.UserLocation", b =>
+                {
+                    b.HasOne("NAFServer.src.Domain.Entities.Location", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NAFServer.src.Domain.Entities.User", "User")
+                        .WithMany("UserLocations")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Location");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.UserRole", b =>
+                {
+                    b.HasOne("NAFServer.src.Domain.Entities.Role", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("NAFServer.src.Domain.Entities.User", "User")
+                        .WithMany("UserRoles")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Interface.ResourceRequestAdditionalInfo", b =>
@@ -876,6 +1122,13 @@ namespace NAFServer.Migrations
                     b.Navigation("ResourceRequests");
                 });
 
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.Location", b =>
+                {
+                    b.Navigation("NAFs");
+
+                    b.Navigation("Users");
+                });
+
             modelBuilder.Entity("NAFServer.src.Domain.Entities.NAF", b =>
                 {
                     b.Navigation("ResourceRequests");
@@ -911,9 +1164,18 @@ namespace NAFServer.Migrations
                     b.Navigation("Histories");
                 });
 
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.Role", b =>
+                {
+                    b.Navigation("Users");
+                });
+
             modelBuilder.Entity("NAFServer.src.Domain.Entities.User", b =>
                 {
-                    b.Navigation("roles");
+                    b.Navigation("UserDepartments");
+
+                    b.Navigation("UserLocations");
+
+                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

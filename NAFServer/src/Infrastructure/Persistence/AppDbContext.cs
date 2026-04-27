@@ -112,6 +112,18 @@ namespace NAFServer.src.Infrastructure.Persistence
                 .HasConversion<string>();
 
             modelBuilder.Entity<NAF>()
+                .HasOne(n => n.Location)
+                .WithMany(l => l.NAFs)
+                .HasForeignKey(n => n.LocationId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<Department>()
+                .HasOne(d => d.DepartmentHead)
+                .WithMany()
+                .HasForeignKey(d => d.DepartmentHeadId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            modelBuilder.Entity<NAF>()
                 .Property(n => n.Progress)
                 .HasConversion<string>();
 

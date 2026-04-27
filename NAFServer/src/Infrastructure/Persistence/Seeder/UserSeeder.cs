@@ -22,6 +22,8 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
 
 
             var employees = await context.Employees.ToListAsync();
+            var roleMap = await context.Roles.ToDictionaryAsync(r => r.Name, r => r.Id);
+            var deptMap = await context.Departments.ToDictionaryAsync(d => d.DepartmentHeadId, d => d.Id);
 
             var users = new List<User>();
 
@@ -37,17 +39,19 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
             // IMPORTANT: IDs are now generated and stable
             var userRoles = new List<UserRole>();
             var userLocations = new List<UserLocation>();
+            var userDepartments = new List<UserDepartment>();
 
             foreach (var emp in employees)
             {
                 var user = users.First(x => x.EmployeeNumber == emp.Id);
 
-                var role = DetermineRole(emp.Position);
+                var roleEnum = DetermineRole(emp.Position);
+                var roleId = roleMap[roleEnum];
 
                 userRoles.Add(new UserRole
                 (
                     user.Id,
-                    (int)role // assuming RoleId is int FK
+                    roleId
                 ));
 
                 // extra rule
@@ -56,7 +60,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
                     userRoles.Add(new UserRole
                     (
                         user.Id,
-                        (int)Roles.REQUESTOR_APPROVER
+                        roleMap[Roles.REQUESTOR_APPROVER]
                     ));
                 }
 
@@ -66,7 +70,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
 
                     switch (emp.Location)
                     {
-                        case "Main Branch":
+                        case "Main Office":
                             empLocation = "Makati HO";
                             break;
                         case "Branch A":
@@ -80,7 +84,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
                     }
 
                     var location = await context.Locations
-                        .FirstOrDefaultAsync(x => x.Name == emp.Location);
+                        .FirstOrDefaultAsync(x => x.Name == empLocation);
 
                     if (location != null)
                     {
@@ -91,31 +95,28 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
                         ));
                     }
                 }
+
+                if (!string.IsNullOrWhiteSpace(emp.DepartmentHeadId) &&
+                    deptMap.TryGetValue(emp.DepartmentHeadId, out var deptId))
+                {
+                    userDepartments.Add(new UserDepartment(user.Id, deptId));
+                }
             }
 
             await context.UserRoles.AddRangeAsync(userRoles);
+            await context.UserDepartments.AddRangeAsync(userDepartments);
+            await context.UserLocations.AddRangeAsync(userLocations);
             await context.SaveChangesAsync();
         }
 
         private static Roles DetermineRole(string position)
         {
-
-            // ADMIN (top-level leadership)
             if (position == "IT Director" || position == "Network Administrator")
-            {
                 return Roles.ADMIN;
-            }
 
             if (position == "HR Director" || position == "Talent Acquisition Manager" || position == "HR Operations Manager")
-            {
                 return Roles.HR;
-            }
 
-            //HR Director
-            //Talent Acquisition Manager
-            //HR Operations Manager
-
-            // DEFAULT
             return Roles.REQUESTOR_APPROVER;
         }
     }

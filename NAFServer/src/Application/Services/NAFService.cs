@@ -56,27 +56,32 @@ namespace NAFServer.src.Application.Services
 
         public async Task<NAFDTO> GetNAFByIdAsync(Guid id)
         {
-            var naf = await _nafRepository.GetByIdAsync(id);
-            var employee = await _employeeRepository.GetByIdAsync(naf.EmployeeId);
+            try
+            {
+                var naf = await _nafRepository.GetByIdAsync(id);
+                var employee = await _employeeRepository.GetByIdAsync(naf.EmployeeId);
 
-            var approverIds = naf.ResourceRequests
-                .SelectMany(rr => rr.ResourceRequestsApprovalSteps)
-                .Select(s => s.ApproverId)
-                .Distinct()
-                .ToList();
+                var approverIds = naf.ResourceRequests
+                    .SelectMany(rr => rr.ResourceRequestsApprovalSteps)
+                    .Select(s => s.ApproverId)
+                    .Distinct()
+                    .ToList();
 
-            var approverEmployees = await Task.WhenAll(
-                approverIds.Select(approverId => _employeeRepository.GetByIdAsync(approverId))
-            );
+                var approverNames = new Dictionary<string, string>();
+                foreach (var approverId in approverIds)
+                {
+                    var approver = await _employeeRepository.GetByIdAsync(approverId);
+                    if (approver != null)
+                        approverNames[approver.Id] = $"{approver.FirstName} {approver.LastName}".Trim();
+                }
 
-            var approverNames = approverEmployees
-                .Where(e => e != null)
-                .ToDictionary(
-                    e => e.Id,
-                    e => $"{e.FirstName} {e.LastName}".Trim()
-                );
-
-            return NAFMapper.ToDTO(naf, employee, approverNames);
+                return NAFMapper.ToDTO(naf, employee, approverNames);
+            }
+            catch (Exception ex)
+            {
+                throw new HttpRequestException(ex.Message);
+            }
+            
         }
 
         private static readonly string[] _withHardwareAutoAddNames = { "Microsoft 365 (E1)", "Basic Internet", "Active Directory", "Printer Access (Black and White)" };

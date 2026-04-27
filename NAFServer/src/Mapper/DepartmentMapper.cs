@@ -12,7 +12,7 @@ namespace NAFServer.src.Mapper
                 department.Code,
                 department.Name,
                 department.IsActive,
-                department.DepartmentHead?.EmployeeNumber ?? "",
+                department.DepartmentHead?.Id ?? "",
                 department.LocationId,
                 department.Location?.Name ?? ""
             );
