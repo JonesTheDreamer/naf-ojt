@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-// import { queryClient } from "@/app/queryClient";
+import { STALE_TIME } from "@/shared/constants/queryConstants";
 import {
   getSubordinateNAFs,
   getApproverNAFs,
@@ -26,14 +26,14 @@ export const useEmployeeNAF = (
     queryKey: ["subordinateNAFs", employeeId, subordinatePage],
     queryFn: () => getSubordinateNAFs(employeeId!, subordinatePage ?? 1),
     enabled: !!employeeId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: STALE_TIME.MEDIUM,
   });
 
   const approverNAFsQuery = useQuery<PagedResult<NAF>, Error>({
     queryKey: ["approverNAFs", employeeId, approvalPage],
     queryFn: () => getApproverNAFs(employeeId!, approvalPage),
     enabled: !!employeeId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: STALE_TIME.MEDIUM,
   });
 
   return {
@@ -74,7 +74,7 @@ export const useNAF = ({ employeeId, nafId }: UseNAFParams) => {
     queryKey: ["employeeNAF", employeeId],
     queryFn: () => getEmployeeNAFs(employeeId!),
     enabled: !!employeeId,
-    staleTime: 1000 * 60 * 5,
+    staleTime: STALE_TIME.MEDIUM,
   });
 
   const createNAFMutation = useMutation({
@@ -89,8 +89,7 @@ export const useNAF = ({ employeeId, nafId }: UseNAFParams) => {
       queryClient.invalidateQueries({ queryKey: ["employeeNAF"] });
       toast.success("NAF created successfully");
     },
-    onError: (error) => {
-      console.error(error.message);
+    onError: () => {
       toast.error("Failed to create NAF");
     },
   });
@@ -102,8 +101,7 @@ export const useNAF = ({ employeeId, nafId }: UseNAFParams) => {
       queryClient.invalidateQueries({ queryKey: ["employeeNAF"] });
       toast.success("NAF deactivated");
     },
-    onError: (error) => {
-      console.error(error.message);
+    onError: () => {
       toast.error("Failed to deactivate NAF");
     },
   });
