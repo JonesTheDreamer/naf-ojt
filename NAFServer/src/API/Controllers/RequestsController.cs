@@ -40,7 +40,7 @@ namespace NAFServer.src.API.Controllers
         public async Task<IActionResult> ChangeResource(Guid requestId, [FromBody] int newResource)
         {
             var rr = await _resourceRequestService.ChangeResourceAsync(requestId, newResource);
-            return CreatedAtAction(nameof(Get), new { id = rr.Id }, new
+            return Ok(new
             {
                 success = true,
                 message = "Resource changed successfully",
