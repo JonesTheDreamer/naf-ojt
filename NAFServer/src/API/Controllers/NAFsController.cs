@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using NAFServer.src.Application.DTOs.NAF;
 using NAFServer.src.Application.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -19,14 +20,14 @@ namespace NAFServer.src.API.Controllers
         }
 
         [HttpGet("{employeeId}/subordinates")]
-        public async Task<IActionResult> GetNAFsUnderEmployee(string employeeId, int page = 1)
+        public async Task<IActionResult> GetNAFsUnderEmployee(string employeeId, [Range(1, int.MaxValue)] int page = 1)
         {
             var nafs = await _nafService.GetNAFsUnderEmployeeAsync(employeeId, page);
             return Ok(nafs);
         }
 
         [HttpGet("{employeeId}/approver/")]
-        public async Task<IActionResult> GetNAFsToApprove(string employeeId, int page = 1)
+        public async Task<IActionResult> GetNAFsToApprove(string employeeId, [Range(1, int.MaxValue)] int page = 1)
         {
             var nafs = await _nafService.GetNAFToApproveAsync(employeeId, page);
             return Ok(nafs);

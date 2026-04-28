@@ -48,7 +48,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
 
         public async Task<PagedResult<NAFDTO>> GetNAFUnderEmployee(string employeeId, int page)
         {
-            int pageSize = 6;
+            int pageSize = PaginationConstants.PageSize;
 
             var employees = await _employeeRepository.GetEmployeeSubordinates(employeeId);
             if (employees == null || !employees.Any())
@@ -112,7 +112,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
 
         public async Task<PagedResult<NAFDTO>> GetNAFToApprove(string employeeId, int page)
         {
-            int pageSize = 6;
+            int pageSize = PaginationConstants.PageSize;
 
             if (string.IsNullOrEmpty(employeeId))
             {

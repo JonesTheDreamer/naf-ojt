@@ -234,11 +234,6 @@ namespace NAFServer.src.Application.Services
             var nafs = await _nafRepository.GetByEmployeeIdAsync(employeeId);
             return nafs;
         }
-        //public async Task<List<NAFDTO>> GetNAFByLocationIdAsync(int departmentId)
-        //{
-        //    var nafs = await _nafRepository.GetByDepartmentIdAsync(departmentId);
-        //    return nafs;
-        //}
 
         public async Task<List<AddBasicResourceResultDTO>> AddBasicResourcesToNAFAsync(Guid nafId, List<BasicResourceWithDateDTO> resources)
         {
@@ -270,11 +265,6 @@ namespace NAFServer.src.Application.Services
             }
 
             return results;
-        }
-
-        public Task<List<NAFDTO>> GetNAFByLocationAsync(int locationId)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task<PagedResult<NAFDTO>> GetNAFsByLocationPagedAsync(int locationId, string status, int page)

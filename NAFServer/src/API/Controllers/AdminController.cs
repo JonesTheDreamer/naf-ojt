@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NAFServer.src.Application.DTOs.Admin;
 using NAFServer.src.Application.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace NAFServer.src.API.Controllers
 {
@@ -47,7 +48,7 @@ namespace NAFServer.src.API.Controllers
         public async Task<IActionResult> GetAdminNAFs(
             [FromQuery] int locationId,
             [FromQuery] string status = "all",
-            [FromQuery] int page = 1)
+            [FromQuery][Range(1, int.MaxValue)] int page = 1)
         {
             return Ok(await _nafService.GetNAFsByLocationPagedAsync(locationId, status, page));
         }
