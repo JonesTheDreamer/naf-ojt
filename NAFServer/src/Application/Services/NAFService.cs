@@ -24,6 +24,7 @@ namespace NAFServer.src.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IUserLocationRepository _userLocationRepository;
         private readonly IUserDepartmentRepository _userDepartmentRepository;
+        private readonly ICurrentUserService _currentUserService;
         public NAFService
         (
             AppDbContext context,
@@ -37,7 +38,8 @@ namespace NAFServer.src.Application.Services
             IResourceRequestHandlerRegistry resourceRequestHandlerRegistry,
             IUserRepository userRepository,
             IUserLocationRepository userLocationRepository,
-            IUserDepartmentRepository userDepartmentRepository
+            IUserDepartmentRepository userDepartmentRepository,
+            ICurrentUserService currentUserService
         )
         {
             _context = context;
@@ -52,36 +54,62 @@ namespace NAFServer.src.Application.Services
             _userRepository = userRepository;
             _userLocationRepository = userLocationRepository;
             _userDepartmentRepository = userDepartmentRepository;
+            _currentUserService = currentUserService;
+        }
+
+        private async Task AuthorizeNAFAccessAsync(NAF naf)
+        {
+            var currentUserId = _currentUserService.EmployeeId;
+
+            // Rule 1: current user is the requestor or the employee on the NAF
+            if (naf.RequestorId == currentUserId || naf.EmployeeId == currentUserId)
+                return;
+
+            // Rule 2: current user is in the same department as the NAF
+            var currentDepartmentId = await _currentUserService.GetDepartmentIdAsync();
+            if (naf.DepartmentId.ToString() == currentDepartmentId)
+                return;
+
+            // Rule 3: current user is an assigned approver on any step
+            bool isApprover = naf.ResourceRequests
+                .SelectMany(rr => rr.ResourceRequestsApprovalSteps)
+                .Any(s => s.ApproverId == currentUserId);
+            if (isApprover)
+                return;
+
+            // Rule 4: admin whose active location matches the NAF's location
+            if (_currentUserService.Role == "ADMIN")
+            {
+                var adminLocationId = await _currentUserService.GetLocationIdAsync();
+                if (naf.LocationId == adminLocationId)
+                    return;
+            }
+
+            throw new UnauthorizedAccessException("You do not have access to this NAF.");
         }
 
         public async Task<NAFDTO> GetNAFByIdAsync(Guid id)
         {
-            try
+            var naf = await _nafRepository.GetByIdAsync(id);
+            var user = await _userRepository.GetUserByEmployeeId(naf.EmployeeId);
+
+            await AuthorizeNAFAccessAsync(naf);
+
+            var approverIds = naf.ResourceRequests
+                .SelectMany(rr => rr.ResourceRequestsApprovalSteps)
+                .Select(s => s.ApproverId)
+                .Distinct()
+                .ToList();
+
+            var approverNames = new Dictionary<string, string>();
+            foreach (var approverId in approverIds)
             {
-                var naf = await _nafRepository.GetByIdAsync(id);
-                var employee = await _employeeRepository.GetByIdAsync(naf.EmployeeId);
-
-                var approverIds = naf.ResourceRequests
-                    .SelectMany(rr => rr.ResourceRequestsApprovalSteps)
-                    .Select(s => s.ApproverId)
-                    .Distinct()
-                    .ToList();
-
-                var approverNames = new Dictionary<string, string>();
-                foreach (var approverId in approverIds)
-                {
-                    var approver = await _employeeRepository.GetByIdAsync(approverId);
-                    if (approver != null)
-                        approverNames[approver.Id] = $"{approver.FirstName} {approver.LastName}".Trim();
-                }
-
-                return NAFMapper.ToDTO(naf, employee, approverNames);
+                var approver = await _employeeRepository.GetByIdAsync(approverId);
+                if (approver != null)
+                    approverNames[approver.Id] = $"{approver.FirstName} {approver.LastName}".Trim();
             }
-            catch (Exception ex)
-            {
-                throw new HttpRequestException(ex.Message);
-            }
-            
+
+            return NAFMapper.ToDTO(naf, user.Employee, approverNames);
         }
 
         private static readonly string[] _withHardwareAutoAddNames = { "Microsoft 365 (E1)", "Basic Internet", "Active Directory", "Printer Access (Black and White)" };
