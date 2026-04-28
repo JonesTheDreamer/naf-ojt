@@ -12,6 +12,7 @@ const STATUS_TABS = [
   { label: "All", value: "all" },
   { label: "Open", value: "open" },
   { label: "In Progress", value: "in_progress" },
+  { label: "For Screening", value: "for_screening" },
   { label: "Accomplished", value: "accomplished" },
 ] as const;
 
