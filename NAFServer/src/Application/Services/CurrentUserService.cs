@@ -50,13 +50,19 @@
         public async Task<string> GetDepartmentIdAsync()
         {
             var employee = await _employeeRepository.GetByIdAsync(EmployeeId);
-            return employee!.DepartmentId;
+            if (employee == null)
+                throw new KeyNotFoundException($"Employee '{EmployeeId}' not found.");
+            return employee.DepartmentId;
         }
 
         public async Task<int> GetLocationIdAsync()
         {
             var user = await _userRepository.GetUserByEmployeeId(EmployeeId);
+            if (user == null)
+                throw new KeyNotFoundException($"User for employee '{EmployeeId}' not found.");
             var location = await _userLocationRepository.GetUserActiveLocation(user.Id);
+            if (location == null)
+                throw new KeyNotFoundException($"No active location found for user '{user.Id}'.");
             return location.LocationId;
         }
     }
