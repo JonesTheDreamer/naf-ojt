@@ -8,6 +8,7 @@ namespace NAFServer.src.Application.DTOs.ResourceRequest
         Guid Id,
         int CurrentStep,
         Progress Progress,
+        bool IsActive,
         DateTime AccomplishedAt,
         DateTime? CancelledAt,
         DateTime? DateNeeded,

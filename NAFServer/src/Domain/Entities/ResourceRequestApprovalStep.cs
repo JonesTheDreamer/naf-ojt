@@ -7,6 +7,7 @@ namespace NAFServer.src.Domain.Entities
         public Guid ResourceRequestId { get; set; }
         public Guid Id { get; set; }
         public int StepOrder { get; set; }
+        public StepAction StepAction { get; set; }
         public string ApproverId { get; set; }
         public Progress Progress { get; set; }
         public DateTime? ApprovedAt { get; set; }
@@ -19,11 +20,13 @@ namespace NAFServer.src.Domain.Entities
         (
             Guid ResourceRequestId,
             string ApproverId,
-            int StepOrder
+            int StepOrder,
+            StepAction StepAction
         )
         {
             this.ResourceRequestId = ResourceRequestId;
             this.StepOrder = StepOrder;
+            this.StepAction = StepAction;
             this.ApproverId = ApproverId;
             Progress = Progress.OPEN;
         }

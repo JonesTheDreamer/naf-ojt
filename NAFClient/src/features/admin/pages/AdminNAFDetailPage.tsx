@@ -8,6 +8,7 @@ import { NAFDetailHeader } from "@/features/naf/components/NAFDetailHeader";
 import { AdminResourceRequestList } from "../components/AdminResourceRequestList";
 import { RoutesEnum } from "@/app/routesEnum";
 import { ProgressStatus } from "@/shared/types/api/naf";
+import { useAuth } from "@/features/auth";
 
 function formatDateTime(dateStr?: string | null) {
   if (!dateStr) return "—";
@@ -23,10 +24,14 @@ function formatDateTime(dateStr?: string | null) {
 
 function nafProgressColor(progress: number): string {
   switch (progress as ProgressStatus) {
-    case ProgressStatus["In Progress"]: return "text-blue-600";
-    case ProgressStatus.Accomplished: return "text-emerald-600";
-    case ProgressStatus.Rejected: return "text-red-500";
-    default: return "text-amber-500";
+    case ProgressStatus["In Progress"]:
+      return "text-blue-600";
+    case ProgressStatus.Accomplished:
+      return "text-emerald-600";
+    case ProgressStatus.Rejected:
+      return "text-red-500";
+    default:
+      return "text-amber-500";
   }
 }
 
@@ -35,6 +40,9 @@ export default function AdminNAFDetailPage() {
   const navigate = useNavigate();
   const { nafQuery, isLoading, isError } = useNAF({ nafId });
   const naf = nafQuery.data;
+  const { user } = useAuth();
+  const currentUserId = user?.employeeId ?? "";
+  console.log(naf);
 
   return (
     <AdminLayout>
@@ -48,9 +56,13 @@ export default function AdminNAFDetailPage() {
           <ChevronLeft className="h-4 w-4" /> Back to NAFs
         </Button>
 
-        {isLoading && <p className="text-sm text-muted-foreground">Loading...</p>}
+        {isLoading && (
+          <p className="text-sm text-muted-foreground">Loading...</p>
+        )}
         {isError && (
-          <p className="text-sm text-muted-foreground">Failed to load NAF details.</p>
+          <p className="text-sm text-muted-foreground">
+            Failed to load NAF details.
+          </p>
         )}
 
         {naf && (
@@ -58,8 +70,12 @@ export default function AdminNAFDetailPage() {
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
               <div>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-base font-semibold text-foreground">Reference:</span>
-                  <span className="text-base font-bold text-amber-500">{naf.reference}</span>
+                  <span className="text-base font-semibold text-foreground">
+                    Reference:
+                  </span>
+                  <span className="text-base font-bold text-amber-500">
+                    {naf.reference}
+                  </span>
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Last Update: {formatDateTime(naf.updatedAt)}
@@ -76,7 +92,19 @@ export default function AdminNAFDetailPage() {
             </div>
             <Separator />
             <NAFDetailHeader naf={naf} />
-            <AdminResourceRequestList naf={naf} />
+            <AdminResourceRequestList
+              naf={naf}
+              currentUser={currentUserId}
+              onApprove={function (requestId: string, remarks: string): void {
+                throw new Error("Function not implemented.");
+              }}
+              onReject={function (
+                requestId: string,
+                reasonForRejection: string,
+              ): void {
+                throw new Error("Function not implemented.");
+              }}
+            />
           </>
         )}
       </div>

@@ -12,7 +12,7 @@ using NAFServer.src.Infrastructure.Persistence;
 namespace NAFServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260426132550_InitialCreate")]
+    [Migration("20260428031645_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -124,7 +124,15 @@ namespace NAFServer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DepartmentDesc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("DepartmentHeadId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DepartmentId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
@@ -451,6 +459,9 @@ namespace NAFServer.Migrations
 
                     b.Property<Guid>("ResourceRequestId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("StepAction")
+                        .HasColumnType("int");
 
                     b.Property<int>("StepOrder")
                         .HasColumnType("int");

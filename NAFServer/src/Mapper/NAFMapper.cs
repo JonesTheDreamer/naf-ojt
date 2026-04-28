@@ -30,8 +30,8 @@ public static class NAFMapper
                 emp.Location,
                 emp.SupervisorId,
                 emp.DepartmentHeadId,
-                "",
-                ""
+                emp.DepartmentId,
+                emp.DepartmentDesc
             ),
             naf.AccomplishedAt,
             naf.SubmittedAt,
@@ -46,6 +46,7 @@ public static class NAFMapper
                     rr.Id,
                     rr.CurrentStep,
                     rr.Progress,
+                    rr.IsActive,
                     rr.AccomplishedAt,
                     rr.CancelledAt,
                     rr.DateNeeded,
@@ -82,6 +83,7 @@ public static class NAFMapper
                         s.Id,
                         s.ResourceRequestId,
                         s.StepOrder,
+                        s.StepAction,
                         s.ApproverId,
                         approverNames?.GetValueOrDefault(s.ApproverId),
                         s.Progress,

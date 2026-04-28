@@ -27,7 +27,9 @@ namespace NAFServer.Migrations
                     Position = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Location = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SupervisorId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    DepartmentHeadId = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    DepartmentHeadId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    DepartmentId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DepartmentDesc = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -506,6 +508,7 @@ namespace NAFServer.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "NEWSEQUENTIALID()"),
                     ResourceRequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StepOrder = table.Column<int>(type: "int", nullable: false),
+                    StepAction = table.Column<int>(type: "int", nullable: false),
                     ApproverId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Progress = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ApprovedAt = table.Column<DateTime>(type: "datetime2", nullable: true)

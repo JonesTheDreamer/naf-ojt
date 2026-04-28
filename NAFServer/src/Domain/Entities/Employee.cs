@@ -18,8 +18,8 @@ namespace NAFServer.src.Domain.Entities
         public string? SupervisorId { get; set; }
         public string? DepartmentHeadId { get; set; }
 
-        //public string DepartmentId { get; set; }
-        //public string DepartmentDesc { get; set; }
+        public string DepartmentId { get; set; }
+        public string DepartmentDesc { get; set; }
         private Employee() { }
 
         public Employee
@@ -34,9 +34,9 @@ namespace NAFServer.src.Domain.Entities
             string Company,
             string Position,
             string Location,
-            string? DepartmentHeadId
-        //string DepartmentId,
-        //string DepartmentDesc
+            string? DepartmentHeadId,
+        string DepartmentId,
+        string DepartmentDesc
         )
         {
             this.Id = Id;
@@ -50,8 +50,8 @@ namespace NAFServer.src.Domain.Entities
             this.Position = Position;
             this.Location = Location;
             this.DepartmentHeadId = DepartmentHeadId;
-            //this.DepartmentId = DepartmentId;
-            //this.DepartmentDesc = DepartmentDesc;
+            this.DepartmentId = DepartmentId;
+            this.DepartmentDesc = DepartmentDesc;
         }
     }
 }

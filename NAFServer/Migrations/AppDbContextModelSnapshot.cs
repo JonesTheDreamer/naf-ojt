@@ -121,7 +121,15 @@ namespace NAFServer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("DepartmentDesc")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("DepartmentHeadId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DepartmentId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FirstName")
@@ -448,6 +456,9 @@ namespace NAFServer.Migrations
 
                     b.Property<Guid>("ResourceRequestId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("StepAction")
+                        .HasColumnType("int");
 
                     b.Property<int>("StepOrder")
                         .HasColumnType("int");

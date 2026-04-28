@@ -19,6 +19,7 @@ export interface NAF extends Entity<string> {
 export interface ResourceRequest extends Entity<string> {
   currentStep: number;
   progress: Progress;
+  isActive: boolean;
   accomplishedAt?: string;
   cancelledAt?: string;
   dateNeeded?: string;
@@ -78,6 +79,7 @@ export interface Step extends Entity<string> {
   id: string;
   resourceRequestId: string;
   stepOrder: number;
+  stepAction: number;
   approverId: string;
   approverName?: string | null;
   progress: number;

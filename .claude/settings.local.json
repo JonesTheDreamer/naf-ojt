@@ -16,7 +16,9 @@
       "Bash(\"/c/Program Files/nodejs/npm\" --version)",
       "Bash(\"/c/Users/Jones H/AppData/Roaming/npm/npm\" --version)",
       "Bash(cmd *)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(git add *)",
+      "Bash(git commit *)"
     ]
   }
 }

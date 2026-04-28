@@ -114,15 +114,17 @@ function RequestItemWrapper({
   const resourceGroup = resourceGroups.find((g) =>
     g.resources.some((r) => r.id === request.resource.id),
   );
-  const existingResourceIds = new Set(
-    naf.resourceRequests.map((rr) => rr.resource.id),
+  const existingActiveResourceIds = new Set(
+    naf.resourceRequests
+      .filter((rr) => rr.isActive)
+      .map((rr) => rr.resource.id),
   );
   const groupResources =
     resourceGroup?.resources.filter(
       (r) =>
         r.isActive &&
         r.id !== request.resource.id &&
-        !existingResourceIds.has(r.id),
+        !existingActiveResourceIds.has(r.id),
     ) ?? [];
 
   const handleChangeResource = async (

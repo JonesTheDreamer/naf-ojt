@@ -87,7 +87,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
                 workflowStepsTemplates.Add(new ApprovalWorkflowStepsTemplate(t.Id, 1, StepAction.APPROVER, ApproverRole.DEPARTMENT_HEAD, "EMPLOYEE"));
                 if (t.Resource.Name != "Shared Folder")
                 {
-                    workflowStepsTemplates.Add(new ApprovalWorkflowStepsTemplate(t.Id, 2, StepAction.APPROVER, ApproverRole.TECHNICAL_HEAD, "EMPLOYEE"));
+                    workflowStepsTemplates.Add(new ApprovalWorkflowStepsTemplate(t.Id, 2, StepAction.FOR_SCREENING, ApproverRole.TECHNICAL_HEAD, "EMPLOYEE"));
                 }
                 else
                 {

@@ -42,8 +42,20 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
         {
             return await _context.Users
                 .Include(u => u.Employee)
-                .FirstOrDefaultAsync(u => u.EmployeeNumber == employeeId)
-                ?? throw new KeyNotFoundException("User not found");
+
+                .Include(u => u.UserLocations
+                    .Where(ul => ul.IsActive))
+                    .ThenInclude(ul => ul.Location)
+
+                .Include(u => u.UserRoles
+                    .Where(ur => ur.IsActive))
+                    .ThenInclude(ur => ur.Role)
+
+                .Include(u => u.UserDepartments
+                    .Where(ud => ud.IsActive))
+                    .ThenInclude(ud => ud.Department)
+
+                .FirstOrDefaultAsync(u => u.EmployeeNumber == employeeId) ?? throw new KeyNotFoundException("User not found"); ;
         }
 
         public async Task<User> SetUserToInactive(int userId)
