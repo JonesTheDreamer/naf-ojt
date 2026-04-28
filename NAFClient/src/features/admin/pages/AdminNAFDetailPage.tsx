@@ -42,7 +42,6 @@ export default function AdminNAFDetailPage() {
   const naf = nafQuery.data;
   const { user } = useAuth();
   const currentUserId = user?.employeeId ?? "";
-  console.log(naf);
 
   return (
     <AdminLayout>

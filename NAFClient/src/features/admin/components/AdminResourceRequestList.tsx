@@ -140,7 +140,12 @@ export function AdminResourceRequestList({
       setApprovingStepId(null);
       toast.success("Request approved");
     },
-    onError: () => toast.error("Failed to approve request"),
+    onError: (error: unknown) => {
+      const message =
+        (error as { response?: { data?: string } })?.response?.data ??
+        "Failed to approve request";
+      toast.error(message);
+    },
   });
 
   const rejectRequest = useMutation({
@@ -156,7 +161,12 @@ export function AdminResourceRequestList({
       setRejectingStepId(null);
       toast.success("Request rejected");
     },
-    onError: () => toast.error("Failed to reject request"),
+    onError: (error: unknown) => {
+      const message =
+        (error as { response?: { data?: string } })?.response?.data ??
+        "Failed to reject request";
+      toast.error(message);
+    },
   });
 
   return (
