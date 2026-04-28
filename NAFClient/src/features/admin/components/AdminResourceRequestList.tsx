@@ -1,3 +1,6 @@
+import { useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import {
   Accordion,
   AccordionContent,
@@ -18,6 +21,12 @@ import {
 import { ResourceIcon } from "@/features/naf/components/resource-request/resourceRequestUtils";
 import { CheckCircle2, XCircle, Clock3 } from "lucide-react";
 import { ApproverActions } from "@/features/naf/components/resource-request/ResourceRequestActions";
+import { ApproveDialog } from "@/features/naf/components/resource-request/ApproveDialog";
+import { RejectDialog } from "@/features/naf/components/resource-request/RejectDialog";
+import {
+  approveResourceRequest,
+  rejectResourceRequest,
+} from "@/features/naf/api";
 
 const STEP_ACTION_LABEL: Record<StepAction, string> = {
   [StepAction.APPROVER]: "Approval",
@@ -113,14 +122,43 @@ export { ApprovalStepsBlock };
 interface AdminResourceRequestListProps {
   naf: NAF;
   currentUser: string;
-  onApprove: (requestId: string, remarks: string) => void;
-  onReject: (requestId: string, reasonForRejection: string) => void;
 }
 
 export function AdminResourceRequestList({
   naf,
   currentUser,
 }: AdminResourceRequestListProps) {
+  const queryClient = useQueryClient();
+  const [approvingStepId, setApprovingStepId] = useState<string | null>(null);
+  const [rejectingStepId, setRejectingStepId] = useState<string | null>(null);
+
+  const approveRequest = useMutation({
+    mutationFn: ({ stepId, comment }: { stepId: string; comment?: string }) =>
+      approveResourceRequest(stepId, comment),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["naf", naf.id] });
+      setApprovingStepId(null);
+      toast.success("Request approved");
+    },
+    onError: () => toast.error("Failed to approve request"),
+  });
+
+  const rejectRequest = useMutation({
+    mutationFn: ({
+      stepId,
+      reasonForRejection,
+    }: {
+      stepId: string;
+      reasonForRejection: string;
+    }) => rejectResourceRequest(stepId, reasonForRejection),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["naf", naf.id] });
+      setRejectingStepId(null);
+      toast.success("Request rejected");
+    },
+    onError: () => toast.error("Failed to reject request"),
+  });
+
   return (
     <div>
       <h2 className="text-lg font-bold mb-4">Requests</h2>
@@ -186,14 +224,10 @@ export function AdminResourceRequestList({
                 {req.histories.length > 0 && (
                   <HistoryTable histories={req.histories} />
                 )}
-                {isApprover && (
+                {isApprover && currentStep && (
                   <ApproverActions
-                    onApprove={function (): void {
-                      throw new Error("Function not implemented.");
-                    }}
-                    onReject={function (): void {
-                      throw new Error("Function not implemented.");
-                    }}
+                    onApprove={() => setApprovingStepId(currentStep.id)}
+                    onReject={() => setRejectingStepId(currentStep.id)}
                   />
                 )}
               </AccordionContent>
@@ -201,6 +235,36 @@ export function AdminResourceRequestList({
           );
         })}
       </Accordion>
+
+      <ApproveDialog
+        open={approvingStepId !== null}
+        onOpenChange={(open) => {
+          if (!open) setApprovingStepId(null);
+        }}
+        onConfirm={(remarks) => {
+          if (!approvingStepId) return;
+          approveRequest.mutate({
+            stepId: approvingStepId,
+            comment: remarks || undefined,
+          });
+        }}
+        isSubmitting={approveRequest.isPending}
+      />
+
+      <RejectDialog
+        open={rejectingStepId !== null}
+        onOpenChange={(open) => {
+          if (!open) setRejectingStepId(null);
+        }}
+        onConfirm={(reason) => {
+          if (!rejectingStepId) return;
+          rejectRequest.mutate({
+            stepId: rejectingStepId,
+            reasonForRejection: reason,
+          });
+        }}
+        isSubmitting={rejectRequest.isPending}
+      />
     </div>
   );
 }

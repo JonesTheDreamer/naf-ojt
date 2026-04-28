@@ -95,15 +95,6 @@ export default function AdminNAFDetailPage() {
             <AdminResourceRequestList
               naf={naf}
               currentUser={currentUserId}
-              onApprove={function (requestId: string, remarks: string): void {
-                throw new Error("Function not implemented.");
-              }}
-              onReject={function (
-                requestId: string,
-                reasonForRejection: string,
-              ): void {
-                throw new Error("Function not implemented.");
-              }}
             />
           </>
         )}
