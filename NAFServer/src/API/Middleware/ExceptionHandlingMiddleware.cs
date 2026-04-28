@@ -26,6 +26,8 @@ namespace NAFServer.src.API.Middleware
 
         private static async Task HandleExceptionAsync(HttpContext context, Exception ex)
         {
+            if (context.Response.HasStarted) return;
+
             int statusCode;
             string message;
 
