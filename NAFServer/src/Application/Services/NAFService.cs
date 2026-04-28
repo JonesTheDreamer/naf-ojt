@@ -67,7 +67,7 @@ namespace NAFServer.src.Application.Services
 
             // Rule 2: current user is in the same department as the NAF
             var currentDepartmentId = await _currentUserService.GetDepartmentIdAsync();
-            if (naf.DepartmentId.ToString() == currentDepartmentId)
+            if (int.TryParse(currentDepartmentId, out int parsedDeptId) && naf.DepartmentId == parsedDeptId)
                 return;
 
             // Rule 3: current user is an assigned approver on any step
@@ -90,10 +90,13 @@ namespace NAFServer.src.Application.Services
 
         public async Task<NAFDTO> GetNAFByIdAsync(Guid id)
         {
-            var naf = await _nafRepository.GetByIdAsync(id);
-            var user = await _userRepository.GetUserByEmployeeId(naf.EmployeeId);
+            var naf = await _nafRepository.GetByIdAsync(id)
+                ?? throw new KeyNotFoundException($"NAF '{id}' not found.");
 
             await AuthorizeNAFAccessAsync(naf);
+
+            var user = await _userRepository.GetUserByEmployeeId(naf.EmployeeId)
+                ?? throw new KeyNotFoundException($"User for employee '{naf.EmployeeId}' not found.");
 
             var approverIds = naf.ResourceRequests
                 .SelectMany(rr => rr.ResourceRequestsApprovalSteps)
@@ -106,7 +109,7 @@ namespace NAFServer.src.Application.Services
             {
                 var approver = await _employeeRepository.GetByIdAsync(approverId);
                 if (approver != null)
-                    approverNames[approver.Id] = $"{approver.FirstName} {approver.LastName}".Trim();
+                    approverNames[approverId] = $"{approver.FirstName} {approver.LastName}".Trim();
             }
 
             return NAFMapper.ToDTO(naf, user.Employee, approverNames);
