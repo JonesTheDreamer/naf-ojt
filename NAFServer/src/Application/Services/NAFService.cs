@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using NAFServer.src.Application.DTOs.NAF;
 using NAFServer.src.Application.DTOs.ResourceRequest;
 using NAFServer.src.Application.Handlers.Interface;
@@ -25,6 +26,7 @@ namespace NAFServer.src.Application.Services
         private readonly IUserLocationRepository _userLocationRepository;
         private readonly IUserDepartmentRepository _userDepartmentRepository;
         private readonly ICurrentUserService _currentUserService;
+        private readonly IConfiguration _configuration;
         public NAFService
         (
             AppDbContext context,
@@ -39,7 +41,8 @@ namespace NAFServer.src.Application.Services
             IUserRepository userRepository,
             IUserLocationRepository userLocationRepository,
             IUserDepartmentRepository userDepartmentRepository,
-            ICurrentUserService currentUserService
+            ICurrentUserService currentUserService,
+            IConfiguration configuration
         )
         {
             _context = context;
@@ -55,6 +58,7 @@ namespace NAFServer.src.Application.Services
             _userLocationRepository = userLocationRepository;
             _userDepartmentRepository = userDepartmentRepository;
             _currentUserService = currentUserService;
+            _configuration = configuration;
         }
 
         private async Task AuthorizeNAFAccessAsync(NAF naf)
@@ -115,9 +119,6 @@ namespace NAFServer.src.Application.Services
             return NAFMapper.ToDTO(naf, user.Employee, approverNames);
         }
 
-        private static readonly string[] _withHardwareAutoAddNames = { "Microsoft 365 (E1)", "Basic Internet", "Active Directory", "Printer Access (Black and White)" };
-        private static readonly string[] _noHardwareAutoAddNames = { "Active Directory" };
-
         public async Task<NAFDTO> CreateAsync(CreateNAFRequestDTO request)
         {
             //fetch from peoplecore
@@ -139,16 +140,14 @@ namespace NAFServer.src.Application.Services
                 .Select(r => r.Id)
                 .ToListAsync()).ToHashSet();
 
-            // Resolve auto-add resource IDs by name from the database
-            var withHardwareIds = await _context.Resources
-                .Where(r => r.IsActive && _withHardwareAutoAddNames.Contains(r.Name))
-                .Select(r => r.Id)
-                .ToListAsync();
+            // Resolve auto-add resource IDs from configuration
+            var withHardwareIds = _configuration
+                .GetSection("HardwareAutoAdd:WithHardwareResourceIds")
+                .Get<List<int>>() ?? new List<int>();
 
-            var noHardwareIds = await _context.Resources
-                .Where(r => r.IsActive && _noHardwareAutoAddNames.Contains(r.Name))
-                .Select(r => r.Id)
-                .ToListAsync();
+            var noHardwareIds = _configuration
+                .GetSection("HardwareAutoAdd:NoHardwareResourceIds")
+                .Get<List<int>>() ?? new List<int>();
 
             var resourcesToAdd = new List<int>();
             if (request.HardwareId != 0 && hardwareResourceIds.Contains(request.HardwareId))
