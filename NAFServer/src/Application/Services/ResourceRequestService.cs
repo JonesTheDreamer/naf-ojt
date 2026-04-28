@@ -220,14 +220,6 @@ namespace NAFServer.src.Application.Services
                             .DepartmentHeadId
                         };
                         break;
-                    //case ApproverRole.POSITION:
-                    //    approverId = step.ApproverEntity switch
-                    //    {
-                    //        "Network Admin" => "9229523",
-                    //        //_ => (await _departmentRepository.GetByIdAsync(employee.DepartmentId))
-                    //        //.PositionHeadId
-                    //    };
-                    //    break;
                     case ApproverRole.TECHNICAL_HEAD:
                         var user = await _userRepository.GetUserByEmployeeId(employee.Id);
                         var activeLocation = await _userLocationRepository.GetUserActiveLocation(user.Id);
@@ -247,7 +239,8 @@ namespace NAFServer.src.Application.Services
                         approvers.Add(new ResourceRequestApprovalStep(
                              request.Id,
                              approverId,
-                             step.StepOrder
+                             step.StepOrder,
+                             step.StepAction
                          ));
                     }
                 }
@@ -328,7 +321,15 @@ namespace NAFServer.src.Application.Services
                     rr.DateNeeded
                 );
 
-                await DeleteAsync(requestId);
+                if (rr.Progress == Progress.ACCOMPLISHED)
+                {
+                    rr.DeactivateResourceRequest();
+                }
+                else
+                {
+                    await DeleteAsync(requestId);
+                }
+
                 ResourceRequestDTO toReturn = resource.IsSpecial
                     ? await CreateSpecialAsync(dto)
                     : await CreateBasicAsync(dto);
