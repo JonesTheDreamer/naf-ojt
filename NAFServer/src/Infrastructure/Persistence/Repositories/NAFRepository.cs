@@ -238,6 +238,10 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
                 case "accomplished":
                     query = query.Where(n => n.Progress == Progress.ACCOMPLISHED);
                     break;
+                case "for_screening":
+                    query = query.Where(n =>
+                        n.ResourceRequests.Any(r => r.Progress == Progress.FOR_SCREENING));
+                    break;
                 default:
                     query = query.Where(n =>
                         n.Progress == Progress.OPEN ||
