@@ -18,13 +18,6 @@ namespace NAFServer.src.API.Controllers
             _nafService = nafService;
         }
 
-        // GET: api/<NAFsController>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
-
         [HttpGet("{employeeId}/subordinates")]
         public async Task<IActionResult> GetNAFsUnderEmployee(string employeeId, int page = 1)
         {
@@ -56,38 +49,20 @@ namespace NAFServer.src.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateNAFRequestDTO request)
         {
-            try
+            var naf = await _nafService.CreateAsync(request);
+            return CreatedAtAction(nameof(Get), new { id = naf.Id }, new
             {
-                var naf = await _nafService.CreateAsync(request);
-                return CreatedAtAction(
-                    nameof(Get),
-                    new { id = naf.Id },
-                    new
-                    {
-                        success = true,
-                        message = "NAF created successfully",
-                        data = naf
-                    }
-                    );
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+                success = true,
+                message = "NAF created successfully",
+                data = naf
+            });
         }
 
         [HttpPost("{nafId:guid}/resources/basic")]
         public async Task<IActionResult> AddBasicResources(Guid nafId, [FromBody] AddBasicResourcesDTO request)
         {
-            try
-            {
-                var results = await _nafService.AddBasicResourcesToNAFAsync(nafId, request.Resources);
-                return Ok(results);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+            var results = await _nafService.AddBasicResourcesToNAFAsync(nafId, request.Resources);
+            return Ok(results);
         }
 
         // DELETE api/<NAFsController>/5

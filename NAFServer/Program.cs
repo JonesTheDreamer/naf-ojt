@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NAFServer.src.API.Middleware;
 using NAFServer.src.Application.Handlers.Interface;
 using NAFServer.src.Application.Handlers.ResourceRequestHandler;
 using NAFServer.src.Application.Interfaces;
@@ -121,6 +122,8 @@ using (var scope = app.Services.CreateScope())
     await InternetResourceSeeder.SeedAsync(context);
     await UserSeeder.SeedAsync(context);
 }
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
