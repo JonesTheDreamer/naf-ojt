@@ -15,14 +15,21 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
 
         public async Task<List<UserRole>> AddUserRoleAsync(int userId, int roleId)
         {
-            var roles = await GetUserRolesAsync(userId);
+            List<UserRole> roles;
+            try
+            {
+                roles = await GetUserRolesAsync(userId);
+            }
+            catch (KeyNotFoundException)
+            {
+                roles = new List<UserRole>();
+            }
+
             var existingRole = roles.FirstOrDefault(r => r.RoleId == roleId);
             if (existingRole != null)
             {
                 if (existingRole.IsActive)
-                {
-                    throw new KeyNotFoundException("User already have this role.");
-                }
+                    throw new KeyNotFoundException("User already has this role.");
                 existingRole.SetToActive();
             }
             else
@@ -30,7 +37,15 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
                 _context.UserRoles.Add(new UserRole(userId, roleId));
             }
             await _context.SaveChangesAsync();
-            return await GetUserRolesAsync(userId);
+
+            try
+            {
+                return await GetUserRolesAsync(userId);
+            }
+            catch (KeyNotFoundException)
+            {
+                return new List<UserRole>();
+            }
         }
 
         public async Task<List<UserRole>> GetUserRolesAsync(int userId)
