@@ -5,12 +5,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAdminUsers } from "../hooks/useAdminUsers";
 import { useAdminLocations } from "../hooks/useAdminLocations";
@@ -127,14 +127,14 @@ export default function RolesPage() {
             {viewAll ? "My Location" : "View All"}
           </Button>
 
-          <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-            <SheetTrigger asChild>
+          <Dialog open={sheetOpen} onOpenChange={setSheetOpen}>
+            <DialogTrigger asChild>
               <Button size="sm">Assign Role</Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-80">
-              <SheetHeader>
-                <SheetTitle>Assign Role</SheetTitle>
-              </SheetHeader>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-md">
+              <DialogHeader>
+                <DialogTitle>Assign Role</DialogTitle>
+              </DialogHeader>
 
               <form onSubmit={handleAssign} className="flex flex-col gap-4 mt-4">
                 <div className="flex flex-col gap-1">
@@ -205,8 +205,8 @@ export default function RolesPage() {
                   {assignRoleMutation.isPending ? "Assigning…" : "Assign Role"}
                 </Button>
               </form>
-            </SheetContent>
-          </Sheet>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
