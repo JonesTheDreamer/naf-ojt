@@ -18,7 +18,8 @@
       "Bash(cmd *)",
       "Bash(git rm *)",
       "Bash(git add *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "PowerShell(dotnet build NAFServer *)"
     ]
   }
 }

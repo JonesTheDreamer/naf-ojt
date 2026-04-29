@@ -23,8 +23,19 @@ export default function AdminLoginPage() {
       const me = await authApi.me();
       setUser(me);
       navigate("/admin");
-    } catch {
-      setError("Invalid employee ID or unauthorized.");
+    } catch (err: unknown) {
+      const status =
+        err && typeof err === "object" && "response" in err
+          ? (err as { response?: { status?: number } }).response?.status
+          : undefined;
+      if (status === 401) {
+        setError("Invalid employee ID or role not assigned.");
+      } else if (status === 400) {
+        const data = (err as { response?: { data?: { error?: string } } }).response?.data;
+        setError(data?.error ?? "Login failed. Contact your administrator.");
+      } else {
+        setError("Invalid employee ID or unauthorized.");
+      }
     } finally {
       setIsLoading(false);
     }

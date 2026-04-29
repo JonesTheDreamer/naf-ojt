@@ -42,10 +42,12 @@ namespace NAFServer.src.Application.Services
                 }
                 else
                 {
-                    if (rr.Progress != Progress.IN_PROGRESS)
-                    {
+                    var nextStep = rr.ResourceRequestsApprovalSteps
+                        .FirstOrDefault(s => s.StepOrder == rr.CurrentStep);
+                    if (nextStep?.StepAction == StepAction.FOR_SCREENING)
+                        rr.SetToForScreening();
+                    else if (rr.Progress != Progress.IN_PROGRESS)
                         rr.SetToInProgress();
-                    }
                 }
 
                 var approver = await _employeeRepository.GetByIdAsync(step.ApproverId);

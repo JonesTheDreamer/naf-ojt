@@ -65,6 +65,12 @@ namespace NAFServer.src.Domain.Entities
             return this;
         }
 
+        public ResourceRequest SetToForScreening()
+        {
+            Progress = Progress.FOR_SCREENING;
+            return this;
+        }
+
         public ResourceRequest SetToImplementation()
         {
             if (Progress == Progress.IMPLEMENTATION) throw new DomainException("Already In Implementation");

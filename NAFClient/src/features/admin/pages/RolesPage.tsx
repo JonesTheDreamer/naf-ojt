@@ -86,6 +86,10 @@ export default function RolesPage() {
   const handleAssign = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
+    if (empLookup.state !== "found") {
+      setFormError("Employee not found. Please enter a valid employee ID.");
+      return;
+    }
     if (!formLocationId) {
       setFormError("Please select a location.");
       return;

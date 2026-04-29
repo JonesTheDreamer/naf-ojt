@@ -14,6 +14,10 @@ export const PROGRESS_CONFIG: Record<
     label: "In Progress",
     className: "text-blue-600 bg-blue-50 border-blue-200",
   },
+  [Progress.FOR_SCREENING]: {
+    label: "For Screening",
+    className: "text-purple-600 bg-purple-50 border-purple-200",
+  },
   [Progress.REJECTED]: {
     label: "Rejected",
     className: "text-red-500 bg-red-50 border-red-200",

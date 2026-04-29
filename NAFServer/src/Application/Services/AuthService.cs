@@ -75,7 +75,7 @@ namespace NAFServer.src.Application.Services
         public async Task<AuthUserDTO> GetCurrentUserAsync(string employeeId)
         {
             var employee = await _employeeRepository.GetByIdAsync(employeeId)
-                ?? throw new KeyNotFoundException($"Employee {employeeId} not found");
+                ?? throw new ApplicationException($"Employee record not found for '{employeeId}'. Contact your administrator.");
 
             var user = await _userRepository.GetUserByEmployeeId(employeeId);
 
