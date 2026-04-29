@@ -15,7 +15,16 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
 
         public async Task<List<UserLocation>> AddUserCurrentLocation(int userId, int locationId)
         {
-            var locations = await GetUserLocationsAsync(userId);
+            List<UserLocation> locations;
+            try
+            {
+                locations = await GetUserLocationsAsync(userId);
+            }
+            catch (KeyNotFoundException)
+            {
+                locations = new List<UserLocation>();
+            }
+
             var existingLocation = locations.FirstOrDefault(l => l.LocationId == locationId);
             if (existingLocation != null)
             {
@@ -27,13 +36,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             }
             else
             {
-                var activeLocation = locations.FirstOrDefault(l => l.IsActive);
-                if (activeLocation != null)
-                {
-                    activeLocation.SetToInactive();
-                }
-                else
-                    _context.UserLocations.Add(new UserLocation(userId, locationId));
+                _context.UserLocations.Add(new UserLocation(userId, locationId));
             }
             await _context.SaveChangesAsync();
             return await GetUserLocationsAsync(userId);

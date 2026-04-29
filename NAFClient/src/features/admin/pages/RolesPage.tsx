@@ -72,6 +72,10 @@ export default function RolesPage() {
   const handleAssign = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError("");
+    if (!formLocationId) {
+      setFormError("Please select a location.");
+      return;
+    }
     try {
       await assignRoleMutation.mutateAsync({ employeeId, role, locationId: formLocationId });
       setEmployeeId("");
