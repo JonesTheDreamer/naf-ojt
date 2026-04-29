@@ -26,12 +26,12 @@ namespace NAFServer.src.API.Controllers
             return Ok(await _adminService.GetAllUsersInLocationAsync(locationId));
         }
 
-        [HttpPost("users")]
-        public async Task<IActionResult> AddUser([FromBody] AddUserDTO dto)
+        [HttpPost("users/{employeeId}")]
+        public async Task<IActionResult> AssignRole(string employeeId, [FromBody] AssignRoleDTO dto)
         {
             try
             {
-                await _adminService.AddUserAsync(dto);
+                await _adminService.AssignRoleToEmployeeAsync(employeeId, dto);
                 return Created("", null);
             }
             catch (ArgumentException ex)
