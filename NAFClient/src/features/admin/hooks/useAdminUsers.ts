@@ -1,6 +1,6 @@
 import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminApi } from "../api";
-import type { AddUserDTO, UserDTO } from "../types";
+import type { AssignRoleDTO, UserDTO } from "../types";
 import { toast } from "sonner";
 
 export function useAdminUsers(locationId: number | null) {
@@ -38,13 +38,14 @@ export function useAdminUsers(locationId: number | null) {
       ? singleLocationQuery.isLoading
       : allLocationsQuery.isLoading || perLocationQueries.some((q) => q.isLoading);
 
-  const addUserMutation = useMutation({
-    mutationFn: (data: AddUserDTO) => adminApi.addUser(data),
+  const assignRoleMutation = useMutation({
+    mutationFn: ({ employeeId, ...data }: { employeeId: string } & AssignRoleDTO) =>
+      adminApi.assignRole(employeeId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
-      toast.success("User added");
+      toast.success("Role assigned");
     },
-    onError: () => toast.error("Failed to add user"),
+    onError: () => toast.error("Failed to assign role"),
   });
 
   const removeRoleMutation = useMutation({
@@ -61,5 +62,5 @@ export function useAdminUsers(locationId: number | null) {
     onError: () => toast.error("Failed to remove role"),
   });
 
-  return { users, isLoading, addUserMutation, removeRoleMutation };
+  return { users, isLoading, assignRoleMutation, removeRoleMutation };
 }
