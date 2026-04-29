@@ -26,8 +26,8 @@ namespace NAFServer.src.API.Controllers
             return Ok(await _adminService.GetAllUsersInLocationAsync(locationId));
         }
 
-        [HttpPost("users/{employeeId}")]
-        public async Task<IActionResult> AssignRole(string employeeId, [FromBody] AssignRoleDTO dto)
+        [HttpPost("users/{employeeId}/roles")]
+        public async Task<IActionResult> AssignRoleToEmployee(string employeeId, [FromBody] AssignRoleDTO dto)
         {
             try
             {
