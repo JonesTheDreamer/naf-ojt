@@ -6,6 +6,6 @@ namespace NAFServer.src.Application.Interfaces
     public interface IAdminService
     {
         Task<List<UserDTO>> GetAllUsersInLocationAsync(int locationId);
-        Task AddUserAsync(AddUserDTO dto);
+        Task AssignRoleToEmployeeAsync(string employeeId, AssignRoleDTO dto);
     }
 }
