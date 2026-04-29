@@ -29,8 +29,7 @@ export interface LocationDTO {
   isActive: boolean;
 }
 
-export interface AddUserDTO {
-  employeeId: string;
+export interface AssignRoleDTO {
   role: string;
   locationId: number;
 }
