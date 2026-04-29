@@ -1,6 +1,4 @@
-﻿using NAFServer.src.Domain.Enums;
-
-namespace NAFServer.src.Application.DTOs.User
+﻿namespace NAFServer.src.Application.DTOs.User
 {
     public record UserDTO
     (
@@ -15,6 +13,6 @@ namespace NAFServer.src.Application.DTOs.User
         string Department,
         int LocationId,
         string Location,
-        List<Roles> Roles
+        List<string> Roles
     );
 }

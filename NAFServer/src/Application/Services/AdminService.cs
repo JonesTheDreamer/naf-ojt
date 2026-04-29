@@ -80,7 +80,7 @@ namespace NAFServer.src.Application.Services
                     activeDept?.Department?.Name ?? "",
                     ul.LocationId,
                     ul.Location?.Name ?? "",
-                    activeRoles.Select(r => r.Role.Name).ToList()
+                    activeRoles.Select(r => r.Role.Name.ToString()).ToList()
                 ));
             }
             return result;
