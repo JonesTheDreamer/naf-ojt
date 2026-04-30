@@ -27,7 +27,7 @@ export default function LocationsPage() {
   const { users, isLoading } = useAdminUsers(locationId);
 
   // Dialog state
-  const [dialogOpen, setSheetOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [employeeId, setEmployeeId] = useState("");
   const [selectedLocationId, setSelectedLocationId] = useState(0);
   const [formError, setFormError] = useState("");
@@ -103,7 +103,7 @@ export default function LocationsPage() {
       setEmployeeId("");
       setSelectedLocationId(0);
       setEmpLookup({ state: "idle", employee: null, userId: null });
-      setSheetOpen(false);
+      setDialogOpen(false);
     } catch {
       setFormError("Failed to assign location. Please try again.");
     }
@@ -135,7 +135,7 @@ export default function LocationsPage() {
           <Dialog
               open={dialogOpen}
               onOpenChange={(open) => {
-                setSheetOpen(open);
+                setDialogOpen(open);
                 if (!open) {
                   setEmployeeId("");
                   setSelectedLocationId(0);
