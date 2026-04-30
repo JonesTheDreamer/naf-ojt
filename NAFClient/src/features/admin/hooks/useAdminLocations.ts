@@ -19,7 +19,11 @@ export function useAdminLocations() {
       queryFn: () => adminApi.getUsers(id),
     })),
   });
-  const allUsers: UserDTO[] = perLocationQueries.flatMap((q) => q.data ?? []);
+  const allUsers: UserDTO[] = [
+    ...new Map(
+      perLocationQueries.flatMap((q) => q.data ?? []).map((u) => [u.id, u])
+    ).values(),
+  ];
 
   const assignLocationMutation = useMutation({
     mutationFn: ({ userId, locationId }: { userId: number; locationId: number }) =>
