@@ -24,6 +24,9 @@ export const adminApi = {
   assignLocation: (userId: number, locationId: number) =>
     api.post(`/user-locations/${userId}/assign`, locationId).then((r) => r.data),
 
+  removeLocation: (userId: number, locationId: number) =>
+    api.delete(`/user-locations/${userId}/remove/${locationId}`).then((r) => r.data),
+
   // Role management
   getUserActiveRoles: (userId: number) =>
     api.get<UserRoleDetailDTO[]>(`/user-roles/${userId}/active`).then((r) => r.data),
