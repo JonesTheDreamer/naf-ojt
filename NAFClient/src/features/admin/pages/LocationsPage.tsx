@@ -27,7 +27,7 @@ export default function LocationsPage() {
   const { users, isLoading } = useAdminUsers(locationId);
 
   // Dialog state
-  const [sheetOpen, setSheetOpen] = useState(false);
+  const [dialogOpen, setSheetOpen] = useState(false);
   const [employeeId, setEmployeeId] = useState("");
   const [selectedLocationId, setSelectedLocationId] = useState(0);
   const [formError, setFormError] = useState("");
@@ -111,8 +111,11 @@ export default function LocationsPage() {
 
   const handleConfirmRemove = async () => {
     if (!pendingRemove) return;
-    await removeLocationMutation.mutateAsync(pendingRemove);
-    setPendingRemove(null);
+    try {
+      await removeLocationMutation.mutateAsync(pendingRemove);
+    } finally {
+      setPendingRemove(null);
+    }
   };
 
   return (
@@ -129,7 +132,18 @@ export default function LocationsPage() {
             {viewAll ? "My Location" : "View All"}
           </Button>
 
-          <Dialog open={sheetOpen} onOpenChange={setSheetOpen}>
+          <Dialog
+              open={dialogOpen}
+              onOpenChange={(open) => {
+                setSheetOpen(open);
+                if (!open) {
+                  setEmployeeId("");
+                  setSelectedLocationId(0);
+                  setEmpLookup({ state: "idle", employee: null, userId: null });
+                  setFormError("");
+                }
+              }}
+            >
             <DialogTrigger asChild>
               <Button size="sm">Assign Location</Button>
             </DialogTrigger>
@@ -227,7 +241,7 @@ export default function LocationsPage() {
         )}
 
         {filtered.map((u) => {
-          const hasLocation = u.locationId && u.location;
+          const hasLocation = u.locationId !== 0;
           const isPending = pendingRemove?.userId === u.id;
           return (
             <Card key={u.id}>
