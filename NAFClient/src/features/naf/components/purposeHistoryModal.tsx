@@ -7,24 +7,13 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import type { Purpose, Step } from "@/shared/types/api/naf";
 import { Status } from "@/shared/types/enum/status";
+import { formatDateTime } from "./resource-request/resourceRequestUtils";
 
 interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   purposes: Purpose[];
   steps: Step[];
-}
-
-function formatDateTime(dateStr?: string | null) {
-  if (!dateStr) return "—";
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
 }
 
 export function PurposeHistoryModal({
@@ -63,13 +52,10 @@ export function PurposeHistoryModal({
 
         <div className="space-y-3 py-1 overflow-y-auto flex-1">
           {sorted.map((p, index) => {
-            console.log(sorted);
-
             const isInitial = index === 0;
             const rejection = p.resourceRequestApprovalStepHistoryId
               ? historyMap.get(p.resourceRequestApprovalStepHistoryId)
               : null;
-            console.log(rejection);
 
             const isAfterRejection = !isInitial && !!rejection;
 

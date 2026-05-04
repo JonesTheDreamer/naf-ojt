@@ -22,8 +22,8 @@ import { PurposeHistoryModal } from "../purposeHistoryModal";
 import { DeleteConfirmDialog } from "../deleteConfirmDialog";
 import { ResubmitDialog } from "../resubmitDialog";
 import { ResourceIcon } from "./resourceRequestUtils";
-import { DateUrgencyBadge } from "./ResourceRequestContent";
 import {
+  DateUrgencyBadge,
   PurposeBlock,
   HistoryTable,
   ImplementationBlock,
@@ -40,6 +40,7 @@ import {
 import { ApproveDialog } from "./ApproveDialog";
 import { RejectDialog } from "./RejectDialog";
 import { ChangeResourceDialog } from "./ChangeResourceDialog";
+import { EditPurposeDialog } from "../editPurposeDialog";
 
 interface ResourceRequestAccordionItemProps {
   request: ResourceRequest;
@@ -68,7 +69,7 @@ export function ResourceRequestAccordionItem({
   isSubmitting,
   resourceGroup,
   groupResources = [],
-  onEdit: _onEdit,
+  onEdit,
   onDelete,
   onRemind,
   onDeactivate,
@@ -78,7 +79,7 @@ export function ResourceRequestAccordionItem({
   onApprove,
   onReject,
 }: ResourceRequestAccordionItemProps) {
-  const [_editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [resubmitDialogOpen, setResubmitDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
@@ -139,8 +140,8 @@ export function ResourceRequestAccordionItem({
               </span>
             )}
             {request.isActive &&
-              progress != Progress.ACCOMPLISHED &&
-              progress != Progress.NOT_ACCOMPLISHED && (
+              progress !== Progress.ACCOMPLISHED &&
+              progress !== Progress.NOT_ACCOMPLISHED && (
                 <DateUrgencyBadge dateNeeded={request.dateNeeded} />
               )}
           </div>
@@ -246,6 +247,15 @@ export function ResourceRequestAccordionItem({
         </AccordionContent>
       </AccordionItem>
 
+      <EditPurposeDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        initialPurpose={initialPurpose}
+        onSubmit={(purpose) => {
+          onEdit(request.id, request.nafId, purpose);
+          setEditDialogOpen(false);
+        }}
+      />
       <PurposeHistoryModal
         open={purposeHistoryOpen}
         onOpenChange={setPurposeHistoryOpen}

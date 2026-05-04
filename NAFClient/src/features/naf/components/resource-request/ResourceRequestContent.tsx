@@ -119,7 +119,7 @@ export function PurposeBlock({ request, onShowHistory }: { request: ResourceRequ
           </p>
         </div>
       )}
-      {request.progress == Progress.ACCOMPLISHED && (
+      {request.progress === Progress.ACCOMPLISHED && (
         <div>
           <p className="text-xs text-muted-foreground mb-0.5">Accomplished At</p>
           <p className="text-sm font-medium">{formatDateTime(request.accomplishedAt)}</p>

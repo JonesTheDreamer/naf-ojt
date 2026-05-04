@@ -9,7 +9,7 @@ import type {
   ResourceRequest,
   PurposeProps,
 } from "@/shared/types/api/naf";
-import { ProgressStatus } from "@/shared/types/api/naf";
+import { Progress } from "@/shared/types/enum/progress";
 import { getResourceGroups } from "@/shared/api/resourceService";
 import { useResourceRequest } from "../hooks/useResourceRequest";
 import { ResourceRequestAccordionItem } from "./resource-request";
@@ -177,17 +177,14 @@ export function ResourceRequestList({
   });
   const resourceGroups = resourceGroupsQuery.data ?? [];
 
-  const pendingCount = (naf?.resourceRequests ?? []).filter((r) => {
-    const p = r.progress as unknown as ProgressStatus;
-    return (
-      p !== ProgressStatus.Accomplished &&
-      p !== ProgressStatus["Not Accomplished"]
-    );
-  }).length;
+  const pendingCount = (naf?.resourceRequests ?? []).filter(
+    (r) =>
+      r.progress !== Progress.ACCOMPLISHED &&
+      r.progress !== Progress.NOT_ACCOMPLISHED,
+  ).length;
 
-  const handleRemind = (id: string) => console.log("TODO remind", id);
-  const handleDeactivate = (id: string) =>
-    console.log("TODO deactivate resource request", id);
+  const handleRemind = (_id: string) => {};
+  const handleDeactivate = (_id: string) => {};
 
   return (
     <div>

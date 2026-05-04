@@ -52,14 +52,12 @@ export default function NAFListPage({
     if (approvalFilter === "subordinates") {
       return {
         activeResult: subordinateNAFsQuery ?? EMPTY_RESULT,
-        // isLoading: subordinateNAFsQuery.isLoading,
         currentPage: subordinatePage,
         handlePageChange: onSubordinatePageChange,
       };
     }
     return {
       activeResult: approverNAFsQuery ?? EMPTY_RESULT,
-      // isLoading: approverNAFsQuery.isLoading,
       currentPage: approvalPage,
       handlePageChange: onApprovalPageChange,
     };
@@ -86,8 +84,6 @@ export default function NAFListPage({
     [onSubordinatePageChange, onApprovalPageChange],
   );
 
-  // handleClearEmployeeFilter removed (unused)
-
   const handleRowClick = useCallback(
     (naf: NAF) => {
       navigate(`/naf/${naf.id}`);
@@ -97,7 +93,12 @@ export default function NAFListPage({
 
   return (
     <div className="p-6 space-y-3">
-      {selectedEmployee && <ActiveEmployeeFilter employee={selectedEmployee} />}
+      {selectedEmployee && (
+        <ActiveEmployeeFilter
+          employee={selectedEmployee}
+          onClear={() => handleEmployeeSelect(null)}
+        />
+      )}
 
       <NAFTableContainer
         data={activeResult.data}
@@ -118,7 +119,13 @@ export default function NAFListPage({
 }
 
 // Active employee filter badge
-function ActiveEmployeeFilter({ employee }: { employee: Employee }) {
+function ActiveEmployeeFilter({
+  employee,
+  onClear,
+}: {
+  employee: Employee;
+  onClear: () => void;
+}) {
   const displayName = [
     employee.lastName,
     employee.firstName,
@@ -139,7 +146,7 @@ function ActiveEmployeeFilter({ employee }: { employee: Employee }) {
           variant="ghost"
           size="icon"
           className="h-5 w-5 rounded-full hover:bg-muted"
-          //   onClick={onClear}
+          onClick={onClear}
           aria-label="Clear employee filter"
         >
           <X className="h-3 w-3" />

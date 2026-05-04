@@ -19,7 +19,12 @@
       "Bash(git rm *)",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "PowerShell(dotnet build NAFServer *)"
+      "PowerShell(dotnet build NAFServer *)",
+      "Bash(npx tsc *)",
+      "Bash(npx --prefix NAFClient tsc --noEmit)",
+      "Bash(git show *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Jones H\\\\Desktop\\\\naf-ojt\\\\NAFClient\\\\src\" -Recurse -Include *.ts, *.tsx)",
+      "Bash(Select-Object FullName)"
     ]
   }
 }

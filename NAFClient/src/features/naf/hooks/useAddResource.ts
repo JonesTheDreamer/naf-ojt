@@ -41,6 +41,10 @@ export type BasicResourceWithDate = {
   dateNeeded: string;
 };
 
+const INTERNET_RESOURCE_ID = 7;
+const GROUP_EMAIL_RESOURCE_ID = 12;
+const SHARED_FOLDER_RESOURCE_ID = 13;
+
 type AddResourcesParams = {
   nafId: string;
   basicResources: BasicResourceWithDate[];
@@ -75,8 +79,8 @@ export const useAddResource = () => {
             errors.push(`Resource ${r.resourceId}: ${r.error ?? "Failed"}`);
           }
         });
-      } catch (e: any) {
-        errors.push(`Basic resources: ${e.message ?? "Unknown error"}`);
+      } catch (e) {
+        errors.push(`Basic resources: ${e instanceof Error ? e.message : "Unknown error"}`);
       }
     }
 
@@ -109,14 +113,15 @@ export const useAddResource = () => {
 
             await createResourceRequest({
               nafId: params.nafId,
-              resourceId: 7,
+              resourceId: INTERNET_RESOURCE_ID,
               purpose: entry.purpose,
               additionalInfo: { InternetResourceId: resourceId! },
               dateNeeded: entry.dateNeeded || null,
             });
             anySuccess = true;
-          } catch (e: any) {
-            const msg = e?.response?.data ?? e?.message ?? "Unknown error";
+          } catch (e) {
+            const axiosData = (e as { response?: { data?: string } })?.response?.data;
+            const msg = axiosData ?? (e instanceof Error ? e.message : "Unknown error");
             errors.push(`Internet resource: ${msg}`);
           }
         })(),
@@ -127,7 +132,7 @@ export const useAddResource = () => {
       specialTasks.push(
         createResourceRequest({
           nafId: params.nafId,
-          resourceId: 12,
+          resourceId: GROUP_EMAIL_RESOURCE_ID,
           purpose: entry.purpose,
           additionalInfo: { GroupEmailId: entry.groupEmailId! },
           dateNeeded: entry.dateNeeded || null,
@@ -135,8 +140,9 @@ export const useAddResource = () => {
           .then(() => {
             anySuccess = true;
           })
-          .catch((e: any) => {
-            const msg = e?.response?.data ?? e?.message ?? "Unknown error";
+          .catch((e: unknown) => {
+            const axiosData = (e as { response?: { data?: string } })?.response?.data;
+            const msg = axiosData ?? (e instanceof Error ? e.message : "Unknown error");
             errors.push(`Group email: ${msg}`);
           }),
       );
@@ -146,7 +152,7 @@ export const useAddResource = () => {
       specialTasks.push(
         createResourceRequest({
           nafId: params.nafId,
-          resourceId: 13,
+          resourceId: SHARED_FOLDER_RESOURCE_ID,
           purpose: entry.purpose,
           additionalInfo: { SharedFolderId: entry.sharedFolderId! },
           dateNeeded: entry.dateNeeded || null,
@@ -154,8 +160,9 @@ export const useAddResource = () => {
           .then(() => {
             anySuccess = true;
           })
-          .catch((e: any) => {
-            const msg = e?.response?.data ?? e?.message ?? "Unknown error";
+          .catch((e: unknown) => {
+            const axiosData = (e as { response?: { data?: string } })?.response?.data;
+            const msg = axiosData ?? (e instanceof Error ? e.message : "Unknown error");
             errors.push(`Shared folder: ${msg}`);
           }),
       );

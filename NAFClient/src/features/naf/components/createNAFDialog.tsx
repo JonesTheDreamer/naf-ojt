@@ -62,8 +62,6 @@ export function CreateNAFDialog() {
       ?.find((g) => g.name === "Hardware")
       ?.resources.filter((r) => r.isActive) ?? [];
 
-  console.log(hardwareResources);
-
   const selectedHardware =
     hardwareResources.find((r) => r.id === hardwareId) ?? null;
 
@@ -79,8 +77,7 @@ export function CreateNAFDialog() {
   const fetchEmployee = async (query: string): Promise<Employee[]> => {
     try {
       return await searchEmployees(query);
-    } catch (error) {
-      console.log(error);
+    } catch {
       return [];
     }
   };
@@ -92,7 +89,7 @@ export function CreateNAFDialog() {
     setDateNeeded("");
   };
 
-  async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!selectedEmployee || !user) return;
     try {
@@ -103,8 +100,8 @@ export function CreateNAFDialog() {
         dateNeeded: dateNeeded || null,
       });
       reset();
-    } catch (error) {
-      console.log(error);
+    } catch {
+      // error is surfaced by the mutation's onError toast
     }
   }
 

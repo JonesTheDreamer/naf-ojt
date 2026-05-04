@@ -1,3 +1,5 @@
+import { ResourceRequestAction } from "@/shared/types/api/naf";
+
 export function formatDateTime(dateStr?: string | null) {
   if (!dateStr) return "—";
   return new Date(dateStr).toLocaleDateString("en-US", {
@@ -22,8 +24,6 @@ export function ResourceIcon({ iconUrl, name }: { iconUrl: string; name: string 
     />
   );
 }
-
-import { ResourceRequestAction } from "@/shared/types/api/naf";
 
 export const ACTION_CONFIG: Record<
   ResourceRequestAction,

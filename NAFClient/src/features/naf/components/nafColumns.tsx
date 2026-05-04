@@ -1,5 +1,3 @@
-"use client";
-
 import type { NAF, ResourceRequest } from "@/shared/types/api/naf";
 import { Progress } from "@/shared/types/enum/progress";
 import { Badge } from "@/components/ui/badge";
@@ -55,8 +53,8 @@ function RequestBadges({ requests }: { requests: ResourceRequest[] }) {
           key={req.id}
           className="inline-flex items-center justify-center px-3 py-0.5 rounded-full text-xs font-medium w-fit min-w-[70px] text-center"
           style={{
-            backgroundColor: `#${req.resource.color}` || "#93c5fd",
-            color: getContrastColor(`#${req.resource.color}` || "#93c5fd"),
+            backgroundColor: req.resource.color ? `#${req.resource.color}` : "#93c5fd",
+            color: getContrastColor(req.resource.color ? `#${req.resource.color}` : "#93c5fd"),
           }}
         >
           {req.resource.name}
