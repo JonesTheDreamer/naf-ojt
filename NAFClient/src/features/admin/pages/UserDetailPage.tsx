@@ -169,28 +169,30 @@ export default function UserDetailPage() {
             </div>
 
             {availableRoles.length > 0 && (
-              <div className="flex items-center gap-2">
-                <select
-                  className="border rounded px-3 py-1.5 text-sm"
-                  value={addRoleValue}
-                  onChange={(e) => {
-                    setAddRoleValue(e.target.value);
-                    setAddRoleError("");
-                  }}
-                >
-                  <option value="">Add role…</option>
-                  {availableRoles.map((r) => (
-                    <option key={r} value={r}>{r}</option>
-                  ))}
-                </select>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={!addRoleValue || assignRoleMutation.isPending}
-                  onClick={handleAddRole}
-                >
-                  Add
-                </Button>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <select
+                    className="border rounded px-3 py-1.5 text-sm"
+                    value={addRoleValue}
+                    onChange={(e) => {
+                      setAddRoleValue(e.target.value);
+                      setAddRoleError("");
+                    }}
+                  >
+                    <option value="">Add role…</option>
+                    {availableRoles.map((r) => (
+                      <option key={r} value={r}>{r}</option>
+                    ))}
+                  </select>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={!addRoleValue || assignRoleMutation.isPending}
+                    onClick={handleAddRole}
+                  >
+                    Add
+                  </Button>
+                </div>
                 {addRoleError && (
                   <p className="text-xs text-red-500">{addRoleError}</p>
                 )}
