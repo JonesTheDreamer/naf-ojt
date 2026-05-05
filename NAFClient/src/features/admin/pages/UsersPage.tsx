@@ -15,7 +15,6 @@ import {
 import { DataTable } from "@/shared/components/ui/datatable";
 import { useAdminAllUsers } from "../hooks/useAdminAllUsers";
 import { useAdminUsers } from "../hooks/useAdminUsers";
-import { useAdminLocations } from "../hooks/useAdminLocations";
 import { searchEmployees } from "@/shared/api/employeeService";
 import type { Employee } from "@/shared/types/api/employee";
 import type { UserDTO } from "../types";
@@ -73,9 +72,8 @@ const columns: ColumnDef<UserDTO>[] = [
 
 export default function UsersPage() {
   const navigate = useNavigate();
-  const { users, isLoading } = useAdminAllUsers();
+  const { users, isLoading, locationsQuery } = useAdminAllUsers();
   const { assignRoleMutation } = useAdminUsers();
-  const { locationsQuery } = useAdminLocations();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [employeeId, setEmployeeId] = useState("");
