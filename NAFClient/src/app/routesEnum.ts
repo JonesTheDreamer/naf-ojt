@@ -14,8 +14,7 @@ export enum RoutesEnum {
   ADMIN_NAF_DETAIL = "/admin/NAF/:nafId",
   ADMIN_IMPLEMENTATION_DETAIL = "/admin/for-implementations/:nafId",
   ADMIN_USERS = "/admin/users",
-  ADMIN_ROLES = "/admin/roles",
-  ADMIN_LOCATIONS = "/admin/locations",
+  ADMIN_USER_DETAIL = "/admin/users/:userId",
 
   // Technical Team routes
   TECH = "/tech",
