@@ -1,10 +1,10 @@
-import AdminLayout from "@/components/layout/AdminLayout";
+import AdminLayout from "@/shared/components/layout/AdminLayout";
 import { useAuth } from "@/features/auth/AuthContext";
-import { useAdminUsers } from "../hooks/useAdminUsers";
+import { useAdminAllUsers } from "../hooks/useAdminAllUsers";
 
 export default function AdminHomePage() {
   const { user } = useAuth();
-  const { users, isLoading } = useAdminUsers(user?.locationId ?? null);
+  const { users, isLoading } = useAdminAllUsers();
 
   return (
     <AdminLayout>

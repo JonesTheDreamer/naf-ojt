@@ -16,9 +16,9 @@ const RequestorLoginPage = lazy(
 const AdminHomePage = lazy(
   () => import("@/features/admin/pages/AdminHomePage"),
 );
-const RolesPage = lazy(() => import("@/features/admin/pages/RolesPage"));
-const LocationsPage = lazy(
-  () => import("@/features/admin/pages/LocationsPage"),
+const UsersPage = lazy(() => import("@/features/admin/pages/UsersPage"));
+const UserDetailPage = lazy(
+  () => import("@/features/admin/pages/UserDetailPage"),
 );
 const AdminNAFListPage = lazy(
   () => import("@/features/admin/pages/AdminNAFListPage"),
@@ -125,24 +125,24 @@ export function AppRouter() {
           }
         />
         <Route
-          path={RoutesEnum.ADMIN_ROLES}
+          path={RoutesEnum.ADMIN_USERS}
           element={
             <ProtectedRoute
               requiredRole="ADMIN"
               loginPath={RoutesEnum.LOGIN_ADMIN}
             >
-              <RolesPage />
+              <UsersPage />
             </ProtectedRoute>
           }
         />
         <Route
-          path={RoutesEnum.ADMIN_LOCATIONS}
+          path={RoutesEnum.ADMIN_USER_DETAIL}
           element={
             <ProtectedRoute
               requiredRole="ADMIN"
               loginPath={RoutesEnum.LOGIN_ADMIN}
             >
-              <LocationsPage />
+              <UserDetailPage />
             </ProtectedRoute>
           }
         />
