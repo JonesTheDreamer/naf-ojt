@@ -86,7 +86,7 @@ namespace NAFServer.src.Application.Services
             return result;
         }
 
-        public async Task<int> AssignRoleToEmployeeAsync(string employeeId, AssignRoleDTO dto)
+        public async Task CreateUserAsync(string employeeId, CreateUserDTO dto)
         {
             if (!Enum.TryParse<Roles>(dto.Role, ignoreCase: true, out var role))
                 throw new ArgumentException($"Invalid role: {dto.Role}");
@@ -107,14 +107,32 @@ namespace NAFServer.src.Application.Services
 
             try
             {
+                await _userLocationRepository.AddUserCurrentLocation(user.Id, dto.LocationId);
+            }
+            catch (KeyNotFoundException) { }
+
+            try
+            {
                 await _userRoleRepository.AddUserRoleAsync(user.Id, roleEntity.Id);
             }
-            catch (KeyNotFoundException)
-            {
-                // Already has this role — not an error
-            }
+            catch (KeyNotFoundException) { }
+        }
 
-            return user.Id;
+        public async Task AddRoleToUserAsync(int userId, AssignRoleDTO dto)
+        {
+            if (!Enum.TryParse<Roles>(dto.Role, ignoreCase: true, out var role))
+                throw new ArgumentException($"Invalid role: {dto.Role}");
+
+            var roleEntity = await _roleRepository.GetByNameAsync(role)
+                ?? throw new KeyNotFoundException($"Role '{dto.Role}' not found in database.");
+
+            await _userRepository.GetUserById(userId);
+
+            try
+            {
+                await _userRoleRepository.AddUserRoleAsync(userId, roleEntity.Id);
+            }
+            catch (KeyNotFoundException) { }
         }
     }
 }

@@ -22,7 +22,7 @@ export default function UserDetailPage() {
   const navigate = useNavigate();
 
   const { users, isLoading, locationsQuery } = useAdminAllUsers();
-  const { assignRoleMutation, removeRoleMutation } = useAdminUsers();
+  const { addRoleMutation, removeRoleMutation } = useAdminUsers();
   const { assignLocationMutation, removeLocationMutation } = useAdminLocations();
 
   const user = users.find((u) => u.id === Number(userId));
@@ -35,16 +35,8 @@ export default function UserDetailPage() {
 
   const handleAddRole = async () => {
     if (!user || !addRoleValue) return;
-    if (!user.locationId) {
-      setAddRoleError("Assign a location to this user before adding a role.");
-      return;
-    }
     setAddRoleError("");
-    await assignRoleMutation.mutateAsync({
-      employeeId: user.employeeId,
-      role: addRoleValue,
-      locationId: user.locationId,
-    });
+    await addRoleMutation.mutateAsync({ userId: user.id, role: addRoleValue });
     setAddRoleValue("");
   };
 
@@ -187,7 +179,7 @@ export default function UserDetailPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    disabled={!addRoleValue || assignRoleMutation.isPending}
+                    disabled={!addRoleValue || addRoleMutation.isPending}
                     onClick={handleAddRole}
                   >
                     Add

@@ -73,7 +73,7 @@ const columns: ColumnDef<UserDTO>[] = [
 export default function UsersPage() {
   const navigate = useNavigate();
   const { users, isLoading, locationsQuery } = useAdminAllUsers();
-  const { assignRoleMutation } = useAdminUsers();
+  const { createUserMutation } = useAdminUsers();
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [employeeId, setEmployeeId] = useState("");
@@ -139,7 +139,7 @@ export default function UsersPage() {
       return;
     }
     try {
-      await assignRoleMutation.mutateAsync({ employeeId, role, locationId: formLocationId });
+      await createUserMutation.mutateAsync({ employeeId, role, locationId: formLocationId });
       resetDialog();
       setDialogOpen(false);
     } catch {
@@ -220,8 +220,8 @@ export default function UsersPage() {
 
                 {formError && <p className="text-sm text-red-500">{formError}</p>}
 
-                <Button type="submit" disabled={assignRoleMutation.isPending} className="w-full">
-                  {assignRoleMutation.isPending ? "Adding…" : "Add User"}
+                <Button type="submit" disabled={createUserMutation.isPending} className="w-full">
+                  {createUserMutation.isPending ? "Adding…" : "Add User"}
                 </Button>
               </form>
             </DialogContent>

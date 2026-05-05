@@ -5,15 +5,20 @@ import { toast } from "sonner";
 export function useAdminUsers() {
   const queryClient = useQueryClient();
 
-  const assignRoleMutation = useMutation({
-    mutationFn: async ({ employeeId, role, locationId }: { employeeId: string; role: string; locationId: number }) => {
-      const { userId } = await adminApi.assignRole(employeeId, { role });
-      await adminApi.assignLocation(userId, locationId);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
-      toast.success("Role assigned");
-    },
+  const invalidateUsers = () =>
+    queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+
+  const createUserMutation = useMutation({
+    mutationFn: ({ employeeId, role, locationId }: { employeeId: string; role: string; locationId: number }) =>
+      adminApi.createUser(employeeId, { role, locationId }),
+    onSuccess: () => { invalidateUsers(); toast.success("User added"); },
+    onError: () => toast.error("Failed to add user"),
+  });
+
+  const addRoleMutation = useMutation({
+    mutationFn: ({ userId, role }: { userId: number; role: string }) =>
+      adminApi.addRole(userId, role),
+    onSuccess: () => { invalidateUsers(); toast.success("Role assigned"); },
     onError: () => toast.error("Failed to assign role"),
   });
 
@@ -24,12 +29,9 @@ export function useAdminUsers() {
       if (!target) throw new Error(`Role ${roleName} not found on user`);
       return adminApi.removeRole(userId, target.roleId);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
-      toast.success("Role removed");
-    },
+    onSuccess: () => { invalidateUsers(); toast.success("Role removed"); },
     onError: () => toast.error("Failed to remove role"),
   });
 
-  return { assignRoleMutation, removeRoleMutation };
+  return { createUserMutation, addRoleMutation, removeRoleMutation };
 }

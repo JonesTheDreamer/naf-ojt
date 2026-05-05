@@ -26,13 +26,31 @@ namespace NAFServer.src.API.Controllers
             return Ok(await _adminService.GetAllUsersInLocationAsync(locationId));
         }
 
-        [HttpPost("users/{employeeId}/roles")]
-        public async Task<IActionResult> AssignRoleToEmployee(string employeeId, [FromBody] AssignRoleDTO dto)
+        [HttpPost("users/{employeeId}")]
+        public async Task<IActionResult> CreateUser(string employeeId, [FromBody] CreateUserDTO dto)
         {
             try
             {
-                var userId = await _adminService.AssignRoleToEmployeeAsync(employeeId, dto);
-                return Ok(new { userId });
+                await _adminService.CreateUserAsync(employeeId, dto);
+                return Created("", null);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpPost("users/{userId:int}/roles")]
+        public async Task<IActionResult> AddRoleToUser(int userId, [FromBody] AssignRoleDTO dto)
+        {
+            try
+            {
+                await _adminService.AddRoleToUserAsync(userId, dto);
+                return Ok();
             }
             catch (ArgumentException ex)
             {

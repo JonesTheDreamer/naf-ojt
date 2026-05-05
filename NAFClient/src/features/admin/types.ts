@@ -29,8 +29,9 @@ export interface LocationDTO {
   isActive: boolean;
 }
 
-export interface AssignRoleDTO {
+export interface CreateUserDTO {
   role: string;
+  locationId: number;
 }
 
 export interface UserRoleDetailDTO {

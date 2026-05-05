@@ -2,7 +2,7 @@ import { api } from "@/shared/api/client";
 import type { NAF } from "@/shared/types/api/naf";
 import type { PagedResult } from "@/shared/types/common/pagedResult";
 import type {
-  AssignRoleDTO,
+  CreateUserDTO,
   ForImplementationItemDTO,
   LocationDTO,
   UserDTO,
@@ -14,8 +14,11 @@ export const adminApi = {
   getUsers: (locationId: number) =>
     api.get<UserDTO[]>(`/admin/users?locationId=${locationId}`).then((r) => r.data),
 
-  assignRole: (employeeId: string, data: AssignRoleDTO) =>
-    api.post<{ userId: number }>(`/admin/users/${employeeId}/roles`, data).then((r) => r.data),
+  createUser: (employeeId: string, data: CreateUserDTO) =>
+    api.post(`/admin/users/${employeeId}`, data).then((r) => r.data),
+
+  addRole: (userId: number, role: string) =>
+    api.post(`/admin/users/${userId}/roles`, { role }).then((r) => r.data),
 
   // Location management
   getLocations: () =>
