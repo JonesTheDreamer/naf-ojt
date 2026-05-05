@@ -1,42 +1,10 @@
-import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminApi } from "../api";
-import type { AssignRoleDTO, UserDTO } from "../types";
+import type { AssignRoleDTO } from "../types";
 import { toast } from "sonner";
 
-export function useAdminUsers(locationId: number | null) {
+export function useAdminUsers() {
   const queryClient = useQueryClient();
-
-  const singleLocationQuery = useQuery({
-    queryKey: ["admin", "users", locationId],
-    queryFn: () => adminApi.getUsers(locationId!),
-    enabled: locationId !== null,
-  });
-
-  const allLocationsQuery = useQuery({
-    queryKey: ["admin", "locations"],
-    queryFn: adminApi.getLocations,
-    enabled: locationId === null,
-  });
-
-  const locationIds =
-    locationId === null ? (allLocationsQuery.data?.map((l) => l.id) ?? []) : [];
-
-  const perLocationQueries = useQueries({
-    queries: locationIds.map((id) => ({
-      queryKey: ["admin", "users", id],
-      queryFn: () => adminApi.getUsers(id),
-    })),
-  });
-
-  const users: UserDTO[] =
-    locationId !== null
-      ? (singleLocationQuery.data ?? [])
-      : perLocationQueries.flatMap((q) => q.data ?? []);
-
-  const isLoading =
-    locationId !== null
-      ? singleLocationQuery.isLoading
-      : allLocationsQuery.isLoading || perLocationQueries.some((q) => q.isLoading);
 
   const assignRoleMutation = useMutation({
     mutationFn: ({ employeeId, ...data }: { employeeId: string } & AssignRoleDTO) =>
@@ -62,5 +30,5 @@ export function useAdminUsers(locationId: number | null) {
     onError: () => toast.error("Failed to remove role"),
   });
 
-  return { users, isLoading, assignRoleMutation, removeRoleMutation };
+  return { assignRoleMutation, removeRoleMutation };
 }

@@ -1,6 +1,5 @@
-import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { adminApi } from "../api";
-import type { UserDTO } from "../types";
 import { toast } from "sonner";
 
 export function useAdminLocations() {
@@ -10,20 +9,6 @@ export function useAdminLocations() {
     queryKey: ["admin", "locations"],
     queryFn: adminApi.getLocations,
   });
-
-  // Fetch all users across every location for the assign dialog cross-reference.
-  const locationIds = locationsQuery.data?.map((l) => l.id) ?? [];
-  const perLocationQueries = useQueries({
-    queries: locationIds.map((id) => ({
-      queryKey: ["admin", "users", id],
-      queryFn: () => adminApi.getUsers(id),
-    })),
-  });
-  const allUsers: UserDTO[] = [
-    ...new Map(
-      perLocationQueries.flatMap((q) => q.data ?? []).map((u) => [u.id, u])
-    ).values(),
-  ];
 
   const assignLocationMutation = useMutation({
     mutationFn: ({ userId, locationId }: { userId: number; locationId: number }) =>
@@ -45,5 +30,5 @@ export function useAdminLocations() {
     onError: () => toast.error("Failed to remove location"),
   });
 
-  return { locationsQuery, allUsers, assignLocationMutation, removeLocationMutation };
+  return { locationsQuery, assignLocationMutation, removeLocationMutation };
 }
