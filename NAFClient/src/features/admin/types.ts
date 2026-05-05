@@ -31,7 +31,6 @@ export interface LocationDTO {
 
 export interface AssignRoleDTO {
   role: string;
-  locationId: number;
 }
 
 export interface UserRoleDetailDTO {

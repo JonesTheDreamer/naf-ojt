@@ -15,7 +15,7 @@ export const adminApi = {
     api.get<UserDTO[]>(`/admin/users?locationId=${locationId}`).then((r) => r.data),
 
   assignRole: (employeeId: string, data: AssignRoleDTO) =>
-    api.post(`/admin/users/${employeeId}/roles`, data).then((r) => r.data),
+    api.post<{ userId: number }>(`/admin/users/${employeeId}/roles`, data).then((r) => r.data),
 
   // Location management
   getLocations: () =>

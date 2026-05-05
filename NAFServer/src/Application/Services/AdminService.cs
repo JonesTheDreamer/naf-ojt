@@ -86,7 +86,7 @@ namespace NAFServer.src.Application.Services
             return result;
         }
 
-        public async Task AssignRoleToEmployeeAsync(string employeeId, AssignRoleDTO dto)
+        public async Task<int> AssignRoleToEmployeeAsync(string employeeId, AssignRoleDTO dto)
         {
             if (!Enum.TryParse<Roles>(dto.Role, ignoreCase: true, out var role))
                 throw new ArgumentException($"Invalid role: {dto.Role}");
@@ -107,21 +107,14 @@ namespace NAFServer.src.Application.Services
 
             try
             {
-                await _userLocationRepository.AddUserCurrentLocation(user.Id, dto.LocationId);
-            }
-            catch (KeyNotFoundException)
-            {
-                // Already in this location — not an error
-            }
-
-            try
-            {
                 await _userRoleRepository.AddUserRoleAsync(user.Id, roleEntity.Id);
             }
             catch (KeyNotFoundException)
             {
                 // Already has this role — not an error
             }
+
+            return user.Id;
         }
     }
 }

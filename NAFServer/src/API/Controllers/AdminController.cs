@@ -31,8 +31,8 @@ namespace NAFServer.src.API.Controllers
         {
             try
             {
-                await _adminService.AssignRoleToEmployeeAsync(employeeId, dto);
-                return Created("", null);
+                var userId = await _adminService.AssignRoleToEmployeeAsync(employeeId, dto);
+                return Ok(new { userId });
             }
             catch (ArgumentException ex)
             {

@@ -1,14 +1,15 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { adminApi } from "../api";
-import type { AssignRoleDTO } from "../types";
 import { toast } from "sonner";
 
 export function useAdminUsers() {
   const queryClient = useQueryClient();
 
   const assignRoleMutation = useMutation({
-    mutationFn: ({ employeeId, ...data }: { employeeId: string } & AssignRoleDTO) =>
-      adminApi.assignRole(employeeId, data),
+    mutationFn: async ({ employeeId, role, locationId }: { employeeId: string; role: string; locationId: number }) => {
+      const { userId } = await adminApi.assignRole(employeeId, { role });
+      await adminApi.assignLocation(userId, locationId);
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
       toast.success("Role assigned");
