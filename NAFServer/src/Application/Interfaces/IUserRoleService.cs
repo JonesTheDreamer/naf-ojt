@@ -6,7 +6,7 @@ namespace NAFServer.src.Application.Interfaces
     {
         Task<List<UserRoleDTO>> GetUserActiveRolesAsync(int userId);
         Task<List<UserRoleDTO>> GetUserRoleHistoryAsync(int userId);
-        Task AssignRoleAsync(int userId, int roleId);
+        Task AssignRoleAsync(int userId, string roleName);
         Task RemoveRoleAsync(int userId, int roleId);
     }
 }

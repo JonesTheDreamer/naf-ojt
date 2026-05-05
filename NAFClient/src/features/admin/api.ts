@@ -18,7 +18,7 @@ export const adminApi = {
     api.post(`/admin/users/${employeeId}`, data).then((r) => r.data),
 
   addRole: (userId: number, role: string) =>
-    api.post(`/admin/users/${userId}/roles`, { role }).then((r) => r.data),
+    api.post(`/user-roles/${userId}/assign`, JSON.stringify(role)).then((r) => r.data),
 
   // Location management
   getLocations: () =>

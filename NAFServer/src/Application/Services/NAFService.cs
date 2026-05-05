@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using NAFServer.src.Application.DTOs.NAF;
 using NAFServer.src.Application.DTOs.ResourceRequest;
 using NAFServer.src.Application.Handlers.Interface;
@@ -105,15 +104,16 @@ namespace NAFServer.src.Application.Services
             var approverIds = naf.ResourceRequests
                 .SelectMany(rr => rr.ResourceRequestsApprovalSteps)
                 .Select(s => s.ApproverId)
+                .Where(id => id is not null)
                 .Distinct()
                 .ToList();
 
             var approverNames = new Dictionary<string, string>();
             foreach (var approverId in approverIds)
             {
-                var approver = await _employeeRepository.GetByIdAsync(approverId);
+                var approver = await _employeeRepository.GetByIdAsync(approverId!);
                 if (approver != null)
-                    approverNames[approverId] = $"{approver.FirstName} {approver.LastName}".Trim();
+                    approverNames[approverId!] = $"{approver.FirstName} {approver.LastName}".Trim();
             }
 
             return NAFMapper.ToDTO(naf, user.Employee, approverNames);

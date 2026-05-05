@@ -1,5 +1,6 @@
 import { Home, ClipboardList, Wrench } from "lucide-react";
 import type { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "./Layout";
 import { useAuth } from "@/features/auth/AuthContext";
 
@@ -10,9 +11,16 @@ const navItems = [
 ];
 
 export default function TechTeamLayout({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
+
   return (
-    <Layout navItems={navItems} currentUser={{ name: user?.name ?? "Tech Team" }}>
+    <Layout navItems={navItems} currentUser={{ name: user?.name ?? "Tech Team" }} onLogout={handleLogout}>
       {children}
     </Layout>
   );

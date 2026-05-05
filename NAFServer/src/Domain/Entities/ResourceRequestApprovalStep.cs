@@ -8,7 +8,7 @@ namespace NAFServer.src.Domain.Entities
         public Guid Id { get; set; }
         public int StepOrder { get; set; }
         public StepAction StepAction { get; set; }
-        public string ApproverId { get; set; }
+        public string? ApproverId { get; set; }
         public Progress Progress { get; set; }
         public DateTime? ApprovedAt { get; set; }
         public ResourceRequest ResourceRequest { get; set; }
@@ -19,7 +19,7 @@ namespace NAFServer.src.Domain.Entities
         public ResourceRequestApprovalStep
         (
             Guid ResourceRequestId,
-            string ApproverId,
+            string? ApproverId,
             int StepOrder,
             StepAction StepAction
         )
@@ -54,6 +54,15 @@ namespace NAFServer.src.Domain.Entities
             Histories.Add(history);
             ApprovedAt = DateTime.UtcNow;
             return this;
+        }
+
+        public void ClaimStep(string adminEmployeeId)
+        {
+            if (StepAction != StepAction.FOR_SCREENING)
+                throw new DomainException("Only FOR_SCREENING steps can be claimed");
+            if (ApproverId is not null)
+                throw new DomainException("Step has already been claimed");
+            ApproverId = adminEmployeeId;
         }
 
         public ResourceRequestApprovalStepHistory SetToRejected(string reasonForRejection)

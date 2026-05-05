@@ -24,7 +24,9 @@
       "Bash(npx --prefix NAFClient tsc --noEmit)",
       "Bash(git show *)",
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Jones H\\\\Desktop\\\\naf-ojt\\\\NAFClient\\\\src\" -Recurse -Include *.ts, *.tsx)",
-      "Bash(Select-Object FullName)"
+      "Bash(Select-Object FullName)",
+      "PowerShell(npm run *)",
+      "PowerShell(Get-Command *)"
     ]
   }
 }

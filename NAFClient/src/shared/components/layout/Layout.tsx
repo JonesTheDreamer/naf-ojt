@@ -10,12 +10,14 @@ interface LayoutProps {
     name: string;
   };
   navItems: NavItem[];
+  onLogout?: () => void;
 }
 
 export default function Layout({
   children,
   currentUser = { name: "User" },
   navItems,
+  onLogout,
 }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -33,6 +35,7 @@ export default function Layout({
         isOpen={sidebarOpen}
         currentUser={currentUser}
         navItems={navItems}
+        onLogout={onLogout}
       />
 
       {/* Overlay for mobile when sidebar is open */}

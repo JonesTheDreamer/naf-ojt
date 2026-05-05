@@ -118,21 +118,5 @@ namespace NAFServer.src.Application.Services
             catch (KeyNotFoundException) { }
         }
 
-        public async Task AddRoleToUserAsync(int userId, AssignRoleDTO dto)
-        {
-            if (!Enum.TryParse<Roles>(dto.Role, ignoreCase: true, out var role))
-                throw new ArgumentException($"Invalid role: {dto.Role}");
-
-            var roleEntity = await _roleRepository.GetByNameAsync(role)
-                ?? throw new KeyNotFoundException($"Role '{dto.Role}' not found in database.");
-
-            await _userRepository.GetUserById(userId);
-
-            try
-            {
-                await _userRoleRepository.AddUserRoleAsync(userId, roleEntity.Id);
-            }
-            catch (KeyNotFoundException) { }
-        }
     }
 }

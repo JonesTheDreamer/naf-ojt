@@ -447,7 +447,6 @@ namespace NAFServer.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ApproverId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Progress")

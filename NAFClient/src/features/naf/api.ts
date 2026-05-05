@@ -104,3 +104,7 @@ export const rejectResourceRequest = async (
 ): Promise<ResourceRequest> => {
   return (await api.put(`/ApprovalSteps/${stepId}/reject`, reasonForRejection)).data;
 };
+
+export const claimScreeningStep = async (stepId: string): Promise<void> => {
+  await api.post(`/ApprovalSteps/${stepId}/claim`);
+};

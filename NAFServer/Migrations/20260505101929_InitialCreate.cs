@@ -509,7 +509,7 @@ namespace NAFServer.Migrations
                     ResourceRequestId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     StepOrder = table.Column<int>(type: "int", nullable: false),
                     StepAction = table.Column<int>(type: "int", nullable: false),
-                    ApproverId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ApproverId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Progress = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ApprovedAt = table.Column<DateTime>(type: "datetime2", nullable: true)
                 },

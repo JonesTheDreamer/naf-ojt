@@ -1,5 +1,6 @@
 import { Home, Users, FileText, Wrench } from "lucide-react";
 import type { ReactNode } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "./Layout";
 import { useAuth } from "@/features/auth/AuthContext";
 
@@ -11,9 +12,16 @@ const navItems = [
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/login");
+  };
+
   return (
-    <Layout navItems={navItems} currentUser={{ name: user?.name ?? "Admin" }}>
+    <Layout navItems={navItems} currentUser={{ name: user?.name ?? "Admin" }} onLogout={handleLogout}>
       {children}
     </Layout>
   );

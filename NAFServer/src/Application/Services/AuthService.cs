@@ -72,24 +72,14 @@ namespace NAFServer.src.Application.Services
             return Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
         }
 
-        public async Task<AuthUserDTO> GetCurrentUserAsync(string employeeId)
+        public async Task<AuthUserDTO> GetCurrentUserAsync(string employeeId, string role)
         {
             var employee = await _employeeRepository.GetByIdAsync(employeeId)
                 ?? throw new ApplicationException($"Employee record not found for '{employeeId}'. Contact your administrator.");
 
             var user = await _userRepository.GetUserByEmployeeId(employeeId);
 
-            List<Domain.Entities.UserRole> activeRoles;
-            try
-            {
-                activeRoles = await _userRoleRepository.GetUserActiveRolesAsync(user.Id);
-            }
-            catch (KeyNotFoundException)
-            {
-                activeRoles = new List<Domain.Entities.UserRole>();
-            }
-
-            var primaryRole = activeRoles.FirstOrDefault()?.Role.Name.ToString() ?? "";
+            var primaryRole = role;
 
             int locationId = 0;
             string location = "";

@@ -188,22 +188,24 @@ export function ResourceRequestList({
 
   return (
     <div>
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-        <h2 className="text-lg font-bold">Requests</h2>
+      <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
         <div className="flex items-center gap-3">
+          <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">
+            Resource Requests
+          </p>
           {pendingCount > 0 && (
-            <span className="text-sm font-semibold text-amber-500">
+            <span className="inline-flex items-center rounded-full bg-amber-50 border border-amber-200 px-2 py-0.5 text-[10px] font-semibold text-amber-700">
               {pendingCount} pending
             </span>
           )}
-          <Button
-            size="sm"
-            className="bg-amber-500 hover:bg-amber-600 text-white font-semibold"
-            onClick={() => setAddResourceOpen(true)}
-          >
-            + Add Resources
-          </Button>
         </div>
+        <Button
+          size="sm"
+          className="bg-amber-500 hover:bg-amber-600 text-white font-semibold gap-1"
+          onClick={() => setAddResourceOpen(true)}
+        >
+          + Add Resources
+        </Button>
       </div>
       <AddResourceDialog
         naf={naf}

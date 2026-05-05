@@ -44,24 +44,6 @@ namespace NAFServer.src.API.Controllers
             }
         }
 
-        [HttpPost("users/{userId:int}/roles")]
-        public async Task<IActionResult> AddRoleToUser(int userId, [FromBody] AssignRoleDTO dto)
-        {
-            try
-            {
-                await _adminService.AddRoleToUserAsync(userId, dto);
-                return Ok();
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(ex.Message);
-            }
-        }
-
         [HttpGet("nafs")]
         public async Task<IActionResult> GetAdminNAFs(
             [FromQuery] int locationId,

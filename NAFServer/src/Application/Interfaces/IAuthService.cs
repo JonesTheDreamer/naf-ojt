@@ -7,6 +7,6 @@ namespace NAFServer.src.Application.Interfaces
     {
         Task<bool> ValidateRoleAsync(string employeeId, Roles role);
         Task<string> GenerateTokenAsync(string employeeId, Roles role);
-        Task<AuthUserDTO> GetCurrentUserAsync(string employeeId);
+        Task<AuthUserDTO> GetCurrentUserAsync(string employeeId, string role);
     }
 }

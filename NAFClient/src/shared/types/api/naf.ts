@@ -80,7 +80,7 @@ export interface Step extends Entity<string> {
   resourceRequestId: string;
   stepOrder: number;
   stepAction: number;
-  approverId: string;
+  approverId: string | null;
   approverName?: string | null;
   progress: number;
   approvedAt?: string;

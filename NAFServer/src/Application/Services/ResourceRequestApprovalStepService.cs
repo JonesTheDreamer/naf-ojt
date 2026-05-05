@@ -50,13 +50,19 @@ namespace NAFServer.src.Application.Services
                         rr.SetToInProgress();
                 }
 
-                var approver = await _employeeRepository.GetByIdAsync(step.ApproverId);
+                string historyNote = "Resource request approved";
+                if (step.ApproverId is not null)
+                {
+                    var approver = await _employeeRepository.GetByIdAsync(step.ApproverId);
+                    if (approver is not null)
+                        historyNote = "Employee " + approver.FirstName + " " + approver.LastName + " approved the resource request";
+                }
 
                 await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
                 (
                     rr.Id,
                     ResourceRequestAction.APPROVE,
-                    "Employee " + approver.FirstName + " " + approver.LastName + " approved the resource request"
+                    historyNote
                 ));
 
                 await _context.SaveChangesAsync();
@@ -82,13 +88,19 @@ namespace NAFServer.src.Application.Services
             step.SetToRejected(reasonForRejection);
             rr.SetToRejected();
 
-            var approver = await _employeeRepository.GetByIdAsync(step.ApproverId);
+            string historyNote = "Resource request rejected";
+            if (step.ApproverId is not null)
+            {
+                var approver = await _employeeRepository.GetByIdAsync(step.ApproverId);
+                if (approver is not null)
+                    historyNote = "Employee " + approver.FirstName + " " + approver.LastName + " rejected the resource request";
+            }
 
             await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
             (
                 rr.Id,
                 ResourceRequestAction.REJECT,
-                "Employee " + approver.FirstName + " " + approver.LastName + " rejected the resource request"
+                historyNote
             ));
 
             await _context.SaveChangesAsync();
@@ -96,5 +108,27 @@ namespace NAFServer.src.Application.Services
             return step;
         }
 
+        public async Task<ResourceRequestApprovalStep> ClaimStepAsync(Guid stepId, string adminEmployeeId)
+        {
+            var rr = await _resourceRequestRepository.GetByApprovalStepId(stepId);
+            var step = rr.ResourceRequestsApprovalSteps.FirstOrDefault(s => s.Id == stepId)
+                ?? throw new KeyNotFoundException("Step not found");
+
+            if (rr.CurrentStep != step.StepOrder)
+                throw new InvalidOperationException("Step is not the current step for this request");
+
+            step.ClaimStep(adminEmployeeId);
+
+            await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
+            (
+                rr.Id,
+                ResourceRequestAction.EDITED,
+                $"Screening step claimed by {adminEmployeeId}"
+            ));
+
+            await _context.SaveChangesAsync();
+
+            return step;
+        }
     }
 }

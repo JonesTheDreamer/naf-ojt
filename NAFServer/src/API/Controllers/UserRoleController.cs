@@ -29,12 +29,16 @@ namespace NAFServer.src.API.Controllers
         }
 
         [HttpPost("{userId}/assign")]
-        public async Task<IActionResult> AssignRole(int userId, [FromBody] int roleId)
+        public async Task<IActionResult> AssignRole(int userId, [FromBody] string roleName)
         {
             try
             {
-                await _userRoleService.AssignRoleAsync(userId, roleId);
+                await _userRoleService.AssignRoleAsync(userId, roleName);
                 return Ok();
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (KeyNotFoundException ex)
             {

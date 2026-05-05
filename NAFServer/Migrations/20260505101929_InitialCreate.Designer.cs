@@ -12,7 +12,7 @@ using NAFServer.src.Infrastructure.Persistence;
 namespace NAFServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260428031645_InitialCreate")]
+    [Migration("20260505101929_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -450,7 +450,6 @@ namespace NAFServer.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("ApproverId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Progress")

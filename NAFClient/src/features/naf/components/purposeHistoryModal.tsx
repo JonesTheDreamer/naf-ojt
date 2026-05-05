@@ -101,7 +101,9 @@ export function PurposeHistoryModal({
                       <span className="text-xs font-medium">
                         {rejection.approverName
                           ? rejection.approverName
-                          : `Step ${rejection.stepOrder} Approver (${rejection.approverId})`}
+                          : rejection.approverId
+                            ? `Step ${rejection.stepOrder} Approver (${rejection.approverId})`
+                            : `Step ${rejection.stepOrder} Approver`}
                       </span>
 
                       <span className="text-xs text-muted-foreground">

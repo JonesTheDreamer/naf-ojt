@@ -19,13 +19,14 @@ import {
   DateUrgencyBadge,
 } from "@/features/naf/components/resource-request/ResourceRequestContent";
 import { ResourceIcon } from "@/features/naf/components/resource-request/resourceRequestUtils";
-import { CheckCircle2, XCircle, Clock3 } from "lucide-react";
+import { CheckCircle2, XCircle, Clock3, UserCheck } from "lucide-react";
 import { ApproverActions } from "@/features/naf/components/resource-request/ResourceRequestActions";
 import { ApproveDialog } from "@/features/naf/components/resource-request/ApproveDialog";
 import { RejectDialog } from "@/features/naf/components/resource-request/RejectDialog";
 import {
   approveResourceRequest,
   rejectResourceRequest,
+  claimScreeningStep,
 } from "@/features/naf/api";
 
 const STEP_ACTION_LABEL: Record<StepAction, string> = {
@@ -33,7 +34,14 @@ const STEP_ACTION_LABEL: Record<StepAction, string> = {
   [StepAction.FOR_SCREENING]: "Screening",
 };
 
-function ApprovalStepsBlock({ request }: { request: ResourceRequest }) {
+interface ApprovalStepsBlockProps {
+  request: ResourceRequest;
+  currentStepOrder: number;
+  onClaim?: (stepId: string) => void;
+  isClaiming?: boolean;
+}
+
+function ApprovalStepsBlock({ request, currentStepOrder, onClaim, isClaiming }: ApprovalStepsBlockProps) {
   if (!request.steps || request.steps.length === 0) return null;
   const sorted = [...request.steps].sort((a, b) => a.stepOrder - b.stepOrder);
   return (
@@ -58,6 +66,12 @@ function ApprovalStepsBlock({ request }: { request: ResourceRequest }) {
           const actionLabel =
             STEP_ACTION_LABEL[step.stepAction as StepAction] ?? "Approval";
 
+          const isUnclaimedScreening =
+            step.stepAction === StepAction.FOR_SCREENING &&
+            step.approverId === null &&
+            step.stepOrder === currentStepOrder &&
+            isPending;
+
           return (
             <div
               key={step.id}
@@ -66,6 +80,7 @@ function ApprovalStepsBlock({ request }: { request: ResourceRequest }) {
                 isApproved && "bg-emerald-50 border-emerald-100",
                 isRejected && "bg-red-50 border-red-100",
                 isPending && "bg-muted/30 border-border",
+                isUnclaimedScreening && "border-amber-200 bg-amber-50/60",
               )}
             >
               <span
@@ -75,39 +90,54 @@ function ApprovalStepsBlock({ request }: { request: ResourceRequest }) {
                     ? "bg-emerald-100 text-emerald-700"
                     : isRejected
                       ? "bg-red-100 text-red-600"
-                      : "bg-muted text-muted-foreground",
+                      : isUnclaimedScreening
+                        ? "bg-amber-100 text-amber-700"
+                        : "bg-muted text-muted-foreground",
                 )}
               >
                 {step.stepOrder}
               </span>
               <div className="flex-1 min-w-0">
-                <p className="font-medium text-foreground truncate">
-                  {step.approverName ?? step.approverId}
+                <p className={cn("font-medium truncate", isUnclaimedScreening ? "text-amber-700" : "text-foreground")}>
+                  {step.approverName ?? step.approverId ?? "—"}
                 </p>
                 <p className="text-[11px] text-muted-foreground">
-                  {actionLabel}
+                  {isUnclaimedScreening ? `${actionLabel} · Awaiting claim` : actionLabel}
                 </p>
               </div>
-              <div className="flex items-center gap-1 shrink-0">
-                {isApproved && (
-                  <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+              <div className="flex items-center gap-2 shrink-0">
+                {isUnclaimedScreening && onClaim ? (
+                  <button
+                    onClick={() => onClaim(step.id)}
+                    disabled={isClaiming}
+                    className="inline-flex items-center gap-1 rounded-md bg-amber-500 hover:bg-amber-600 disabled:opacity-50 px-2.5 py-1 text-xs font-semibold text-white transition-colors"
+                  >
+                    <UserCheck className="h-3 w-3" />
+                    {isClaiming ? "Claiming…" : "Claim"}
+                  </button>
+                ) : (
+                  <>
+                    {isApproved && (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                    )}
+                    {isRejected && <XCircle className="h-3.5 w-3.5 text-red-500" />}
+                    {isPending && !isUnclaimedScreening && (
+                      <Clock3 className="h-3.5 w-3.5 text-muted-foreground" />
+                    )}
+                    <span
+                      className={cn(
+                        "text-xs font-semibold",
+                        isApproved
+                          ? "text-emerald-600"
+                          : isRejected
+                            ? "text-red-500"
+                            : "text-muted-foreground",
+                      )}
+                    >
+                      {statusLabel}
+                    </span>
+                  </>
                 )}
-                {isRejected && <XCircle className="h-3.5 w-3.5 text-red-500" />}
-                {isPending && (
-                  <Clock3 className="h-3.5 w-3.5 text-muted-foreground" />
-                )}
-                <span
-                  className={cn(
-                    "text-xs font-semibold",
-                    isApproved
-                      ? "text-emerald-600"
-                      : isRejected
-                        ? "text-red-500"
-                        : "text-muted-foreground",
-                  )}
-                >
-                  {statusLabel}
-                </span>
               </div>
             </div>
           );
@@ -118,6 +148,14 @@ function ApprovalStepsBlock({ request }: { request: ResourceRequest }) {
 }
 
 export { ApprovalStepsBlock };
+
+function extractErrorMessage(error: unknown, fallback: string): string {
+  const data = (error as { response?: { data?: unknown } })?.response?.data;
+  if (typeof data === "string") return data;
+  if (data && typeof data === "object" && "error" in data)
+    return String((data as { error: unknown }).error);
+  return fallback;
+}
 
 interface AdminResourceRequestListProps {
   naf: NAF;
@@ -132,6 +170,17 @@ export function AdminResourceRequestList({
   const [approvingStepId, setApprovingStepId] = useState<string | null>(null);
   const [rejectingStepId, setRejectingStepId] = useState<string | null>(null);
 
+  const claimStep = useMutation({
+    mutationFn: (stepId: string) => claimScreeningStep(stepId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["naf", naf.id] });
+      toast.success("Screening step claimed");
+    },
+    onError: (error: unknown) => {
+      toast.error(extractErrorMessage(error, "Failed to claim step"));
+    },
+  });
+
   const approveRequest = useMutation({
     mutationFn: ({ stepId, comment }: { stepId: string; comment?: string }) =>
       approveResourceRequest(stepId, comment),
@@ -141,10 +190,7 @@ export function AdminResourceRequestList({
       toast.success("Request approved");
     },
     onError: (error: unknown) => {
-      const message =
-        (error as { response?: { data?: string } })?.response?.data ??
-        "Failed to approve request";
-      toast.error(message);
+      toast.error(extractErrorMessage(error, "Failed to approve request"));
     },
   });
 
@@ -162,10 +208,7 @@ export function AdminResourceRequestList({
       toast.success("Request rejected");
     },
     onError: (error: unknown) => {
-      const message =
-        (error as { response?: { data?: string } })?.response?.data ??
-        "Failed to reject request";
-      toast.error(message);
+      toast.error(extractErrorMessage(error, "Failed to reject request"));
     },
   });
 
@@ -179,7 +222,9 @@ export function AdminResourceRequestList({
           const currentStep = req.steps.find(
             (s) => s.stepOrder === req.currentStep,
           );
-          const isApprover = currentStep?.approverId === currentUser;
+          const isApprover =
+            currentStep?.approverId === currentUser &&
+            currentStep?.approverId !== null;
           return (
             <AccordionItem
               key={req.id}
@@ -227,7 +272,12 @@ export function AdminResourceRequestList({
                 </span>
               </AccordionTrigger>
               <AccordionContent className="px-4 pb-4 pt-2 space-y-3">
-                <ApprovalStepsBlock request={req} />
+                <ApprovalStepsBlock
+                  request={req}
+                  currentStepOrder={req.currentStep}
+                  onClaim={(stepId) => claimStep.mutate(stepId)}
+                  isClaiming={claimStep.isPending}
+                />
                 {req.additionalInfo && (
                   <AdditionalInfoBlock info={req.additionalInfo} />
                 )}

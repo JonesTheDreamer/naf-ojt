@@ -9,7 +9,7 @@ namespace NAFServer.src.Application.DTOs.ResourceRequestApprovalStep
         Guid ResourceRequestId,
         int StepOrder,
         StepAction StepAction,
-        string ApproverId,
+        string? ApproverId,
         string? ApproverName,
         Progress Progress,
         DateTime? ApprovedAt,

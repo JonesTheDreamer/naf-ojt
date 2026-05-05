@@ -1,5 +1,4 @@
 import { useParams } from "react-router-dom";
-import { Separator } from "@/components/ui/separator";
 import { ProgressStatus } from "@/shared/types/api/naf";
 import RequestorLayout from "@/shared/components/layout/RequestorLayout";
 import { useNAF } from "../hooks/useNAF";
@@ -7,10 +6,19 @@ import { useAuth } from "@/features/auth/AuthContext";
 import { NAFDetailHeader } from "../components/NAFDetailHeader";
 import { ResourceRequestList } from "../components/ResourceRequestList";
 
+function formatDate(dateStr?: string | null) {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
+
 function formatDateTime(dateStr?: string | null) {
   if (!dateStr) return "—";
   return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "long",
+    month: "short",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
@@ -23,37 +31,35 @@ function nafProgressLabel(progress: number): string {
   return ProgressStatus[progress as ProgressStatus] ?? String(progress);
 }
 
-function nafProgressColor(progress: number): string {
-  switch (progress as ProgressStatus) {
-    case ProgressStatus["In Progress"]:
-      return "text-blue-600";
-    case ProgressStatus.Accomplished:
-      return "text-emerald-600";
-    case ProgressStatus.Rejected:
-      return "text-red-500";
-    case ProgressStatus["For Screening"]:
-      return "text-teal-600";
-    default:
-      return "text-amber-500";
-  }
+const STATUS_STYLES: Record<number, { bg: string; text: string; dot: string }> = {
+  0: { bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-400"  }, // Open
+  1: { bg: "bg-blue-50",    text: "text-blue-700",    dot: "bg-blue-400"   }, // In Progress
+  2: { bg: "bg-red-50",     text: "text-red-700",     dot: "bg-red-400"    }, // Rejected
+  3: { bg: "bg-teal-50",    text: "text-teal-700",    dot: "bg-teal-400"   }, // For Screening
+  4: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-400"}, // Accomplished
+  5: { bg: "bg-gray-50",    text: "text-gray-600",    dot: "bg-gray-400"   }, // Not Accomplished
+};
+
+function StatusPill({ progress }: { progress: number }) {
+  const style = STATUS_STYLES[progress] ?? STATUS_STYLES[0];
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${style.bg} ${style.text} border-current/20`}>
+      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />
+      {nafProgressLabel(progress)}
+    </span>
+  );
 }
 
 function LoadingSkeleton() {
   return (
-    <div className="space-y-5 animate-pulse">
-      <div className="flex justify-between">
-        <div className="space-y-2">
-          <div className="h-5 w-64 bg-muted rounded" />
-          <div className="h-3 w-40 bg-muted rounded" />
-        </div>
-        <div className="h-5 w-24 bg-muted rounded" />
+    <div className="space-y-6 animate-pulse">
+      <div className="h-28 bg-gray-100 rounded-xl" />
+      <div className="h-40 bg-gray-100 rounded-xl" />
+      <div className="space-y-2">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="h-14 bg-gray-100 rounded-lg" />
+        ))}
       </div>
-      <div className="h-px bg-muted" />
-      <div className="h-48 bg-muted rounded-lg" />
-      <div className="h-6 w-32 bg-muted rounded" />
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="h-14 bg-muted rounded-lg" />
-      ))}
     </div>
   );
 }
@@ -63,68 +69,74 @@ export default function NAFDetailPage() {
   const { user } = useAuth();
   const currentUserId = user?.employeeId ?? "";
 
-  const {
-    nafQuery: naf,
-    isLoading,
-    isError,
-    deactivateNAFAsync,
-  } = useNAF({ nafId });
-  console.log(naf.data);
+  const { nafQuery: naf, isLoading, isError, deactivateNAFAsync } = useNAF({ nafId });
 
   const handleDeactivateNAF = async () => {
     if (!nafId) return;
-    try {
-      await deactivateNAFAsync(nafId);
-    } catch (error) {
-      console.error("Failed to deactivate NAF:", error);
-    }
+    try { await deactivateNAFAsync(nafId); }
+    catch (error) { console.error("Failed to deactivate NAF:", error); }
   };
+
+  const progressNum = naf.data?.progress as unknown as number;
 
   return (
     <RequestorLayout>
-      <div className="max-w-4xl mx-auto w-full space-y-6 pb-12 px-4 sm:px-6">
+      <div className="max-w-4xl mx-auto w-full space-y-5 pb-16 px-4 sm:px-6">
+
         {isLoading && <LoadingSkeleton />}
+
         {isError && (
-          <div className="text-center py-16 text-muted-foreground text-sm">
+          <div className="text-center py-16 text-gray-400 text-sm">
             Failed to load NAF details. Please try again.
           </div>
         )}
+
         {!isLoading && !isError && !naf?.data && (
-          <div className="text-center py-16 text-muted-foreground text-sm">
+          <div className="text-center py-16 text-gray-400 text-sm">
             NAF not found.
           </div>
         )}
 
         {naf?.data && (
           <>
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-base font-semibold text-foreground">
-                    Reference:
-                  </span>
-                  <span className="text-base font-bold text-amber-500">
+            {/* ── Document hero ─────────────────────────────────────── */}
+            <div className="rounded-xl border border-gray-100 bg-white px-6 py-5">
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-[10px] font-mono uppercase tracking-widest text-gray-400">
+                      Network Access Form
+                    </span>
+                  </div>
+                  <p
+                    className="text-2xl font-bold tracking-tight text-amber-500 font-mono"
+                  >
                     {naf.data.reference}
-                  </span>
+                  </p>
+                  <div className="flex items-center gap-4 mt-2 flex-wrap">
+                    <span className="text-xs text-gray-400">
+                      Submitted{" "}
+                      <span className="text-gray-600 font-medium">
+                        {formatDate(naf.data.submittedAt)}
+                      </span>
+                    </span>
+                    <span className="w-px h-3 bg-gray-200" />
+                    <span className="text-xs text-gray-400">
+                      Updated{" "}
+                      <span className="text-gray-600 font-medium">
+                        {formatDateTime(naf.data.updatedAt)}
+                      </span>
+                    </span>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Last Update: {formatDateTime(naf.data.updatedAt)}
-                </p>
-              </div>
-              <div className="flex flex-col items-start sm:items-end gap-0.5 shrink-0">
-                <span className="text-xs text-muted-foreground">Status</span>
-                <span
-                  className={`text-sm font-bold ${nafProgressColor(naf.data.progress as unknown as number)}`}
-                >
-                  {nafProgressLabel(naf.data.progress as unknown as number)}
-                </span>
+                <StatusPill progress={progressNum} />
               </div>
             </div>
-            <Separator />
-            <NAFDetailHeader
-              naf={naf.data}
-              onDeactivate={handleDeactivateNAF}
-            />
+
+            {/* ── Employee + NAF detail ─────────────────────────────── */}
+            <NAFDetailHeader naf={naf.data} onDeactivate={handleDeactivateNAF} />
+
+            {/* ── Resource requests ─────────────────────────────────── */}
             <ResourceRequestList naf={naf.data} currentUserId={currentUserId} />
           </>
         )}

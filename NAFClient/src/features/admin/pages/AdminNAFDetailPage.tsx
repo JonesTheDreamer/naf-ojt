@@ -1,7 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { Separator } from "@/components/ui/separator";
-import { Button } from "@/components/ui/button";
-import { ChevronLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import AdminLayout from "@/shared/components/layout/AdminLayout";
 import { useNAF } from "@/features/naf/hooks/useNAF";
 import { NAFDetailHeader } from "@/features/naf/components/NAFDetailHeader";
@@ -10,29 +8,48 @@ import { RoutesEnum } from "@/app/routesEnum";
 import { ProgressStatus } from "@/shared/types/api/naf";
 import { useAuth } from "@/features/auth";
 
+function formatDate(dateStr?: string | null) {
+  if (!dateStr) return "—";
+  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
 function formatDateTime(dateStr?: string | null) {
   if (!dateStr) return "—";
   return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
+    month: "short", day: "numeric", year: "numeric",
+    hour: "numeric", minute: "2-digit", hour12: true,
   });
 }
 
-function nafProgressColor(progress: number): string {
-  switch (progress as ProgressStatus) {
-    case ProgressStatus["In Progress"]:
-      return "text-blue-600";
-    case ProgressStatus.Accomplished:
-      return "text-emerald-600";
-    case ProgressStatus.Rejected:
-      return "text-red-500";
-    default:
-      return "text-amber-500";
-  }
+const STATUS_STYLES: Record<number, { bg: string; text: string; dot: string }> = {
+  0: { bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-400"   },
+  1: { bg: "bg-blue-50",    text: "text-blue-700",    dot: "bg-blue-400"    },
+  2: { bg: "bg-red-50",     text: "text-red-700",     dot: "bg-red-400"     },
+  3: { bg: "bg-teal-50",    text: "text-teal-700",    dot: "bg-teal-400"    },
+  4: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-400" },
+  5: { bg: "bg-gray-50",    text: "text-gray-600",    dot: "bg-gray-400"    },
+};
+
+function StatusPill({ progress }: { progress: number }) {
+  const style = STATUS_STYLES[progress] ?? STATUS_STYLES[0];
+  return (
+    <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${style.bg} ${style.text} border-current/20`}>
+      <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />
+      {ProgressStatus[progress] ?? String(progress)}
+    </span>
+  );
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="h-28 bg-gray-100 rounded-xl" />
+      <div className="h-40 bg-gray-100 rounded-xl" />
+      <div className="space-y-2">
+        {[1, 2, 3].map((i) => <div key={i} className="h-14 bg-gray-100 rounded-lg" />)}
+      </div>
+    </div>
+  );
 }
 
 export default function AdminNAFDetailPage() {
@@ -42,59 +59,50 @@ export default function AdminNAFDetailPage() {
   const naf = nafQuery.data;
   const { user } = useAuth();
   const currentUserId = user?.employeeId ?? "";
+  const progressNum = naf?.progress as unknown as number;
 
   return (
     <AdminLayout>
-      <div className="max-w-4xl mx-auto w-full space-y-6 pb-12 px-4 sm:px-6">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-1.5"
+      <div className="max-w-4xl mx-auto w-full space-y-5 pb-16 px-4 sm:px-6">
+        <button
+          className="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700 transition-colors"
           onClick={() => navigate(RoutesEnum.ADMIN_NAF)}
         >
-          <ChevronLeft className="h-4 w-4" /> Back to NAFs
-        </Button>
+          <ArrowLeft className="w-3.5 h-3.5" />
+          NAFs
+        </button>
 
-        {isLoading && (
-          <p className="text-sm text-muted-foreground">Loading...</p>
-        )}
-        {isError && (
-          <p className="text-sm text-muted-foreground">
-            Failed to load NAF details.
-          </p>
-        )}
+        {isLoading && <LoadingSkeleton />}
+        {isError && <p className="text-center py-16 text-sm text-gray-400">Failed to load NAF details.</p>}
 
         {naf && (
           <>
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-base font-semibold text-foreground">
-                    Reference:
+            {/* Document hero */}
+            <div className="rounded-xl border border-gray-100 bg-white px-6 py-5">
+              <div className="flex items-start justify-between gap-4 flex-wrap">
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-gray-400">
+                    Network Access Form
                   </span>
-                  <span className="text-base font-bold text-amber-500">
+                  <p className="text-2xl font-bold tracking-tight text-amber-500 font-mono mt-1">
                     {naf.reference}
-                  </span>
+                  </p>
+                  <div className="flex items-center gap-4 mt-2 flex-wrap">
+                    <span className="text-xs text-gray-400">
+                      Submitted <span className="text-gray-600 font-medium">{formatDate(naf.submittedAt)}</span>
+                    </span>
+                    <span className="w-px h-3 bg-gray-200" />
+                    <span className="text-xs text-gray-400">
+                      Updated <span className="text-gray-600 font-medium">{formatDateTime(naf.updatedAt)}</span>
+                    </span>
+                  </div>
                 </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Last Update: {formatDateTime(naf.updatedAt)}
-                </p>
-              </div>
-              <div className="flex flex-col items-start sm:items-end gap-0.5 shrink-0">
-                <span className="text-xs text-muted-foreground">Status</span>
-                <span
-                  className={`text-sm font-bold ${nafProgressColor(naf.progress as unknown as number)}`}
-                >
-                  {ProgressStatus[naf.progress as unknown as number]}
-                </span>
+                <StatusPill progress={progressNum} />
               </div>
             </div>
-            <Separator />
+
             <NAFDetailHeader naf={naf} />
-            <AdminResourceRequestList
-              naf={naf}
-              currentUser={currentUserId}
-            />
+            <AdminResourceRequestList naf={naf} currentUser={currentUserId} />
           </>
         )}
       </div>

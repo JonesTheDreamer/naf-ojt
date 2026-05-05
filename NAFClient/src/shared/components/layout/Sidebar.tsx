@@ -1,4 +1,4 @@
-import { User } from "lucide-react";
+import { LogOut, User } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/shared/utils/utils";
 
@@ -14,12 +14,14 @@ interface SidebarProps {
     name: string;
   };
   navItems: NavItem[];
+  onLogout?: () => void;
 }
 
 export default function Sidebar({
   isOpen = true,
   currentUser = { name: "User" },
   navItems,
+  onLogout,
 }: SidebarProps) {
   const location = useLocation();
   return (
@@ -67,12 +69,21 @@ export default function Sidebar({
           <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-500 shrink-0">
             <User className="w-4 h-4" />
           </div>
-          <div className="min-w-0">
+          <div className="min-w-0 flex-1">
             <p className="text-xs text-gray-400 leading-tight">Hello</p>
             <p className="text-sm font-semibold text-gray-800 truncate leading-tight">
               {currentUser.name}
             </p>
           </div>
+          {onLogout && (
+            <button
+              onClick={onLogout}
+              className="shrink-0 flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700 transition-colors"
+            >
+              <LogOut className="w-4 h-4" />
+              <span>Logout</span>
+            </button>
+          )}
         </div>
       </div>
     </aside>

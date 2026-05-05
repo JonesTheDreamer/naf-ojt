@@ -4,6 +4,7 @@ using NAFServer.src.Application.DTOs.ResourceRequest;
 using NAFServer.src.Application.DTOs.ResourceRequestApprovalStep;
 using NAFServer.src.Application.DTOs.ResourceRequestApprovalStepHistory;
 using NAFServer.src.Domain.Entities;
+using NAFServer.src.Domain.Enums;
 using NAFServer.src.Mapper.Helper;
 
 public static class NAFMapper
@@ -85,7 +86,9 @@ public static class NAFMapper
                         s.StepOrder,
                         s.StepAction,
                         s.ApproverId,
-                        approverNames?.GetValueOrDefault(s.ApproverId),
+                        s.ApproverId is not null
+                            ? approverNames?.GetValueOrDefault(s.ApproverId)
+                            : s.StepAction == StepAction.FOR_SCREENING ? "Technical Team" : null,
                         s.Progress,
                         s.ApprovedAt,
                         s.Histories.Select(h => new ResourceRequestApprovalStepHistoryDTO(

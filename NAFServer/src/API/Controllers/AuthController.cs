@@ -31,7 +31,7 @@ namespace NAFServer.src.API.Controllers
         [Authorize]
         public async Task<IActionResult> Me()
         {
-            var user = await _authService.GetCurrentUserAsync(_currentUserService.EmployeeId);
+            var user = await _authService.GetCurrentUserAsync(_currentUserService.EmployeeId, _currentUserService.Role);
             return Ok(user);
         }
 

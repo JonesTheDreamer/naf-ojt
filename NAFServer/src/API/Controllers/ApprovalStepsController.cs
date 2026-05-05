@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NAFServer.src.Application.Interfaces;
+using NAFServer.src.Domain.Enums;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -12,9 +13,12 @@ namespace NAFServer.src.API.Controllers
     public class ApprovalStepsController : ControllerBase
     {
         private readonly IResourceRequestApprovalStepService _resourceRequestApprovalStepService;
-        public ApprovalStepsController(IResourceRequestApprovalStepService resourceRequestApprovalStepService)
+        private readonly ICurrentUserService _currentUserService;
+
+        public ApprovalStepsController(IResourceRequestApprovalStepService resourceRequestApprovalStepService, ICurrentUserService currentUserService)
         {
             _resourceRequestApprovalStepService = resourceRequestApprovalStepService;
+            _currentUserService = currentUserService;
         }
         // GET: api/<AprrovalStepsController>
         [HttpGet]
@@ -57,7 +61,21 @@ namespace NAFServer.src.API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+        }
 
+        [HttpPost("{id}/claim")]
+        [Authorize(Roles = nameof(Roles.ADMIN))]
+        public async Task<IActionResult> Claim(Guid id)
+        {
+            try
+            {
+                await _resourceRequestApprovalStepService.ClaimStepAsync(id, _currentUserService.EmployeeId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
