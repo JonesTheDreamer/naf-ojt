@@ -31,6 +31,22 @@ export default function UserDetailPage() {
   const [locationEditing, setLocationEditing] = useState(false);
   const [selectedLocationId, setSelectedLocationId] = useState(0);
   const [addRoleValue, setAddRoleValue] = useState("");
+  const [addRoleError, setAddRoleError] = useState("");
+
+  const handleAddRole = async () => {
+    if (!user || !addRoleValue) return;
+    if (!user.locationId) {
+      setAddRoleError("Assign a location to this user before adding a role.");
+      return;
+    }
+    setAddRoleError("");
+    await assignRoleMutation.mutateAsync({
+      employeeId: user.employeeId,
+      role: addRoleValue,
+      locationId: user.locationId,
+    });
+    setAddRoleValue("");
+  };
 
   const availableRoles = ROLES.filter((r) => !user?.roles.includes(r));
 
@@ -38,16 +54,6 @@ export default function UserDetailPage() {
     if (!user) return;
     await removeRoleMutation.mutateAsync({ userId: user.id, roleName });
     setPendingRemoveRole(null);
-  };
-
-  const handleAddRole = async () => {
-    if (!user || !addRoleValue) return;
-    await assignRoleMutation.mutateAsync({
-      employeeId: user.employeeId,
-      role: addRoleValue,
-      locationId: user.locationId,
-    });
-    setAddRoleValue("");
   };
 
   const handleChangeLocation = async () => {
@@ -167,7 +173,10 @@ export default function UserDetailPage() {
                 <select
                   className="border rounded px-3 py-1.5 text-sm"
                   value={addRoleValue}
-                  onChange={(e) => setAddRoleValue(e.target.value)}
+                  onChange={(e) => {
+                    setAddRoleValue(e.target.value);
+                    setAddRoleError("");
+                  }}
                 >
                   <option value="">Add role…</option>
                   {availableRoles.map((r) => (
@@ -182,6 +191,9 @@ export default function UserDetailPage() {
                 >
                   Add
                 </Button>
+                {addRoleError && (
+                  <p className="text-xs text-red-500">{addRoleError}</p>
+                )}
               </div>
             )}
           </CardContent>
