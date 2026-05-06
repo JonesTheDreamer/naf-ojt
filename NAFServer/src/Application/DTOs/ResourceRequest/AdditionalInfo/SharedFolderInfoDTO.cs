@@ -2,9 +2,7 @@
 {
     public record SharedFolderInfoDTO(
         int SharedFolderId,
-        string Name,
-        string DepartmentId,
-        string Remarks
+        string Name
     ) : AdditionalInfoDTO
     {
         public override AdditionalInfoType Type => AdditionalInfoType.SharedFolder;

@@ -2,8 +2,7 @@
 {
     public record GroupEmailInfoDTO(
         int GroupEmailId,
-        string Email,
-        string DepartmentId
+        string Email
     ) : AdditionalInfoDTO
     {
         public override AdditionalInfoType Type => AdditionalInfoType.GroupEmail;

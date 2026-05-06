@@ -20,16 +20,13 @@ namespace NAFServer.src.Mapper.Helper
                 SharedFolderRequestInfo folder =>
                     new SharedFolderInfoDTO(
                         folder.SharedFolderId,
-                        folder.SharedFolder.Name,
-                        folder.SharedFolder.DepartmentId,
-                        folder.SharedFolder.Remarks
+                        folder.SharedFolder.Name
                     ),
 
                 GroupEmailRequestInfo email =>
                     new GroupEmailInfoDTO(
                         email.GroupEmailId,
-                        email.GroupEmail.Email,
-                        email.GroupEmail.DepartmentId
+                        email.GroupEmail.Email
                     ),
 
                 _ => throw new Exception("Unknown AdditionalInfo type")
