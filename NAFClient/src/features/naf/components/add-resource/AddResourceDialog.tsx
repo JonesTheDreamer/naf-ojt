@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import type { NAF, InternetRequestInfo, GroupEmailInfo, SharedFolderInfo } from "@/shared/types/api/naf";
+import type { NAF, InternetRequestInfo } from "@/shared/types/api/naf";
 import { Progress } from "@/shared/types/enum/progress";
 import { useResource, useResourceMetadata } from "@/shared/hooks/useResource";
 import {
@@ -42,13 +42,6 @@ export function AddResourceDialog({ naf, open, onOpenChange }: AddResourceDialog
     .filter((rr) => rr.additionalInfo?.type === 0 && rr.progress === Progress.ACCOMPLISHED)
     .map((rr) => (rr.additionalInfo as InternetRequestInfo).internetResourceId);
 
-  const usedGroupEmails = naf.resourceRequests
-    .filter((rr) => rr.additionalInfo?.type === 2)
-    .map((rr) => (rr.additionalInfo as GroupEmailInfo).email);
-
-  const usedSharedFolderNames = naf.resourceRequests
-    .filter((rr) => rr.additionalInfo?.type === 1)
-    .map((rr) => (rr.additionalInfo as SharedFolderInfo).name);
 
   const availableBasic = (getAllResource.data ?? []).filter(
     (r) => !r.isSpecial && !existingResourceIds.includes(r.id),
@@ -145,7 +138,6 @@ export function AddResourceDialog({ naf, open, onOpenChange }: AddResourceDialog
                 key={entry._id}
                 entry={entry}
                 allGroupEmails={groupEmails.data ?? []}
-                usedEmails={[...usedGroupEmails, ...groupEmailEntries.filter((e) => e._id !== entry._id && e.email.trim().length > 0).map((e) => e.email)]}
                 onChange={(patch) => patchGroupEmailEntry(entry._id, patch)}
                 onRemove={() => setGroupEmailEntries((prev) => prev.filter((e) => e._id !== entry._id))}
               />
@@ -163,7 +155,6 @@ export function AddResourceDialog({ naf, open, onOpenChange }: AddResourceDialog
                 key={entry._id}
                 entry={entry}
                 allSharedFolders={sharedFolders.data ?? []}
-                usedNames={[...usedSharedFolderNames, ...sharedFolderEntries.filter((e) => e._id !== entry._id && e.name.trim().length > 0).map((e) => e.name)]}
                 onChange={(patch) => patchSharedFolderEntry(entry._id, patch)}
                 onRemove={() => setSharedFolderEntries((prev) => prev.filter((e) => e._id !== entry._id))}
               />

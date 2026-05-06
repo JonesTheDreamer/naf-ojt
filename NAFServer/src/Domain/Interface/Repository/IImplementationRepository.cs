@@ -4,7 +4,7 @@ namespace NAFServer.src.Domain.Interface.Repository
 {
     public interface IImplementationRepository
     {
-        Task<ResourceRequestImplementation> GetByIdAsync(string id);
+        Task<ResourceRequestImplementation> GetByIdAsync(Guid id);
         Task<List<NAF>> GetForImplementationsAsync(int locationId);
         Task<List<NAF>> GetMyTasksByEmployeeIdAsync(string employeeId);
         Task<ResourceRequestImplementation?> GetByResourceRequestIdAsync(Guid resourceRequestId);

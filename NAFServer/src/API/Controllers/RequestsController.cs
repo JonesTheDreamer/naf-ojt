@@ -55,6 +55,13 @@ namespace NAFServer.src.API.Controllers
             return Ok();
         }
 
+        [HttpPut("{id:guid}/deactivate")]
+        public async Task<IActionResult> Deactivate(Guid id)
+        {
+            var rr = await _resourceRequestService.DeactivateAsync(id);
+            return Ok(rr);
+        }
+
         [HttpPut("{id:guid}/cancel")]
         public async Task<IActionResult> Cancel(Guid id)
         {

@@ -49,10 +49,6 @@ export function NAFTableContainer({
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <p className="text-xs text-muted-foreground italic">
-          ( Select a row to view Network Access Request Form details )
-        </p>
-
         <div className="flex flex-col items-center gap-3 md:flex-row w-full justify-end">
           <SearchBar<Employee>
             placeholder="Enter NAF Reference Number / Employee Name"
@@ -83,6 +79,9 @@ export function NAFTableContainer({
         </div>
       </div>
 
+      <p className="text-xs text-muted-foreground italic">
+        ( Select a row to view Network Access Request Form details )
+      </p>
       <DataTable
         columns={columns}
         data={data}

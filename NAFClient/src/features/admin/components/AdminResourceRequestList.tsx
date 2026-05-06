@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Accordion } from "@/components/ui/accordion";
 import type { NAF } from "@/shared/types/api/naf";
+import { Progress } from "@/shared/types/enum/progress";
+import { ResourceRequestFilterBar, type ProgressFilter } from "@/features/naf/components/resource-request/ResourceRequestFilterBar";
 import { ResourceRequestAccordionItem } from "@/features/naf/components/resource-request";
 import { adminApi } from "../api";
 import {
@@ -29,6 +32,8 @@ export function AdminResourceRequestList({
 }: AdminResourceRequestListProps) {
   const queryClient = useQueryClient();
   const nafQueryKey = ["naf", naf.id];
+  const [filter, setFilter] = useState<ProgressFilter>("all");
+  const [showInactive, setShowInactive] = useState(false);
 
   const claimStep = useMutation({
     mutationFn: (stepId: string) => claimScreeningStep(stepId),
@@ -121,11 +126,23 @@ export function AdminResourceRequestList({
     setToDelayed.isPending ||
     setToAccomplished.isPending;
 
+  const filteredRequests = naf.resourceRequests.filter((r) => {
+    const isInactive = !r.isActive || !!r.cancelledAt;
+    if (filter === "all") return showInactive ? true : !isInactive;
+    return (r.progress as unknown as Progress) === filter;
+  });
+
   return (
     <div>
       <h2 className="text-lg font-bold mb-4">Requests</h2>
+      <ResourceRequestFilterBar
+        selected={filter}
+        showInactive={showInactive}
+        onChange={setFilter}
+        onToggleInactive={setShowInactive}
+      />
       <Accordion type="multiple" className="space-y-2">
-        {naf.resourceRequests.map((req) => {
+        {filteredRequests.map((req) => {
           const currentStep = req.steps.find(
             (s) => s.stepOrder === req.currentStep,
           );

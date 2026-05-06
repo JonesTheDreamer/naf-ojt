@@ -8,6 +8,8 @@
         ACCEPT,
         ACCOMPLISH,
         EDITED,
-        CANCELLED
+        CANCELLED,
+        SCREENING,
+        IMPLEMENTATION
     }
 }

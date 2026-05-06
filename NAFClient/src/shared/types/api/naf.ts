@@ -42,6 +42,8 @@ export enum ResourceRequestAction {
   ACCOMPLISH = 4,
   EDITED = 5,
   CANCELLED = 6,
+  SCREENING = 7,
+  IMPLEMENTATION = 8,
 }
 
 export interface ResourceRequestHistory {

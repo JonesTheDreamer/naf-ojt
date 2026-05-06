@@ -34,6 +34,10 @@ export const PROGRESS_CONFIG: Record<
     label: "Not Accomplished",
     className: "text-gray-500 bg-gray-50 border-gray-200",
   },
+  [Progress.CANCELLED]: {
+    label: "Cancelled",
+    className: "text-gray-400 bg-gray-50 border-gray-200",
+  },
 };
 
 export function ProgressBadge({

@@ -2,13 +2,12 @@ import { X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { FieldLabel } from "@/components/ui/field";
 import { cn } from "@/shared/utils/utils";
-import { CreateOrSelectCombobox } from "@/shared/components/common/CreateOrSelectCombobox";
+import { SearchOrCreateInput } from "@/shared/components/common/SearchOrCreateInput";
 import type { GroupEmailEntry } from "../../hooks/useAddResource";
 
 interface GroupEmailEntryCardProps {
   entry: GroupEmailEntry;
   allGroupEmails: { id: number; email: string }[];
-  usedEmails: string[];
   onChange: (patch: Partial<GroupEmailEntry>) => void;
   onRemove: () => void;
 }
@@ -16,13 +15,10 @@ interface GroupEmailEntryCardProps {
 export function GroupEmailEntryCard({
   entry,
   allGroupEmails,
-  usedEmails,
   onChange,
   onRemove,
 }: GroupEmailEntryCardProps) {
-  const options = allGroupEmails
-    .filter((g) => !usedEmails.map((e) => e.toLowerCase()).includes(g.email.toLowerCase()))
-    .map((g) => g.email);
+  const allEmails = allGroupEmails.map((g) => g.email);
 
   return (
     <div className="border rounded-md p-3 space-y-2 relative">
@@ -50,11 +46,11 @@ export function GroupEmailEntryCard({
             </span>
           )}
         </div>
-        <CreateOrSelectCombobox
-          options={options}
+        <SearchOrCreateInput
+          options={allEmails}
           value={entry.email}
           onChange={(val, isNew) => onChange({ email: val, isNew })}
-          placeholder="Search or enter email..."
+          placeholder="Enter email address..."
         />
       </div>
 

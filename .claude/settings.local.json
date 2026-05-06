@@ -26,7 +26,13 @@
       "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Jones H\\\\Desktop\\\\naf-ojt\\\\NAFClient\\\\src\" -Recurse -Include *.ts, *.tsx)",
       "Bash(Select-Object FullName)",
       "PowerShell(npm run *)",
-      "PowerShell(Get-Command *)"
+      "PowerShell(Get-Command *)",
+      "Bash(del *)",
+      "Bash(date *)",
+      "Bash(xargs grep *)",
+      "Bash(npx shadcn@latest add popover --yes)",
+      "Bash(dir *)",
+      "Bash(git *)"
     ]
   }
 }

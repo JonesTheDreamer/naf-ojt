@@ -5,11 +5,12 @@ namespace NAFServer.src.Application.Interfaces
 {
     public interface IImplementationService
     {
-        Task<ResourceRequestImplementationDTO> SetToInProgress(string request, string employeeId);
-        Task<ResourceRequestImplementationDTO> SetToDelayed(string request, string delayReason);
-        Task<ResourceRequestImplementationDTO> SetToAccomplished(string request);
+        Task<ResourceRequestImplementationDTO> CreateImplementationAsync(Guid request);
+        Task<ResourceRequestImplementationDTO> SetToInProgress(Guid request, string employeeId);
+        Task<ResourceRequestImplementationDTO> SetToDelayed(Guid request, string delayReason);
+        Task<ResourceRequestImplementationDTO> SetToAccomplished(Guid request);
         Task<List<NAFDTO>> GetMyTasksAsync(string employeeId);
         Task<List<NAFDTO>> GetForImplementationsAsync(int locationId);
-        Task<ForImplementationItemDTO> AssignToMeAsync(Guid resourceRequestId, string employeeId);
+        Task<ForImplementationItemDTO> AssignToMeAsync(Guid request, string employeeId);
     }
 }

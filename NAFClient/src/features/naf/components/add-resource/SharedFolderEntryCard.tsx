@@ -2,13 +2,12 @@ import { X } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { FieldLabel } from "@/components/ui/field";
 import { cn } from "@/shared/utils/utils";
-import { CreateOrSelectCombobox } from "@/shared/components/common/CreateOrSelectCombobox";
+import { SearchOrCreateInput } from "@/shared/components/common/SearchOrCreateInput";
 import type { SharedFolderEntry } from "../../hooks/useAddResource";
 
 interface SharedFolderEntryCardProps {
   entry: SharedFolderEntry;
   allSharedFolders: { id: number; name: string }[];
-  usedNames: string[];
   onChange: (patch: Partial<SharedFolderEntry>) => void;
   onRemove: () => void;
 }
@@ -16,13 +15,10 @@ interface SharedFolderEntryCardProps {
 export function SharedFolderEntryCard({
   entry,
   allSharedFolders,
-  usedNames,
   onChange,
   onRemove,
 }: SharedFolderEntryCardProps) {
-  const options = allSharedFolders
-    .filter((f) => !usedNames.map((n) => n.toLowerCase()).includes(f.name.toLowerCase()))
-    .map((f) => f.name);
+  const allNames = allSharedFolders.map((f) => f.name);
 
   return (
     <div className="border rounded-md p-3 space-y-2 relative">
@@ -50,11 +46,11 @@ export function SharedFolderEntryCard({
             </span>
           )}
         </div>
-        <CreateOrSelectCombobox
-          options={options}
+        <SearchOrCreateInput
+          options={allNames}
           value={entry.name}
           onChange={(val, isNew) => onChange({ name: val, isNew })}
-          placeholder="Search or enter folder name..."
+          placeholder="Enter shared folder name..."
         />
       </div>
 

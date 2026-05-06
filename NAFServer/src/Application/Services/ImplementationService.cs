@@ -28,7 +28,26 @@ namespace NAFServer.src.Application.Services
             _context = context;
         }
 
-        public async Task<ResourceRequestImplementationDTO> SetToAccomplished(string request)
+        public async Task<ResourceRequestImplementationDTO> CreateImplementationAsync(Guid request)
+        {
+            var rr = await _resourceRequestRepository.GetByIdAsync(request);
+            var implementation = await _implementationRepository.CreateAsync(request);
+            if (rr.NAF.Progress != Progress.IN_PROGRESS)
+            {
+                rr.NAF.SetToInProgress();
+            }
+
+            await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
+            (
+                request,
+                ResourceRequestAction.IMPLEMENTATION,
+                "Implementation started for resource request"
+            ));
+            await _context.SaveChangesAsync();
+            return ResourceRequestImplementationMapper.ToDTO(implementation);
+        }
+
+        public async Task<ResourceRequestImplementationDTO> SetToAccomplished(Guid request)
         {
             var implementation = await _implementationRepository.GetByIdAsync(request);
             implementation.SetToAccomplished();
@@ -42,11 +61,16 @@ namespace NAFServer.src.Application.Services
                 "Resource Request accomplished"
             ));
 
+            if (resourceRequest.NAF.IsFullyApproved())
+            {
+                resourceRequest.NAF.SetToApproved();
+            }
+
             await _context.SaveChangesAsync();
             return ResourceRequestImplementationMapper.ToDTO(implementation);
         }
 
-        public async Task<ResourceRequestImplementationDTO> SetToDelayed(string request, string delayReason)
+        public async Task<ResourceRequestImplementationDTO> SetToDelayed(Guid request, string delayReason)
         {
             var implementation = await _implementationRepository.GetByIdAsync(request);
             implementation.SetToDelayed(delayReason);
@@ -62,7 +86,7 @@ namespace NAFServer.src.Application.Services
             return ResourceRequestImplementationMapper.ToDTO(implementation);
         }
 
-        public async Task<ResourceRequestImplementationDTO> SetToInProgress(string request, string employeeId)
+        public async Task<ResourceRequestImplementationDTO> SetToInProgress(Guid request, string employeeId)
         {
             var implementation = await _implementationRepository.GetByIdAsync(request);
             implementation.SetToInProgress(employeeId);

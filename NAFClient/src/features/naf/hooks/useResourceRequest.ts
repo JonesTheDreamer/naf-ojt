@@ -3,6 +3,7 @@ import {
   cancelResourceRequest,
   changeResource,
   createResourceRequest,
+  deactivateResourceRequest,
   deleteResourceRequest,
   editResourceRequestPurpose,
   rejectResourceRequest,
@@ -98,6 +99,23 @@ export const useResourceRequest = (
     onError: () => toast.error("Failed to cancel request"),
   });
 
+  const deactivateRequest = useMutation({
+    mutationFn: () => deactivateResourceRequest(resourceRequestId),
+    onSuccess: (updatedRequest) => {
+      queryClient.setQueryData<NAF | undefined>(["naf", NAFId], (oldNAF) => {
+        if (!oldNAF) return oldNAF;
+        return {
+          ...oldNAF,
+          resourceRequests: oldNAF.resourceRequests.map((req) =>
+            req.id === updatedRequest.id ? updatedRequest : req,
+          ),
+        };
+      });
+      toast.success("Resource deactivated");
+    },
+    onError: () => toast.error("Failed to deactivate resource"),
+  });
+
   const createRequest = useMutation({
     mutationFn: (payload: {
       nafId: string;
@@ -128,5 +146,7 @@ export const useResourceRequest = (
     createRequestError: createRequest.isError,
     changeResourceAsync: changeResourceRequest.mutateAsync,
     changeResourceError: changeResourceRequest.isError,
+    deactivateRequestAsync: deactivateRequest.mutateAsync,
+    deactivateRequestError: deactivateRequest.isError,
   };
 };

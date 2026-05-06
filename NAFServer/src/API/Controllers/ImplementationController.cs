@@ -46,7 +46,7 @@ namespace NAFServer.src.API.Controllers
         }
 
         [HttpPatch("{implementationId}/in-progress")]
-        public async Task<IActionResult> SetToInProgress(string implementationId)
+        public async Task<IActionResult> SetToInProgress(Guid implementationId)
         {
             try
             {
@@ -63,7 +63,7 @@ namespace NAFServer.src.API.Controllers
         }
 
         [HttpPatch("{implementationId}/delayed")]
-        public async Task<IActionResult> SetToDelayed(string implementationId, [FromBody] string delayReason)
+        public async Task<IActionResult> SetToDelayed(Guid implementationId, [FromBody] string delayReason)
         {
             try
             {
@@ -80,7 +80,7 @@ namespace NAFServer.src.API.Controllers
         }
 
         [HttpPatch("{implementationId}/accomplished")]
-        public async Task<IActionResult> SetToAccomplished(string implementationId)
+        public async Task<IActionResult> SetToAccomplished(Guid implementationId)
         {
             try
             {

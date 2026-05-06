@@ -14,9 +14,9 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             _context = context;
         }
 
-        public async Task<ResourceRequestImplementation> GetByIdAsync(string id)
+        public async Task<ResourceRequestImplementation> GetByIdAsync(Guid id)
         {
-            return await _context.Implementations.FindAsync(Guid.Parse(id))
+            return await _context.Implementations.FindAsync(id)
                 ?? throw new KeyNotFoundException("Implementation not found");
         }
 

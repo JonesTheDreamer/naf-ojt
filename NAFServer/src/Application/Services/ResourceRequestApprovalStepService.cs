@@ -35,6 +35,11 @@ namespace NAFServer.src.Application.Services
 
                 step.SetToApproved(comment);
                 rr.NextStep();
+                if (naf.Progress != Progress.IN_PROGRESS)
+                {
+                    naf.SetToInProgress();
+                }
+
                 if (rr.IsAccomplished())
                 {
                     rr.SetToImplementation();

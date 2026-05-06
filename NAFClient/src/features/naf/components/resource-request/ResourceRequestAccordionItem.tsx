@@ -41,6 +41,7 @@ import { ApproveDialog } from "./ApproveDialog";
 import { RejectDialog } from "./RejectDialog";
 import { ChangeResourceDialog } from "./ChangeResourceDialog";
 import { EditPurposeDialog } from "../editPurposeDialog";
+import { DeactivateConfirmDialog } from "../deactivateConfirmDialog";
 import { ImplementationActionsBlock } from "./ImplementationActionsBlock";
 
 interface ResourceRequestAccordionItemProps {
@@ -104,6 +105,7 @@ export function ResourceRequestAccordionItem({
   const [purposeHistoryOpen, setPurposeHistoryOpen] = useState(false);
   const [changeResourceDialogOpen, setChangeResourceDialogOpen] =
     useState(false);
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
 
   const progress = request.progress as unknown as Progress;
   const config = PROGRESS_CONFIG[progress];
@@ -247,7 +249,7 @@ export function ResourceRequestAccordionItem({
                     )}
                     {progress === Progress.ACCOMPLISHED && isRequestor && (
                       <DeactivateAction
-                        onDeactivate={() => onDeactivate?.(request.id)}
+                        onDeactivate={() => setDeactivateDialogOpen(true)}
                       />
                     )}
                     {progress === Progress.REJECTED &&
@@ -343,6 +345,16 @@ export function ResourceRequestAccordionItem({
         onConfirm={(newResourceId) => {
           onChangeResource?.(request.id, newResourceId);
           setChangeResourceDialogOpen(false);
+        }}
+        isSubmitting={isSubmitting}
+      />
+      <DeactivateConfirmDialog
+        open={deactivateDialogOpen}
+        onOpenChange={setDeactivateDialogOpen}
+        resourceName={request.resource.name}
+        onConfirm={() => {
+          onDeactivate?.(request.id);
+          setDeactivateDialogOpen(false);
         }}
         isSubmitting={isSubmitting}
       />

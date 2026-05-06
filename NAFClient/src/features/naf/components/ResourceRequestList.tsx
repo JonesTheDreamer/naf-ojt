@@ -13,6 +13,10 @@ import { Progress } from "@/shared/types/enum/progress";
 import { getResourceGroups } from "@/shared/api/resourceService";
 import { useResourceRequest } from "../hooks/useResourceRequest";
 import { ResourceRequestAccordionItem } from "./resource-request";
+import {
+  ResourceRequestFilterBar,
+  type ProgressFilter,
+} from "./resource-request/ResourceRequestFilterBar";
 import { AddResourceDialog } from "./add-resource";
 
 interface RequestItemWrapperProps {
@@ -21,7 +25,6 @@ interface RequestItemWrapperProps {
   currentUserId: string;
   resourceGroups: ResourceGroup[];
   onRemind: (id: string) => void;
-  onDeactivate: (id: string) => void;
 }
 
 function RequestItemWrapper({
@@ -30,7 +33,6 @@ function RequestItemWrapper({
   currentUserId,
   resourceGroups,
   onRemind,
-  onDeactivate,
 }: RequestItemWrapperProps) {
   const {
     updateResourceRequestAsync,
@@ -39,6 +41,7 @@ function RequestItemWrapper({
     rejectRequestAsync,
     cancelRequestAsync,
     changeResourceAsync,
+    deactivateRequestAsync,
   } = useResourceRequest(request.id, request.nafId);
 
   const handleEdit = async (
@@ -138,6 +141,14 @@ function RequestItemWrapper({
     }
   };
 
+  const handleDeactivate = async (_id: string) => {
+    try {
+      await deactivateRequestAsync();
+    } catch (error) {
+      console.error("Failed to deactivate resource:", error);
+    }
+  };
+
   return (
     <ResourceRequestAccordionItem
       isRequestor={isRequestor}
@@ -149,7 +160,7 @@ function RequestItemWrapper({
       onEdit={handleEdit}
       onDelete={handleDelete}
       onRemind={onRemind}
-      onDeactivate={onDeactivate}
+      onDeactivate={handleDeactivate}
       onResubmit={handleResubmit}
       onCancel={handleCancel}
       onChangeResource={handleChangeResource}
@@ -169,6 +180,8 @@ export function ResourceRequestList({
   currentUserId,
 }: ResourceRequestListProps) {
   const [addResourceOpen, setAddResourceOpen] = useState(false);
+  const [filter, setFilter] = useState<ProgressFilter>("all");
+  const [showInactive, setShowInactive] = useState(false);
 
   const resourceGroupsQuery = useQuery({
     queryKey: ["resourceGroups"],
@@ -183,8 +196,13 @@ export function ResourceRequestList({
       r.progress !== Progress.NOT_ACCOMPLISHED,
   ).length;
 
+  const filteredRequests = (naf?.resourceRequests ?? []).filter((r) => {
+    const isInactive = !r.isActive || !!r.cancelledAt;
+    if (filter === "all") return showInactive ? true : !isInactive;
+    return (r.progress as unknown as Progress) === filter;
+  });
+
   const handleRemind = (_id: string) => {};
-  const handleDeactivate = (_id: string) => {};
 
   return (
     <div>
@@ -212,8 +230,14 @@ export function ResourceRequestList({
         open={addResourceOpen}
         onOpenChange={setAddResourceOpen}
       />
+      <ResourceRequestFilterBar
+        selected={filter}
+        showInactive={showInactive}
+        onChange={setFilter}
+        onToggleInactive={setShowInactive}
+      />
       <Accordion type="multiple" className="space-y-2">
-        {(naf?.resourceRequests ?? []).map((req) => (
+        {filteredRequests.map((req) => (
           <RequestItemWrapper
             naf={naf}
             key={req.id}
@@ -221,7 +245,6 @@ export function ResourceRequestList({
             currentUserId={currentUserId}
             resourceGroups={resourceGroups}
             onRemind={handleRemind}
-            onDeactivate={handleDeactivate}
           />
         ))}
       </Accordion>

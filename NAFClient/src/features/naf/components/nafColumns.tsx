@@ -53,8 +53,12 @@ function RequestBadges({ requests }: { requests: ResourceRequest[] }) {
           key={req.id}
           className="inline-flex items-center justify-center px-3 py-0.5 rounded-full text-xs font-medium w-fit min-w-[70px] text-center"
           style={{
-            backgroundColor: req.resource.color ? `#${req.resource.color}` : "#93c5fd",
-            color: getContrastColor(req.resource.color ? `#${req.resource.color}` : "#93c5fd"),
+            backgroundColor: req.resource.color
+              ? `#${req.resource.color}`
+              : "#93c5fd",
+            color: getContrastColor(
+              req.resource.color ? `#${req.resource.color}` : "#93c5fd",
+            ),
           }}
         >
           {req.resource.name}
@@ -137,7 +141,11 @@ export const columns: ColumnDef<NAF>[] = [
     id: "requests",
     header: "Requests",
     size: 160,
-    accessorFn: (r) => r.resourceRequests,
+    accessorFn: (r) =>
+      r.resourceRequests.filter(
+        (req) => req.progress !== Progress.ACCOMPLISHED,
+      ),
+
     cell: ({ getValue }) => {
       const rr = getValue<ResourceRequest[]>();
       return <RequestBadges requests={rr} />;

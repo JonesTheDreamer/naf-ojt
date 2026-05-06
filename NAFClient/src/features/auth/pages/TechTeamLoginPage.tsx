@@ -19,8 +19,9 @@ export default function TechTeamLoginPage() {
     setError("");
     setIsLoading(true);
     try {
-      const user = await authApi.loginTechnicalTeam({ employeeId });
-      setUser(user);
+      await authApi.loginTechnicalTeam({ employeeId });
+      const me = await authApi.me();
+      setUser(me);
       navigate("/tech");
     } catch {
       setError("Invalid employee ID or unauthorized.");

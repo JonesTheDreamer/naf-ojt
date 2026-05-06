@@ -36,4 +36,6 @@ export const ACTION_CONFIG: Record<
   [ResourceRequestAction.ACCOMPLISH]: { label: "Accomplished", className: "bg-emerald-100 text-emerald-700" },
   [ResourceRequestAction.EDITED]: { label: "Edited", className: "bg-gray-100 text-gray-600" },
   [ResourceRequestAction.CANCELLED]: { label: "Cancelled", className: "bg-gray-50 border-gray-200" },
+  [ResourceRequestAction.SCREENING]: { label: "Screening", className: "bg-purple-100 text-purple-700" },
+  [ResourceRequestAction.IMPLEMENTATION]: { label: "Implementation", className: "bg-indigo-100 text-indigo-700" },
 };

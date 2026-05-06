@@ -19,8 +19,9 @@ export default function RequestorLoginPage() {
     setError("");
     setIsLoading(true);
     try {
-      const user = await authApi.loginRequestorApprover({ employeeId });
-      setUser(user);
+      await authApi.loginRequestorApprover({ employeeId });
+      const me = await authApi.me();
+      setUser(me);
       navigate("/NAF");
     } catch {
       setError("Invalid employee ID or unauthorized.");

@@ -20,10 +20,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authApi
       .me()
       .then(setUser)
-      .catch(() => setUser(null))
-      .finally(() => {
-        setIsLoading(false);
-      });
+      .catch(() => {})
+      .finally(() => setIsLoading(false));
   }, []);
 
   const logout = async () => {

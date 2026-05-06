@@ -1,10 +1,13 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { ProgressStatus } from "@/shared/types/api/naf";
 import RequestorLayout from "@/shared/components/layout/RequestorLayout";
 import { useNAF } from "../hooks/useNAF";
 import { useAuth } from "@/features/auth/AuthContext";
 import { NAFDetailHeader } from "../components/NAFDetailHeader";
 import { ResourceRequestList } from "../components/ResourceRequestList";
+import { Button } from "@/components/ui/button";
+import { RoutesEnum } from "@/app/routesEnum";
+import { ChevronLeft } from "lucide-react";
 
 function formatDate(dateStr?: string | null) {
   if (!dateStr) return "—";
@@ -31,19 +34,22 @@ function nafProgressLabel(progress: number): string {
   return ProgressStatus[progress as ProgressStatus] ?? String(progress);
 }
 
-const STATUS_STYLES: Record<number, { bg: string; text: string; dot: string }> = {
-  0: { bg: "bg-amber-50",   text: "text-amber-700",   dot: "bg-amber-400"  }, // Open
-  1: { bg: "bg-blue-50",    text: "text-blue-700",    dot: "bg-blue-400"   }, // In Progress
-  2: { bg: "bg-red-50",     text: "text-red-700",     dot: "bg-red-400"    }, // Rejected
-  3: { bg: "bg-teal-50",    text: "text-teal-700",    dot: "bg-teal-400"   }, // For Screening
-  4: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-400"}, // Accomplished
-  5: { bg: "bg-gray-50",    text: "text-gray-600",    dot: "bg-gray-400"   }, // Not Accomplished
-};
+const STATUS_STYLES: Record<number, { bg: string; text: string; dot: string }> =
+  {
+    0: { bg: "bg-amber-50", text: "text-amber-700", dot: "bg-amber-400" }, // Open
+    1: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-400" }, // In Progress
+    2: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-400" }, // Rejected
+    3: { bg: "bg-teal-50", text: "text-teal-700", dot: "bg-teal-400" }, // For Screening
+    4: { bg: "bg-emerald-50", text: "text-emerald-700", dot: "bg-emerald-400" }, // Accomplished
+    5: { bg: "bg-gray-50", text: "text-gray-600", dot: "bg-gray-400" }, // Not Accomplished
+  };
 
 function StatusPill({ progress }: { progress: number }) {
   const style = STATUS_STYLES[progress] ?? STATUS_STYLES[0];
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${style.bg} ${style.text} border-current/20`}>
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${style.bg} ${style.text} border-current/20`}
+    >
       <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${style.dot}`} />
       {nafProgressLabel(progress)}
     </span>
@@ -69,20 +75,29 @@ export default function NAFDetailPage() {
   const { user } = useAuth();
   const currentUserId = user?.employeeId ?? "";
 
-  const { nafQuery: naf, isLoading, isError, deactivateNAFAsync } = useNAF({ nafId });
+  const {
+    nafQuery: naf,
+    isLoading,
+    isError,
+    deactivateNAFAsync,
+  } = useNAF({ nafId });
 
   const handleDeactivateNAF = async () => {
     if (!nafId) return;
-    try { await deactivateNAFAsync(nafId); }
-    catch (error) { console.error("Failed to deactivate NAF:", error); }
+    try {
+      await deactivateNAFAsync(nafId);
+    } catch (error) {
+      console.error("Failed to deactivate NAF:", error);
+    }
   };
+
+  const navigate = useNavigate();
 
   const progressNum = naf.data?.progress as unknown as number;
 
   return (
     <RequestorLayout>
       <div className="max-w-4xl mx-auto w-full space-y-5 pb-16 px-4 sm:px-6">
-
         {isLoading && <LoadingSkeleton />}
 
         {isError && (
@@ -97,6 +112,15 @@ export default function NAFDetailPage() {
           </div>
         )}
 
+        <Button
+          variant="ghost"
+          size="sm"
+          className="gap-1.5"
+          onClick={() => navigate(RoutesEnum.NAF)}
+        >
+          <ChevronLeft className="h-4 w-4" /> Back to NAFs
+        </Button>
+
         {naf?.data && (
           <>
             {/* ── Document hero ─────────────────────────────────────── */}
@@ -108,9 +132,7 @@ export default function NAFDetailPage() {
                       Network Access Form
                     </span>
                   </div>
-                  <p
-                    className="text-2xl font-bold tracking-tight text-amber-500 font-mono"
-                  >
+                  <p className="text-2xl font-bold tracking-tight text-amber-500 font-mono">
                     {naf.data.reference}
                   </p>
                   <div className="flex items-center gap-4 mt-2 flex-wrap">
@@ -134,7 +156,10 @@ export default function NAFDetailPage() {
             </div>
 
             {/* ── Employee + NAF detail ─────────────────────────────── */}
-            <NAFDetailHeader naf={naf.data} onDeactivate={handleDeactivateNAF} />
+            <NAFDetailHeader
+              naf={naf.data}
+              onDeactivate={handleDeactivateNAF}
+            />
 
             {/* ── Resource requests ─────────────────────────────────── */}
             <ResourceRequestList naf={naf.data} currentUserId={currentUserId} />

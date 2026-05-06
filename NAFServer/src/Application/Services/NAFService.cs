@@ -121,7 +121,7 @@ namespace NAFServer.src.Application.Services
 
         public async Task<NAFDTO> CreateAsync(CreateNAFRequestDTO request)
         {
-            //fetch from peoplecore
+            //fetch from people core
             var employee = await _employeeRepository.GetByIdAsync(request.EmployeeId);
             //fetch from users table
             var employeeUser = await _userRepository.GetUserByEmployeeId(request.EmployeeId);

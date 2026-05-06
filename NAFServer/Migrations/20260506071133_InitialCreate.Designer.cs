@@ -12,7 +12,7 @@ using NAFServer.src.Infrastructure.Persistence;
 namespace NAFServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260505101929_InitialCreate")]
+    [Migration("20260506071133_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -180,10 +180,6 @@ namespace NAFServer.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("DepartmentId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -631,15 +627,7 @@ namespace NAFServer.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("DepartmentId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Remarks")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

@@ -24,6 +24,7 @@ namespace NAFServer.src.Application.Services
         private readonly IResourceRequestHandlerRegistry _resourceRequestHandlerRegistry;
         private readonly IUserRepository _userRepository;
         private readonly IUserLocationRepository _userLocationRepository;
+        private readonly IImplementationService _implementationService;
 
         public ResourceRequestService(
             IResourceRequestRepository resourceRequestRepository,
@@ -36,6 +37,7 @@ namespace NAFServer.src.Application.Services
             IResourceRequestHandlerRegistry resourceRequestHandlerRegistry,
             IUserRepository userRepository,
             IUserLocationRepository userLocationRepository,
+            IImplementationService implementationService,
             AppDbContext context
         )
         {
@@ -49,6 +51,7 @@ namespace NAFServer.src.Application.Services
             _resourceRequestHandlerRegistry = resourceRequestHandlerRegistry;
             _userRepository = userRepository;
             _userLocationRepository = userLocationRepository;
+            _implementationService = implementationService;
             _context = context;
         }
 
@@ -179,7 +182,7 @@ namespace NAFServer.src.Application.Services
 
                 await _context.ResourceRequests.AddAsync(rr);
                 await _context.SaveChangesAsync();
-                await _context.Implementations.AddAsync(new Domain.Entities.ResourceRequestImplementation(rr.Id));
+                var implementation = await _implementationService.CreateImplementationAsync(rr.Id);
                 await _context.SaveChangesAsync();
                 rr.Resource = resource;
                 return ResourceRequestMapper.ToDTO(rr);
@@ -370,6 +373,21 @@ namespace NAFServer.src.Application.Services
             ));
 
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<ResourceRequestDTO> DeactivateAsync(Guid requestId)
+        {
+            var rr = await _resourceRequestRepository.GetByIdAsync(requestId);
+            rr.DeactivateResourceRequest();
+            await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
+            (
+                rr.Id,
+                ResourceRequestAction.CANCELLED,
+                "Resource request deactivated"
+            ));
+
+            await _context.SaveChangesAsync();
+            return ResourceRequestMapper.ToDTO(rr);
         }
 
         public async Task DeleteAsync(Guid requestId)
