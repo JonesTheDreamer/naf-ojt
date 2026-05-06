@@ -1,4 +1,4 @@
-import { Home, Users, FileText, Wrench } from "lucide-react";
+import { Home, Users, FileText, Wrench, Box } from "lucide-react";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "./Layout";
@@ -9,6 +9,7 @@ const navItems = [
   { label: "NAFs", icon: <FileText className="w-5 h-5" />, href: "/admin/NAF" },
   { label: "Implementations", icon: <Wrench className="w-5 h-5" />, href: "/admin/for-implementations" },
   { label: "Users", icon: <Users className="w-5 h-5" />, href: "/admin/users" },
+  { label: "Resources", icon: <Box className="w-5 h-5" />, href: "/admin/resources" },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {

@@ -32,6 +32,12 @@ const ForImplementationsPage = lazy(
 const AdminImplementationDetailPage = lazy(
   () => import("@/features/admin/pages/AdminImplementationDetailPage"),
 );
+const ResourceListPage = lazy(
+  () => import("@/features/resource-management/pages/ResourceListPage"),
+);
+const ResourceDetailPage = lazy(
+  () => import("@/features/resource-management/pages/ResourceDetailPage"),
+);
 
 export function AppRouter() {
   return (
@@ -143,6 +149,28 @@ export function AppRouter() {
               loginPath={RoutesEnum.LOGIN_ADMIN}
             >
               <UserDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={RoutesEnum.ADMIN_RESOURCES}
+          element={
+            <ProtectedRoute
+              requiredRole="ADMIN"
+              loginPath={RoutesEnum.LOGIN_ADMIN}
+            >
+              <ResourceListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={RoutesEnum.ADMIN_RESOURCE_DETAIL}
+          element={
+            <ProtectedRoute
+              requiredRole="ADMIN"
+              loginPath={RoutesEnum.LOGIN_ADMIN}
+            >
+              <ResourceDetailPage />
             </ProtectedRoute>
           }
         />
