@@ -4,7 +4,11 @@ import {
   createInternetPurpose,
   createInternetResource,
 } from "@/shared/api/resourceMetadataService";
-import { createResourceRequest } from "../api";
+import {
+  createResourceRequest,
+  findOrCreateGroupEmail,
+  findOrCreateSharedFolder,
+} from "../api";
 import { toast } from "sonner";
 
 export type InternetEntry = {
@@ -24,14 +28,16 @@ export type InternetEntry = {
 
 export type GroupEmailEntry = {
   _id: string;
-  groupEmailId: number | null;
+  email: string;
+  isNew: boolean;
   purpose: string;
   dateNeeded: string;
 };
 
 export type SharedFolderEntry = {
   _id: string;
-  sharedFolderId: number | null;
+  name: string;
+  isNew: boolean;
   purpose: string;
   dateNeeded: string;
 };
@@ -130,13 +136,16 @@ export const useAddResource = () => {
 
     params.groupEmailEntries.forEach((entry) => {
       specialTasks.push(
-        createResourceRequest({
-          nafId: params.nafId,
-          resourceId: GROUP_EMAIL_RESOURCE_ID,
-          purpose: entry.purpose,
-          additionalInfo: { GroupEmailId: entry.groupEmailId! },
-          dateNeeded: entry.dateNeeded || null,
-        })
+        findOrCreateGroupEmail(entry.email.trim())
+          .then(({ id }) =>
+            createResourceRequest({
+              nafId: params.nafId,
+              resourceId: GROUP_EMAIL_RESOURCE_ID,
+              purpose: entry.purpose,
+              additionalInfo: { GroupEmailId: id },
+              dateNeeded: entry.dateNeeded || null,
+            }),
+          )
           .then(() => {
             anySuccess = true;
           })
@@ -150,13 +159,16 @@ export const useAddResource = () => {
 
     params.sharedFolderEntries.forEach((entry) => {
       specialTasks.push(
-        createResourceRequest({
-          nafId: params.nafId,
-          resourceId: SHARED_FOLDER_RESOURCE_ID,
-          purpose: entry.purpose,
-          additionalInfo: { SharedFolderId: entry.sharedFolderId! },
-          dateNeeded: entry.dateNeeded || null,
-        })
+        findOrCreateSharedFolder(entry.name.trim())
+          .then(({ id }) =>
+            createResourceRequest({
+              nafId: params.nafId,
+              resourceId: SHARED_FOLDER_RESOURCE_ID,
+              purpose: entry.purpose,
+              additionalInfo: { SharedFolderId: id },
+              dateNeeded: entry.dateNeeded || null,
+            }),
+          )
           .then(() => {
             anySuccess = true;
           })
