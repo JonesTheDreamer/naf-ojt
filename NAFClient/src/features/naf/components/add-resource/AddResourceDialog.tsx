@@ -42,13 +42,13 @@ export function AddResourceDialog({ naf, open, onOpenChange }: AddResourceDialog
     .filter((rr) => rr.additionalInfo?.type === 0 && rr.progress === Progress.ACCOMPLISHED)
     .map((rr) => (rr.additionalInfo as InternetRequestInfo).internetResourceId);
 
-  const usedGroupEmailIds = naf.resourceRequests
-    .filter((rr) => rr.additionalInfo?.type === 2 && rr.progress === Progress.ACCOMPLISHED)
-    .map((rr) => (rr.additionalInfo as GroupEmailInfo).groupEmailId);
+  const usedGroupEmails = naf.resourceRequests
+    .filter((rr) => rr.additionalInfo?.type === 2)
+    .map((rr) => (rr.additionalInfo as GroupEmailInfo).email);
 
-  const usedSharedFolderIds = naf.resourceRequests
-    .filter((rr) => rr.additionalInfo?.type === 1 && rr.progress === Progress.ACCOMPLISHED)
-    .map((rr) => (rr.additionalInfo as SharedFolderInfo).sharedFolderId);
+  const usedSharedFolderNames = naf.resourceRequests
+    .filter((rr) => rr.additionalInfo?.type === 1)
+    .map((rr) => (rr.additionalInfo as SharedFolderInfo).name);
 
   const availableBasic = (getAllResource.data ?? []).filter(
     (r) => !r.isSpecial && !existingResourceIds.includes(r.id),
@@ -60,10 +60,10 @@ export function AddResourceDialog({ naf, open, onOpenChange }: AddResourceDialog
     setInternetEntries((prev) => [...prev, { _id: newEntry(), internetPurposeId: null, internetResourceId: null, purpose: "", dateNeeded: "", isOther: false, newPurposeName: "", newPurposeDescription: "", newResourceName: "", newResourceUrl: "", newResourceDescription: "" }]);
 
   const addGroupEmailEntry = () =>
-    setGroupEmailEntries((prev) => [...prev, { _id: newEntry(), groupEmailId: null, purpose: "", dateNeeded: "" }]);
+    setGroupEmailEntries((prev) => [...prev, { _id: newEntry(), email: "", isNew: false, purpose: "", dateNeeded: "" }]);
 
   const addSharedFolderEntry = () =>
-    setSharedFolderEntries((prev) => [...prev, { _id: newEntry(), sharedFolderId: null, purpose: "", dateNeeded: "" }]);
+    setSharedFolderEntries((prev) => [...prev, { _id: newEntry(), name: "", isNew: false, purpose: "", dateNeeded: "" }]);
 
   const patchInternetEntry = (_id: string, patch: Partial<InternetEntry>) =>
     setInternetEntries((prev) => prev.map((e) => (e._id === _id ? { ...e, ...patch } : e)));
@@ -79,8 +79,8 @@ export function AddResourceDialog({ naf, open, onOpenChange }: AddResourceDialog
       ? e.newPurposeName.trim().length > 0 && e.newResourceName.trim().length > 0 && e.newResourceUrl.trim().length > 0 && e.purpose.trim().length > 0
       : e.internetResourceId !== null && e.purpose.trim().length > 0;
 
-  const isGroupEmailEntryComplete = (e: GroupEmailEntry) => e.groupEmailId !== null && e.purpose.trim().length > 0;
-  const isSharedFolderEntryComplete = (e: SharedFolderEntry) => e.sharedFolderId !== null && e.purpose.trim().length > 0;
+  const isGroupEmailEntryComplete = (e: GroupEmailEntry) => e.email.trim().length > 0 && e.purpose.trim().length > 0;
+  const isSharedFolderEntryComplete = (e: SharedFolderEntry) => e.name.trim().length > 0 && e.purpose.trim().length > 0;
 
   const hasAnything = basicResources.length > 0 || internetEntries.length > 0 || groupEmailEntries.length > 0 || sharedFolderEntries.length > 0;
   const allComplete = internetEntries.every(isInternetEntryComplete) && groupEmailEntries.every(isGroupEmailEntryComplete) && sharedFolderEntries.every(isSharedFolderEntryComplete);
@@ -145,7 +145,7 @@ export function AddResourceDialog({ naf, open, onOpenChange }: AddResourceDialog
                 key={entry._id}
                 entry={entry}
                 allGroupEmails={groupEmails.data ?? []}
-                usedGroupEmailIds={[...usedGroupEmailIds, ...groupEmailEntries.filter((e) => e._id !== entry._id && e.groupEmailId !== null).map((e) => e.groupEmailId!)]}
+                usedEmails={[...usedGroupEmails, ...groupEmailEntries.filter((e) => e._id !== entry._id && e.email.trim().length > 0).map((e) => e.email)]}
                 onChange={(patch) => patchGroupEmailEntry(entry._id, patch)}
                 onRemove={() => setGroupEmailEntries((prev) => prev.filter((e) => e._id !== entry._id))}
               />
@@ -163,7 +163,7 @@ export function AddResourceDialog({ naf, open, onOpenChange }: AddResourceDialog
                 key={entry._id}
                 entry={entry}
                 allSharedFolders={sharedFolders.data ?? []}
-                usedSharedFolderIds={[...usedSharedFolderIds, ...sharedFolderEntries.filter((e) => e._id !== entry._id && e.sharedFolderId !== null).map((e) => e.sharedFolderId!)]}
+                usedNames={[...usedSharedFolderNames, ...sharedFolderEntries.filter((e) => e._id !== entry._id && e.name.trim().length > 0).map((e) => e.name)]}
                 onChange={(patch) => patchSharedFolderEntry(entry._id, patch)}
                 onRemove={() => setSharedFolderEntries((prev) => prev.filter((e) => e._id !== entry._id))}
               />
