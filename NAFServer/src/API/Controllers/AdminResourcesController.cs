@@ -42,7 +42,7 @@ namespace NAFServer.src.API.Controllers
             try
             {
                 var id = await _resourceManagementService.CreateResourceAsync(dto);
-                return Created($"api/admin/resources/{id}", new { id });
+                return Created($"/api/admin/resources/{id}", new { id });
             }
             catch (ArgumentException ex)
             {
@@ -62,6 +62,10 @@ namespace NAFServer.src.API.Controllers
             {
                 return NotFound(ex.Message);
             }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 return BadRequest(ex.Message);
@@ -74,7 +78,7 @@ namespace NAFServer.src.API.Controllers
             try
             {
                 await _resourceManagementService.AddWorkflowTemplateAsync(id, dto);
-                return Created("", null);
+                return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
