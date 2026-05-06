@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NAFServer.src.Application.DTOs.Lookup;
 using NAFServer.src.Application.Interfaces;
 
 namespace NAFServer.src.API.Controllers
@@ -10,8 +11,21 @@ namespace NAFServer.src.API.Controllers
     public class SharedFoldersController : ControllerBase
     {
         private readonly ISharedFolderService _service;
-        public SharedFoldersController(ISharedFolderService service) { _service = service; }
+
+        public SharedFoldersController(ISharedFolderService service)
+        {
+            _service = service;
+        }
+
         [HttpGet]
-        public async Task<IActionResult> Get() => Ok(await _service.GetAllAsync());
+        public async Task<IActionResult> Get()
+            => Ok(await _service.GetAllAsync());
+
+        [HttpPost("find-or-create")]
+        public async Task<IActionResult> FindOrCreate([FromBody] FindOrCreateSharedFolderDTO dto)
+        {
+            var result = await _service.FindOrCreateAsync(dto.Name);
+            return Ok(new SharedFolderItemDTO(result.Id, result.Name));
+        }
     }
 }

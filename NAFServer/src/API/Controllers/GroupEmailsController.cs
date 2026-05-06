@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NAFServer.src.Application.DTOs.Lookup;
 using NAFServer.src.Application.Interfaces;
 
 namespace NAFServer.src.API.Controllers
@@ -10,8 +11,21 @@ namespace NAFServer.src.API.Controllers
     public class GroupEmailsController : ControllerBase
     {
         private readonly IGroupEmailService _service;
-        public GroupEmailsController(IGroupEmailService service) { _service = service; }
+
+        public GroupEmailsController(IGroupEmailService service)
+        {
+            _service = service;
+        }
+
         [HttpGet]
-        public async Task<IActionResult> Get() => Ok(await _service.GetAllAsync());
+        public async Task<IActionResult> Get()
+            => Ok(await _service.GetAllAsync());
+
+        [HttpPost("find-or-create")]
+        public async Task<IActionResult> FindOrCreate([FromBody] FindOrCreateGroupEmailDTO dto)
+        {
+            var result = await _service.FindOrCreateAsync(dto.Email);
+            return Ok(new GroupEmailDTO(result.Id, result.Email));
+        }
     }
 }
