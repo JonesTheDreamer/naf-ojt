@@ -28,7 +28,7 @@ import {
   HistoryTable,
   ImplementationBlock,
 } from "./ResourceRequestContent";
-import { ApprovalStepsBlock } from "@/features/admin/components/AdminResourceRequestList";
+import { ApprovalStepsBlock } from "./ResourceRequestContent";
 import {
   OpenActions,
   ReminderAction,
@@ -41,31 +41,41 @@ import { ApproveDialog } from "./ApproveDialog";
 import { RejectDialog } from "./RejectDialog";
 import { ChangeResourceDialog } from "./ChangeResourceDialog";
 import { EditPurposeDialog } from "../editPurposeDialog";
+import { ImplementationActionsBlock } from "./ImplementationActionsBlock";
 
 interface ResourceRequestAccordionItemProps {
   request: ResourceRequest;
-  isCurrentApprover: boolean;
-  isRequestor: boolean;
-  isApprover: boolean;
+  isCurrentApprover?: boolean;
+  isRequestor?: boolean;
+  isApprover?: boolean;
   isSubmitting?: boolean;
   resourceGroup?: ResourceGroup;
   groupResources?: Resource[];
-  onEdit: (requestId: string, nafId: string, purpose: PurposeProps) => void;
-  onDelete: (requestId: string) => void;
-  onRemind: (requestId: string) => void;
-  onDeactivate: (requestId: string) => void;
-  onResubmit: (requestId: string, nafId: string, purpose: PurposeProps) => void;
-  onCancel: (requestId: string) => void;
-  onChangeResource: (requestId: string, newResourceId: number) => void;
-  onApprove: (requestId: string, remarks: string) => void;
-  onReject: (requestId: string, reasonForRejection: string) => void;
+  onEdit?: (requestId: string, nafId: string, purpose: PurposeProps) => void;
+  onDelete?: (requestId: string) => void;
+  onRemind?: (requestId: string) => void;
+  onDeactivate?: (requestId: string) => void;
+  onResubmit?: (requestId: string, nafId: string, purpose: PurposeProps) => void;
+  onCancel?: (requestId: string) => void;
+  onChangeResource?: (requestId: string, newResourceId: number) => void;
+  onApprove?: (requestId: string, remarks: string) => void;
+  onReject?: (requestId: string, reasonForRejection: string) => void;
+  // FOR_SCREENING (admin)
+  onClaim?: (stepId: string) => void;
+  isClaiming?: boolean;
+  // IMPLEMENTATION (admin)
+  onAccept?: (resourceRequestId: string) => void;
+  onSetToInProgress?: (implementationId: string) => void;
+  onSetToDelayed?: (implementationId: string, reason: string) => void;
+  onSetToAccomplished?: (implementationId: string) => void;
+  isSubmittingImpl?: boolean;
 }
 
 export function ResourceRequestAccordionItem({
   request,
   isCurrentApprover = false,
-  isApprover,
-  isRequestor,
+  isApprover = false,
+  isRequestor = false,
   isSubmitting,
   resourceGroup,
   groupResources = [],
@@ -78,6 +88,13 @@ export function ResourceRequestAccordionItem({
   onChangeResource,
   onApprove,
   onReject,
+  onClaim,
+  isClaiming,
+  onAccept,
+  onSetToInProgress,
+  onSetToDelayed,
+  onSetToAccomplished,
+  isSubmittingImpl,
 }: ResourceRequestAccordionItemProps) {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [resubmitDialogOpen, setResubmitDialogOpen] = useState(false);
@@ -159,7 +176,14 @@ export function ResourceRequestAccordionItem({
         </AccordionTrigger>
 
         <AccordionContent className="px-4 pb-4 pt-2">
-          {request.steps.length > 0 && <ApprovalStepsBlock request={request} />}
+          {request.steps.length > 0 && (
+            <ApprovalStepsBlock
+              request={request}
+              currentStepOrder={request.currentStep}
+              onClaim={onClaim}
+              isClaiming={isClaiming}
+            />
+          )}
           <div className="mt-3">
             <PurposeBlock
               request={request}
@@ -182,25 +206,38 @@ export function ResourceRequestAccordionItem({
             {progress === Progress.IMPLEMENTATION && (
               <ImplementationBlock impl={request.implementation} />
             )}
+            {(onAccept || onSetToInProgress || onSetToDelayed || onSetToAccomplished) &&
+              progress === Progress.IMPLEMENTATION && (
+                <ImplementationActionsBlock
+                  impl={request.implementation}
+                  resourceRequestId={request.id}
+                  onAccept={onAccept}
+                  onSetToInProgress={onSetToInProgress}
+                  onSetToDelayed={onSetToDelayed}
+                  onSetToAccomplished={onSetToAccomplished}
+                  isSubmitting={isSubmittingImpl}
+                />
+              )}
 
             {request.isActive && (
               <>
                 {isApprover && isCurrentApprover && (
                   <>
                     {(progress === Progress.OPEN ||
-                      progress === Progress.IN_PROGRESS) && (
+                      progress === Progress.IN_PROGRESS ||
+                      progress === Progress.FOR_SCREENING) && (
                       <ApproverActions
                         onApprove={() => setApproveDialogOpen(true)}
                         onReject={() => setRejectDialogOpen(true)}
                       />
                     )}
                     {progress === Progress.IMPLEMENTATION && (
-                      <ReminderAction onRemind={() => onRemind(request.id)} />
+                      <ReminderAction onRemind={() => onRemind?.(request.id)} />
                     )}
                   </>
                 )}
 
-                {!isCurrentApprover && !isApprover && (
+                {!isCurrentApprover && !isApprover && onEdit && (
                   <>
                     {progress === Progress.OPEN && (
                       <OpenActions
@@ -210,7 +247,7 @@ export function ResourceRequestAccordionItem({
                     )}
                     {progress === Progress.ACCOMPLISHED && isRequestor && (
                       <DeactivateAction
-                        onDeactivate={() => onDeactivate(request.id)}
+                        onDeactivate={() => onDeactivate?.(request.id)}
                       />
                     )}
                     {progress === Progress.REJECTED &&
@@ -219,11 +256,11 @@ export function ResourceRequestAccordionItem({
                       ) : (
                         <RejectedActions
                           onResubmit={() => setResubmitDialogOpen(true)}
-                          onCancel={() => onCancel(request.id)}
+                          onCancel={() => onCancel?.(request.id)}
                         />
                       ))}
                     {progress === Progress.IMPLEMENTATION && (
-                      <ReminderAction onRemind={() => onRemind(request.id)} />
+                      <ReminderAction onRemind={() => onRemind?.(request.id)} />
                     )}
                     {canChangeResource &&
                       progress !== Progress.NOT_ACCOMPLISHED &&
@@ -252,7 +289,7 @@ export function ResourceRequestAccordionItem({
         onOpenChange={setEditDialogOpen}
         initialPurpose={initialPurpose}
         onSubmit={(purpose) => {
-          onEdit(request.id, request.nafId, purpose);
+          onEdit?.(request.id, request.nafId, purpose);
           setEditDialogOpen(false);
         }}
       />
@@ -267,7 +304,7 @@ export function ResourceRequestAccordionItem({
         onOpenChange={setResubmitDialogOpen}
         initialPurpose={initialPurpose}
         onSubmit={(purpose) => {
-          onResubmit(request.id, request.nafId, { ...purpose });
+          onResubmit?.(request.id, request.nafId, { ...purpose });
           setResubmitDialogOpen(false);
         }}
       />
@@ -276,7 +313,7 @@ export function ResourceRequestAccordionItem({
         onOpenChange={setDeleteDialogOpen}
         resourceName={request.resource.name}
         onConfirm={() => {
-          onDelete(request.id);
+          onDelete?.(request.id);
           setDeleteDialogOpen(false);
         }}
       />
@@ -284,7 +321,7 @@ export function ResourceRequestAccordionItem({
         open={approveDialogOpen}
         onOpenChange={setApproveDialogOpen}
         onConfirm={(remarks) => {
-          onApprove(request.id, remarks);
+          onApprove?.(request.id, remarks);
           setApproveDialogOpen(false);
         }}
         isSubmitting={isSubmitting}
@@ -293,7 +330,7 @@ export function ResourceRequestAccordionItem({
         open={rejectDialogOpen}
         onOpenChange={setRejectDialogOpen}
         onConfirm={(reason) => {
-          onReject(request.id, reason);
+          onReject?.(request.id, reason);
           setRejectDialogOpen(false);
         }}
         isSubmitting={isSubmitting}
@@ -304,7 +341,7 @@ export function ResourceRequestAccordionItem({
         currentResourceName={request.resource.name}
         availableResources={groupResources}
         onConfirm={(newResourceId) => {
-          onChangeResource(request.id, newResourceId);
+          onChangeResource?.(request.id, newResourceId);
           setChangeResourceDialogOpen(false);
         }}
         isSubmitting={isSubmitting}

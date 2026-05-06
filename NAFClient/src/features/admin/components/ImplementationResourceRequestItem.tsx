@@ -10,7 +10,7 @@ import type { ResourceRequest } from "@/shared/types/api/naf";
 import { ImplementationStatus } from "@/shared/types/enum/status";
 import { AdditionalInfoBlock } from "@/features/naf/components/resource-request/ResourceRequestContent";
 import { ResourceIcon } from "@/features/naf/components/resource-request/resourceRequestUtils";
-import { DelayedReasonModal } from "./DelayedReasonModal";
+import { DelayedReasonModal } from "@/features/naf/components/DelayedReasonModal";
 
 const IMPL_STATUS_CONFIG: Record<
   ImplementationStatus,
