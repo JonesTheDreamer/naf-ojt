@@ -1,4 +1,5 @@
 using NAFServer.src.Application.DTOs.ResourceGroup;
+using NAFServer.src.Application.DTOs.ResourceManagement;
 using NAFServer.src.Application.Interfaces;
 using NAFServer.src.Domain.Interface.Repository;
 using NAFServer.src.Infrastructure.Persistence;
@@ -61,6 +62,20 @@ namespace NAFServer.src.Application.Services
                 ?? throw new KeyNotFoundException($"Resource group {groupId} not found after update.");
 
             return ToDTO(updated);
+        }
+
+        public async Task<ResourceGroupDTO> CreateAsync(CreateResourceGroupDTO dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+                throw new ArgumentException("Group name is required.");
+
+            var group = new Domain.Entities.ResourceGroup(dto.Name, dto.CanOwnMany, false);
+            _context.ResourceGroups.Add(group);
+            await _context.SaveChangesAsync();
+
+            var created = await _resourceGroupRepository.GetGroupByIdAsync(group.Id)
+                ?? throw new InvalidOperationException("Failed to retrieve created group.");
+            return ToDTO(created);
         }
 
         private static ResourceGroupDTO ToDTO(Domain.Entities.ResourceGroup group)

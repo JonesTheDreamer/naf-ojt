@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using NAFServer.src.Application.DTOs.ResourceManagement;
 using NAFServer.src.Application.Interfaces;
 
 namespace NAFServer.src.API.Controllers
@@ -21,6 +22,24 @@ namespace NAFServer.src.API.Controllers
         {
             var groups = await _resourceGroupService.GetAllGroupsAsync();
             return Ok(groups);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateResourceGroupDTO dto)
+        {
+            try
+            {
+                var group = await _resourceGroupService.CreateAsync(dto);
+                return Created("", group);
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("{groupId}/resources/{resourceId}")]

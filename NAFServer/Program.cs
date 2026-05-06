@@ -95,6 +95,7 @@ builder.Services.AddScoped<IImplementationRepository, ImplementationRepository>(
 builder.Services.AddScoped<IImplementationService, ImplementationService>();
 builder.Services.AddScoped<IResourceGroupRepository, ResourceGroupRepository>();
 builder.Services.AddScoped<IResourceGroupService, ResourceGroupService>();
+builder.Services.AddScoped<IResourceManagementService, ResourceManagementService>();
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<CacheService>();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
