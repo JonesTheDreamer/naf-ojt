@@ -32,7 +32,15 @@
       "Bash(xargs grep *)",
       "Bash(npx shadcn@latest add popover --yes)",
       "Bash(dir *)",
-      "Bash(git *)"
+      "Bash(git *)",
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\Jones H\\\\Desktop\\\\naf-ojt\" -Recurse -Directory | Where-Object { $_.FullName -match \"\\(NAFServer|NAFClient\\)\" } | Select-Object -ExpandProperty FullName | Sort-Object)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\Jones H\\\\Desktop\\\\naf-ojt\" -Recurse -Directory)",
+      "Bash(Select-Object -First 30)",
+      "Bash(New-Item -ItemType Directory -Path \"C:\\\\Users\\\\Jones H\\\\Desktop\\\\naf-ojt\\\\NAFServer\\\\src\\\\Application\\\\DTOs\\\\ResourceManagement\" -Force)",
+      "Bash(Out-Null)",
+      "Bash(Write-Host \"Directory created\")",
+      "Bash(Get-ChildItem *)",
+      "Bash(Select-Object Name)"
     ]
   }
 }

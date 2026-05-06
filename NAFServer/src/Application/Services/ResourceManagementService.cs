@@ -79,12 +79,11 @@ namespace NAFServer.src.Application.Services
                 .ToListAsync();
 
             var employeeIds = requests.Select(rr => rr.NAF.EmployeeId).Distinct().ToList();
-            var employees = new Dictionary<string, Employee>();
-            foreach (var eid in employeeIds)
-            {
-                var emp = await _employeeRepository.GetByIdAsync(eid);
-                if (emp != null) employees[eid] = emp;
-            }
+            var employeeTasks = employeeIds.Select(async eid => (eid, emp: await _employeeRepository.GetByIdAsync(eid)));
+            var employeeResults = await Task.WhenAll(employeeTasks);
+            var employees = employeeResults
+                .Where(x => x.emp != null)
+                .ToDictionary(x => x.eid, x => x.emp!);
 
             var byLocation = requests
                 .GroupBy(rr => rr.NAF.LocationId)
@@ -133,14 +132,7 @@ namespace NAFServer.src.Application.Services
                     _context.ApprovalWorkflowTemplates.Add(template);
                     await _context.SaveChangesAsync();
 
-                    var steps = dto.Steps!.Select(s => new ApprovalWorkflowStepsTemplate(
-                        template.Id,
-                        s.StepOrder,
-                        Enum.Parse<StepAction>(s.StepAction),
-                        Enum.Parse<ApproverRole>(s.ApproverRole),
-                        s.ApproverEntity
-                    )).ToList();
-                    _context.ApprovalWorkflowStepsTemplates.AddRange(steps);
+                    _context.ApprovalWorkflowStepsTemplates.AddRange(BuildSteps(template.Id, dto.Steps!));
                     await _context.SaveChangesAsync();
                 }
 
@@ -158,8 +150,19 @@ namespace NAFServer.src.Application.Services
         {
             var resource = await _context.Resources.FindAsync(id)
                 ?? throw new KeyNotFoundException($"Resource {id} not found");
-            resource.SetToInactive();
-            await _context.SaveChangesAsync();
+
+            using var tx = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                resource.SetToInactive();
+                await _context.SaveChangesAsync();
+                await tx.CommitAsync();
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task AddWorkflowTemplateAsync(int resourceId, AddWorkflowTemplateDTO dto)
@@ -189,14 +192,7 @@ namespace NAFServer.src.Application.Services
                 _context.ApprovalWorkflowTemplates.Add(template);
                 await _context.SaveChangesAsync();
 
-                var steps = dto.Steps.Select(s => new ApprovalWorkflowStepsTemplate(
-                    template.Id,
-                    s.StepOrder,
-                    Enum.Parse<StepAction>(s.StepAction),
-                    Enum.Parse<ApproverRole>(s.ApproverRole),
-                    s.ApproverEntity
-                )).ToList();
-                _context.ApprovalWorkflowStepsTemplates.AddRange(steps);
+                _context.ApprovalWorkflowStepsTemplates.AddRange(BuildSteps(template.Id, dto.Steps));
                 await _context.SaveChangesAsync();
 
                 await tx.CommitAsync();
@@ -206,6 +202,17 @@ namespace NAFServer.src.Application.Services
                 await tx.RollbackAsync();
                 throw;
             }
+        }
+        private static List<ApprovalWorkflowStepsTemplate> BuildSteps(Guid templateId, List<CreateWorkflowStepDTO> steps)
+        {
+            return steps.Select(s =>
+            {
+                if (!Enum.TryParse<StepAction>(s.StepAction, out var stepAction))
+                    throw new ArgumentException($"Invalid StepAction: '{s.StepAction}'. Valid values: {string.Join(", ", Enum.GetNames<StepAction>())}");
+                if (!Enum.TryParse<ApproverRole>(s.ApproverRole, out var approverRole))
+                    throw new ArgumentException($"Invalid ApproverRole: '{s.ApproverRole}'. Valid values: {string.Join(", ", Enum.GetNames<ApproverRole>())}");
+                return new ApprovalWorkflowStepsTemplate(templateId, s.StepOrder, stepAction, approverRole, s.ApproverEntity);
+            }).ToList();
         }
     }
 }
