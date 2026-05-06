@@ -41,12 +41,13 @@ export function useDeactivateResource() {
   });
 }
 
-export function useAddWorkflowTemplate(resourceId: number) {
+export function useAddWorkflowTemplate() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: (payload: AddWorkflowTemplatePayload) =>
+    mutationFn: ({ resourceId, payload }: { resourceId: number; payload: AddWorkflowTemplatePayload }) =>
       resourceManagementApi.addWorkflowTemplate(resourceId, payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.detail(resourceId) }),
+    onSuccess: (_data, { resourceId }) =>
+      qc.invalidateQueries({ queryKey: KEYS.detail(resourceId) }),
   });
 }
 

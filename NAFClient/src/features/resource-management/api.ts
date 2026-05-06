@@ -10,23 +10,13 @@ import type { ResourceGroup } from "@/shared/types/api/naf";
 
 export const resourceManagementApi = {
   async getAll(): Promise<AdminResourceListItem[]> {
-    try {
-      const res = await api.get<AdminResourceListItem[]>("/admin/resources");
-      return res.data;
-    } catch (e) {
-      console.log(e);
-      return [];
-    }
+    const res = await api.get<AdminResourceListItem[]>("/admin/resources");
+    return res.data;
   },
 
-  async getDetail(id: number): Promise<AdminResourceDetail | null> {
-    try {
-      const res = await api.get<AdminResourceDetail>(`/admin/resources/${id}`);
-      return res.data;
-    } catch (e) {
-      console.log(e);
-      return null;
-    }
+  async getDetail(id: number): Promise<AdminResourceDetail> {
+    const res = await api.get<AdminResourceDetail>(`/admin/resources/${id}`);
+    return res.data;
   },
 
   async createResource(payload: CreateResourcePayload): Promise<{ id: number }> {
