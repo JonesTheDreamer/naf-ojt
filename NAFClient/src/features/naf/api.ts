@@ -98,6 +98,10 @@ export const cancelResourceRequest = async (resourceRequestId: string): Promise<
   await api.put(`/Requests/${resourceRequestId}/cancel`);
 };
 
+export const deactivateResourceRequest = async (resourceRequestId: string): Promise<ResourceRequest> => {
+  return (await api.put(`/Requests/${resourceRequestId}/deactivate`)).data;
+};
+
 export const rejectResourceRequest = async (
   stepId: string,
   reasonForRejection: string,
@@ -108,3 +112,13 @@ export const rejectResourceRequest = async (
 export const claimScreeningStep = async (stepId: string): Promise<void> => {
   await api.post(`/ApprovalSteps/${stepId}/claim`);
 };
+
+export const findOrCreateGroupEmail = async (
+  email: string,
+): Promise<{ id: number; email: string }> =>
+  (await api.post("/GroupEmails/find-or-create", { email })).data;
+
+export const findOrCreateSharedFolder = async (
+  name: string,
+): Promise<{ id: number; name: string }> =>
+  (await api.post("/SharedFolders/find-or-create", { name })).data;
