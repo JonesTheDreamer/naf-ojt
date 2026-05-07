@@ -40,7 +40,8 @@
       "Bash(Out-Null)",
       "Bash(Write-Host \"Directory created\")",
       "Bash(Get-ChildItem *)",
-      "Bash(Select-Object Name)"
+      "Bash(Select-Object Name)",
+      "Bash(grep -E \"\\\\.cs$\")"
     ]
   }
 }
