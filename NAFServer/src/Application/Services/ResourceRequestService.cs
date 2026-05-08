@@ -1,4 +1,5 @@
-﻿using NAFServer.src.Application.DTOs.ResourceRequest;
+﻿using Microsoft.EntityFrameworkCore;
+using NAFServer.src.Application.DTOs.ResourceRequest;
 using NAFServer.src.Application.Handlers.Interface;
 using NAFServer.src.Application.Interfaces;
 using NAFServer.src.Domain.Entities;
@@ -25,6 +26,7 @@ namespace NAFServer.src.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IUserLocationRepository _userLocationRepository;
         private readonly IImplementationService _implementationService;
+        private readonly IResourceGroupRepository _resourceGroupRepository;
 
         public ResourceRequestService(
             IResourceRequestRepository resourceRequestRepository,
@@ -38,6 +40,7 @@ namespace NAFServer.src.Application.Services
             IUserRepository userRepository,
             IUserLocationRepository userLocationRepository,
             IImplementationService implementationService,
+            IResourceGroupRepository resourceGroupRepository,
             AppDbContext context
         )
         {
@@ -52,6 +55,7 @@ namespace NAFServer.src.Application.Services
             _userRepository = userRepository;
             _userLocationRepository = userLocationRepository;
             _implementationService = implementationService;
+            _resourceGroupRepository = resourceGroupRepository;
             _context = context;
         }
 
@@ -61,6 +65,16 @@ namespace NAFServer.src.Application.Services
 
             if (!resource.IsSpecial)
                 throw new ArgumentException("Invalid Resource. Using CreateSpecialAsync for a basic resource.");
+
+            if (resource.ResourceGroup?.CanOwnMany == false)
+            {
+                var existing = await _context.ResourceRequests
+                    .AnyAsync(rr => rr.ResourceId == request.resourceId && rr.NAFId == request.nafId);
+                if (existing)
+                {
+                    throw new ApplicationException("Duplicate resource request: this resource is already requested in this NAF.");
+                }
+            }
 
             var hasOuterTransaction = _context.Database.CurrentTransaction != null;
 
@@ -163,6 +177,16 @@ namespace NAFServer.src.Application.Services
                 if (resource.IsSpecial)
                 {
                     throw new ArgumentException("Invalid Resource. Using Create Basic for special resource.");
+                }
+
+                if (resource.ResourceGroup?.CanOwnMany == false)
+                {
+                    var existing = await _context.ResourceRequests
+                        .AnyAsync(rr => rr.ResourceId == request.resourceId && rr.NAFId == request.nafId);
+                    if (existing)
+                    {
+                        throw new ApplicationException("Duplicate resource request: this resource is already requested in this NAF.");
+                    }
                 }
 
                 var rr = new ResourceRequest(
@@ -340,9 +364,13 @@ namespace NAFServer.src.Application.Services
                 {
                     rr.DeactivateResourceRequest();
                 }
-                else
+                else if (rr.Progress == Progress.OPEN)
                 {
                     await DeleteAsync(requestId);
+                }
+                else
+                {
+                    rr.Cancel();
                 }
 
                 ResourceRequestDTO toReturn = resource.IsSpecial

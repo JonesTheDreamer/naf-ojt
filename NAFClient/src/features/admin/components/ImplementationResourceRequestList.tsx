@@ -1,7 +1,7 @@
 import { Accordion } from "@/components/ui/accordion";
 import type { ResourceRequest } from "@/shared/types/api/naf";
 import { Progress } from "@/shared/types/enum/progress";
-import { ImplementationResourceRequestItem } from "./ImplementationResourceRequestItem";
+import { ResourceRequestAccordionItem } from "@/features/naf/components/resource-request/ResourceRequestAccordionItem";
 
 interface ImplementationResourceRequestListProps {
   requests: ResourceRequest[];
@@ -35,14 +35,14 @@ export function ImplementationResourceRequestList({
       )}
       <Accordion type="multiple" className="space-y-2">
         {implRequests.map((req) => (
-          <ImplementationResourceRequestItem
+          <ResourceRequestAccordionItem
             key={req.id}
             request={req}
             onAccept={onAccept}
             onSetToInProgress={onSetToInProgress}
             onSetToDelayed={onSetToDelayed}
             onSetToAccomplished={onSetToAccomplished}
-            isSubmitting={isSubmitting}
+            isSubmittingImpl={isSubmitting}
           />
         ))}
       </Accordion>

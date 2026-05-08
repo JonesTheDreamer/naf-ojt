@@ -73,17 +73,19 @@ namespace NAFServer.src.Application.Services
 
             var activeProgress = new[] { Progress.OPEN, Progress.IN_PROGRESS, Progress.FOR_SCREENING, Progress.IMPLEMENTATION };
             var requests = await _context.ResourceRequests
-                .Where(rr => rr.ResourceId == id && activeProgress.Contains(rr.Progress))
+                .Where(rr => rr.ResourceId == id)
                 .Include(rr => rr.NAF)
                 .ThenInclude(n => n.Location)
                 .ToListAsync();
 
             var employeeIds = requests.Select(rr => rr.NAF.EmployeeId).Distinct().ToList();
-            var employeeTasks = employeeIds.Select(async eid => (eid, emp: await _employeeRepository.GetByIdAsync(eid)));
-            var employeeResults = await Task.WhenAll(employeeTasks);
-            var employees = employeeResults
-                .Where(x => x.emp != null)
-                .ToDictionary(x => x.eid, x => x.emp!);
+            var employees = new Dictionary<string, Employee>();
+            foreach (var eid in employeeIds)
+            {
+                var emp = await _employeeRepository.GetByIdAsync(eid);
+                if (emp != null)
+                    employees[eid] = emp;
+            }
 
             var byLocation = requests
                 .GroupBy(rr => rr.NAF.LocationId)

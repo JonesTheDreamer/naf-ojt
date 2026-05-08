@@ -4,13 +4,14 @@ import {
   getGroupEmails,
   getSharedFolders,
 } from "@/shared/api/resourceMetadataService";
-import { getAllResources } from "@/shared/api/resourceService";
+import { getAllResources, getResourceGroups } from "@/shared/api/resourceService";
 import type {
   InternetPurposeItem,
   InternetResourceItem,
   GroupEmailItem,
   SharedFolderItem,
   Resource,
+  ResourceGroup,
 } from "@/shared/types/api/naf";
 import { useQuery } from "@tanstack/react-query";
 
@@ -23,8 +24,15 @@ export const useResource = () => {
     staleTime: STALE_24H,
   });
 
+  const resourceGroups = useQuery<ResourceGroup[], Error>({
+    queryKey: ["resourceGroups"],
+    queryFn: getResourceGroups,
+    staleTime: STALE_24H,
+  });
+
   return {
     getAllResource,
+    resourceGroups,
     isLoading: getAllResource.isLoading,
     isError: getAllResource.isError,
   };

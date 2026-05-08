@@ -41,7 +41,8 @@
       "Bash(Write-Host \"Directory created\")",
       "Bash(Get-ChildItem *)",
       "Bash(Select-Object Name)",
-      "Bash(grep -E \"\\\\.cs$\")"
+      "Bash(grep -E \"\\\\.cs$\")",
+      "PowerShell(Remove-Item *)"
     ]
   }
 }

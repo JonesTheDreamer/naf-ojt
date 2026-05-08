@@ -3,7 +3,9 @@ using NAFServer.src.Application.DTOs.Lookup;
 using NAFServer.src.Application.Interfaces;
 using NAFServer.src.Domain.Entities;
 using NAFServer.src.Domain.Interface.Repository;
+using NAFServer.src.Infrastructure.Helper;
 using NAFServer.src.Infrastructure.Persistence;
+using NAFServer.src.Infrastructure.Persistence.Repositories;
 
 namespace NAFServer.src.Application.Services
 {
@@ -11,11 +13,13 @@ namespace NAFServer.src.Application.Services
     {
         private readonly ISharedFolderRepository _repo;
         private readonly AppDbContext _context;
+        private readonly CacheService _cache;
 
-        public SharedFolderService(ISharedFolderRepository repo, AppDbContext context)
+        public SharedFolderService(ISharedFolderRepository repo, AppDbContext context, CacheService cache)
         {
             _repo = repo;
             _context = context;
+            _cache = cache;
         }
 
         public async Task<List<SharedFolderItemDTO>> GetAllAsync()
@@ -33,6 +37,7 @@ namespace NAFServer.src.Application.Services
             var created = new SharedFolder(name);
             _context.SharedFolders.Add(created);
             await _context.SaveChangesAsync();
+            _cache.Remove(SharedFolderRepository.AllKey);
             return created;
         }
     }

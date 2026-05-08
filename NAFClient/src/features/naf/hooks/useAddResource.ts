@@ -45,15 +45,18 @@ export type SharedFolderEntry = {
 export type BasicResourceWithDate = {
   id: number;
   dateNeeded: string;
+  purpose?: string;
 };
 
-const INTERNET_RESOURCE_ID = 7;
-const GROUP_EMAIL_RESOURCE_ID = 12;
-const SHARED_FOLDER_RESOURCE_ID = 13;
+export const INTERNET_RESOURCE_ID = 7;
+export const GROUP_EMAIL_RESOURCE_ID = 12;
+export const SHARED_FOLDER_RESOURCE_ID = 13;
+export const DEDICATED_SPECIAL_IDS = [INTERNET_RESOURCE_ID, GROUP_EMAIL_RESOURCE_ID, SHARED_FOLDER_RESOURCE_ID];
 
 type AddResourcesParams = {
   nafId: string;
   basicResources: BasicResourceWithDate[];
+  specialResources: BasicResourceWithDate[];
   internetEntries: InternetEntry[];
   groupEmailEntries: GroupEmailEntry[];
   sharedFolderEntries: SharedFolderEntry[];
@@ -87,6 +90,24 @@ export const useAddResource = () => {
         });
       } catch (e) {
         errors.push(`Basic resources: ${e instanceof Error ? e.message : "Unknown error"}`);
+      }
+    }
+
+    // ── Other special resources (no additional info, go through approval workflow) ──
+    for (const resource of params.specialResources) {
+      try {
+        await createResourceRequest({
+          nafId: params.nafId,
+          resourceId: resource.id,
+          purpose: resource.purpose?.trim() || "Special resource needed",
+          additionalInfo: {},
+          dateNeeded: resource.dateNeeded || null,
+        });
+        anySuccess = true;
+      } catch (e) {
+        const axiosData = (e as { response?: { data?: string } })?.response?.data;
+        const msg = axiosData ?? (e instanceof Error ? e.message : "Unknown error");
+        errors.push(`Resource ${resource.id}: ${msg}`);
       }
     }
 

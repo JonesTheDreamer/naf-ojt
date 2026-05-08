@@ -26,7 +26,10 @@ export function useCreateResource() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (payload: CreateResourcePayload) => resourceManagementApi.createResource(payload),
-    onSuccess: () => qc.invalidateQueries({ queryKey: KEYS.list }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: KEYS.list });
+      qc.invalidateQueries({ queryKey: ["allResources"] });
+    },
   });
 }
 

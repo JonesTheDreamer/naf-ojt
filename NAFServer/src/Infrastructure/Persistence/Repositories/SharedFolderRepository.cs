@@ -8,15 +8,18 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
     public class SharedFolderRepository : ISharedFolderRepository
     {
         private readonly AppDbContext _context;
+        private readonly CacheService _cache;
+        private static readonly TimeSpan Ttl = TimeSpan.FromMinutes(30);
+        internal const string AllKey = "shared-folders:all";
 
-        public SharedFolderRepository(AppDbContext context, CacheService cacheService)
+        public SharedFolderRepository(AppDbContext context, CacheService cache)
         {
             _context = context;
+            _cache = cache;
         }
 
-        public async Task<List<SharedFolder>> GetAllAsync()
-        {
-            return await _context.SharedFolders.ToListAsync();
-        }
+        public Task<List<SharedFolder>> GetAllAsync() =>
+            _cache.GetOrSetAsync(AllKey, () => _context.SharedFolders.ToListAsync(),
+                new() { AbsoluteExpirationRelativeToNow = Ttl });
     }
 }
