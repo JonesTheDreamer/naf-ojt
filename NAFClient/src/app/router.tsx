@@ -3,15 +3,9 @@ import { RoutesEnum } from "./routesEnum";
 import { lazy, Suspense } from "react";
 import { ProtectedRoute } from "@/features/auth/ProtectedRoute";
 
+const LoginPage = lazy(() => import("@/features/auth/pages/LoginPage"));
 const ViewAllNAF = lazy(() => import("@/features/naf/pages/ViewAllNAF"));
 const NAFDetailPage = lazy(() => import("@/features/naf/pages/ViewNAFDetail"));
-
-const AdminLoginPage = lazy(
-  () => import("@/features/auth/pages/AdminLoginPage"),
-);
-const RequestorLoginPage = lazy(
-  () => import("@/features/auth/pages/RequestorLoginPage"),
-);
 
 const AdminHomePage = lazy(
   () => import("@/features/admin/pages/AdminHomePage"),
@@ -43,21 +37,14 @@ export function AppRouter() {
   return (
     <Suspense fallback={<div>Loading...</div>}>
       <Routes>
-        {/* Login routes */}
-        <Route path={RoutesEnum.LOGIN_ADMIN} element={<AdminLoginPage />} />
-        <Route
-          path={RoutesEnum.LOGIN_REQUESTOR}
-          element={<RequestorLoginPage />}
-        />
+        {/* Login */}
+        <Route path={RoutesEnum.LOGIN} element={<LoginPage />} />
 
         {/* Requestor/Approver routes */}
         <Route
           path={RoutesEnum.NAF}
           element={
-            <ProtectedRoute
-              requiredRole="REQUESTOR_APPROVER"
-              loginPath={RoutesEnum.LOGIN_REQUESTOR}
-            >
+            <ProtectedRoute requiredRole="REQUESTOR_APPROVER">
               <ViewAllNAF />
             </ProtectedRoute>
           }
@@ -65,10 +52,7 @@ export function AppRouter() {
         <Route
           path={`${RoutesEnum.NAF}/:nafId`}
           element={
-            <ProtectedRoute
-              requiredRole="REQUESTOR_APPROVER"
-              loginPath={RoutesEnum.LOGIN_REQUESTOR}
-            >
+            <ProtectedRoute requiredRole="REQUESTOR_APPROVER">
               <NAFDetailPage />
             </ProtectedRoute>
           }
@@ -78,10 +62,7 @@ export function AppRouter() {
         <Route
           path={RoutesEnum.ADMIN}
           element={
-            <ProtectedRoute
-              requiredRole="ADMIN"
-              loginPath={RoutesEnum.LOGIN_ADMIN}
-            >
+            <ProtectedRoute requiredRole="ADMIN">
               <AdminHomePage />
             </ProtectedRoute>
           }
@@ -89,10 +70,7 @@ export function AppRouter() {
         <Route
           path={RoutesEnum.ADMIN_NAF}
           element={
-            <ProtectedRoute
-              requiredRole="ADMIN"
-              loginPath={RoutesEnum.LOGIN_ADMIN}
-            >
+            <ProtectedRoute requiredRole="ADMIN">
               <AdminNAFListPage />
             </ProtectedRoute>
           }
@@ -100,10 +78,7 @@ export function AppRouter() {
         <Route
           path={RoutesEnum.ADMIN_NAF_DETAIL}
           element={
-            <ProtectedRoute
-              requiredRole="ADMIN"
-              loginPath={RoutesEnum.LOGIN_ADMIN}
-            >
+            <ProtectedRoute requiredRole="ADMIN">
               <AdminNAFDetailPage />
             </ProtectedRoute>
           }
@@ -111,10 +86,7 @@ export function AppRouter() {
         <Route
           path={RoutesEnum.ADMIN_FOR_IMPLEMENTATIONS}
           element={
-            <ProtectedRoute
-              requiredRole="ADMIN"
-              loginPath={RoutesEnum.LOGIN_ADMIN}
-            >
+            <ProtectedRoute requiredRole="ADMIN">
               <ForImplementationsPage />
             </ProtectedRoute>
           }
@@ -122,10 +94,7 @@ export function AppRouter() {
         <Route
           path={RoutesEnum.ADMIN_IMPLEMENTATION_DETAIL}
           element={
-            <ProtectedRoute
-              requiredRole="ADMIN"
-              loginPath={RoutesEnum.LOGIN_ADMIN}
-            >
+            <ProtectedRoute requiredRole="ADMIN">
               <AdminImplementationDetailPage />
             </ProtectedRoute>
           }
@@ -133,10 +102,7 @@ export function AppRouter() {
         <Route
           path={RoutesEnum.ADMIN_USERS}
           element={
-            <ProtectedRoute
-              requiredRole="ADMIN"
-              loginPath={RoutesEnum.LOGIN_ADMIN}
-            >
+            <ProtectedRoute requiredRole="ADMIN">
               <UsersPage />
             </ProtectedRoute>
           }
@@ -144,10 +110,7 @@ export function AppRouter() {
         <Route
           path={RoutesEnum.ADMIN_USER_DETAIL}
           element={
-            <ProtectedRoute
-              requiredRole="ADMIN"
-              loginPath={RoutesEnum.LOGIN_ADMIN}
-            >
+            <ProtectedRoute requiredRole="ADMIN">
               <UserDetailPage />
             </ProtectedRoute>
           }
@@ -155,10 +118,7 @@ export function AppRouter() {
         <Route
           path={RoutesEnum.ADMIN_RESOURCES}
           element={
-            <ProtectedRoute
-              requiredRole="ADMIN"
-              loginPath={RoutesEnum.LOGIN_ADMIN}
-            >
+            <ProtectedRoute requiredRole="ADMIN">
               <ResourceListPage />
             </ProtectedRoute>
           }
@@ -166,19 +126,13 @@ export function AppRouter() {
         <Route
           path={RoutesEnum.ADMIN_RESOURCE_DETAIL}
           element={
-            <ProtectedRoute
-              requiredRole="ADMIN"
-              loginPath={RoutesEnum.LOGIN_ADMIN}
-            >
+            <ProtectedRoute requiredRole="ADMIN">
               <ResourceDetailPage />
             </ProtectedRoute>
           }
         />
 
-        <Route
-          path="*"
-          element={<Navigate to={RoutesEnum.LOGIN_REQUESTOR} replace />}
-        />
+        <Route path="*" element={<Navigate to={RoutesEnum.LOGIN} replace />} />
       </Routes>
     </Suspense>
   );
