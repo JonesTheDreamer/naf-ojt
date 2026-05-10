@@ -1,5 +1,6 @@
 import { LogOut, User } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import { cn } from "@/shared/utils/utils";
 import { useAuth } from "@/features/auth/AuthContext";
 
@@ -40,8 +41,12 @@ export default function Sidebar({
 
   const handleRoleSwitch = async (role: string) => {
     if (role === user?.activeRole) return;
-    await selectRole(role);
-    navigate(ROLE_HOME[role] ?? "/NAF");
+    try {
+      await selectRole(role);
+      navigate(ROLE_HOME[role] ?? "/NAF");
+    } catch {
+      toast.error("Failed to switch role. Please try again.");
+    }
   };
 
   return (

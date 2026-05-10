@@ -36,7 +36,7 @@ namespace NAFServer.src.Application.Services
             var user = await _userRepository.GetUserByEmployeeId(employeeId);
 
             var roles = user.UserRoles
-                .Where(ur => InScopeRoles.Contains(ur.Role.Name))
+                .Where(ur => ur.Role != null && InScopeRoles.Contains(ur.Role.Name))
                 .OrderBy(ur => Array.IndexOf(InScopeRoles, ur.Role.Name))
                 .Select(ur => ur.Role.Name)
                 .ToList();
@@ -51,12 +51,13 @@ namespace NAFServer.src.Application.Services
         {
             var user = await _userRepository.GetUserByEmployeeId(employeeId);
 
-            var hasRole = user.UserRoles.Any(ur => ur.Role.Name == role);
+            var hasRole = user.UserRoles.Any(ur =>
+                ur.Role != null && ur.Role.Name == role && InScopeRoles.Contains(ur.Role.Name));
             if (!hasRole)
                 throw new UnauthorizedAccessException($"User does not have role {role}.");
 
             var roles = user.UserRoles
-                .Where(ur => InScopeRoles.Contains(ur.Role.Name))
+                .Where(ur => ur.Role != null && InScopeRoles.Contains(ur.Role.Name))
                 .OrderBy(ur => Array.IndexOf(InScopeRoles, ur.Role.Name))
                 .Select(ur => ur.Role.Name)
                 .ToList();
@@ -69,7 +70,7 @@ namespace NAFServer.src.Application.Services
             var user = await _userRepository.GetUserByEmployeeId(employeeId);
 
             var roles = user.UserRoles
-                .Where(ur => InScopeRoles.Contains(ur.Role.Name))
+                .Where(ur => ur.Role != null && InScopeRoles.Contains(ur.Role.Name))
                 .OrderBy(ur => Array.IndexOf(InScopeRoles, ur.Role.Name))
                 .Select(ur => ur.Role.Name)
                 .ToList();
