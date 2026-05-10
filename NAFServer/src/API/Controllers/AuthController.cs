@@ -19,19 +19,58 @@ namespace NAFServer.src.API.Controllers
             _currentUserService = currentUserService;
         }
 
-        [HttpPost("login/admin")]
-        public async Task<IActionResult> LoginAdmin([FromBody] LoginRequestDTO request)
-            => await LoginWithRole(request.EmployeeId, Roles.ADMIN);
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDTO request)
+        {
+            try
+            {
+                var dto = await _authService.LoginAsync(request.EmployeeId);
+                var activeRole = Enum.Parse<Roles>(dto.ActiveRole);
+                var token = await _authService.GenerateTokenAsync(request.EmployeeId, activeRole);
+                SetAuthCookie(token);
+                return Ok(dto);
+            }
+            catch (KeyNotFoundException)
+            {
+                return Unauthorized("Invalid employee ID.");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+        }
 
-        [HttpPost("login/requestor-approver")]
-        public async Task<IActionResult> LoginRequestorApprover([FromBody] LoginRequestDTO request)
-            => await LoginWithRole(request.EmployeeId, Roles.REQUESTOR_APPROVER);
+        [HttpPost("select-role")]
+        [Authorize]
+        public async Task<IActionResult> SelectRole([FromBody] SelectRoleRequestDTO request)
+        {
+            if (!Enum.TryParse<Roles>(request.Role, out var role))
+                return BadRequest("Invalid role.");
+
+            try
+            {
+                var dto = await _authService.SelectRoleAsync(_currentUserService.EmployeeId, role);
+                var token = await _authService.GenerateTokenAsync(_currentUserService.EmployeeId, role);
+                SetAuthCookie(token);
+                return Ok(dto);
+            }
+            catch (KeyNotFoundException)
+            {
+                return Unauthorized("Invalid employee ID.");
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Forbid();
+            }
+        }
 
         [HttpGet("me")]
         [Authorize]
         public async Task<IActionResult> Me()
         {
-            var user = await _authService.GetCurrentUserAsync(_currentUserService.EmployeeId, _currentUserService.Role);
+            var user = await _authService.GetCurrentUserAsync(
+                _currentUserService.EmployeeId,
+                _currentUserService.Role);
             return Ok(user);
         }
 
@@ -42,12 +81,8 @@ namespace NAFServer.src.API.Controllers
             return Ok();
         }
 
-        private async Task<IActionResult> LoginWithRole(string employeeId, Roles role)
+        private void SetAuthCookie(string token)
         {
-            var authUser = await _authService.SelectRoleAsync(employeeId, role);
-
-            var token = await _authService.GenerateTokenAsync(employeeId, role);
-
             Response.Cookies.Append("auth_token", token, new CookieOptions
             {
                 HttpOnly = true,
@@ -55,8 +90,6 @@ namespace NAFServer.src.API.Controllers
                 Expires = DateTimeOffset.UtcNow.AddHours(8),
                 Path = "/"
             });
-
-            return Ok(authUser);
         }
     }
 }
