@@ -44,8 +44,7 @@ namespace NAFServer.src.API.Controllers
 
         private async Task<IActionResult> LoginWithRole(string employeeId, Roles role)
         {
-            var isValid = await _authService.ValidateRoleAsync(employeeId, role);
-            if (!isValid) return Unauthorized("Invalid employee ID or role.");
+            var authUser = await _authService.SelectRoleAsync(employeeId, role);
 
             var token = await _authService.GenerateTokenAsync(employeeId, role);
 
@@ -57,7 +56,7 @@ namespace NAFServer.src.API.Controllers
                 Path = "/"
             });
 
-            return Ok(new { employeeId, role = role.ToString() });
+            return Ok(authUser);
         }
     }
 }

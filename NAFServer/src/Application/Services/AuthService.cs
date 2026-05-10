@@ -1,6 +1,7 @@
 using Microsoft.IdentityModel.Tokens;
 using NAFServer.src.Application.DTOs.Auth;
 using NAFServer.src.Application.Interfaces;
+using NAFServer.src.Domain.Entities;
 using NAFServer.src.Domain.Enums;
 using NAFServer.src.Domain.Interface.Repository;
 using System.IdentityModel.Tokens.Jwt;
@@ -18,6 +19,8 @@ namespace NAFServer.src.Application.Services
         private readonly IRoleRepository _roleRepository;
         private readonly IUserLocationRepository _userLocationRepository;
 
+        private static readonly Roles[] InScopeRoles = [Roles.ADMIN, Roles.REQUESTOR_APPROVER];
+
         public AuthService(
             IConfiguration config,
             IUserRepository userRepository,
@@ -34,19 +37,82 @@ namespace NAFServer.src.Application.Services
             _userLocationRepository = userLocationRepository;
         }
 
-        public async Task<bool> ValidateRoleAsync(string employeeId, Roles role)
+        public async Task<AuthUserDTO> LoginAsync(string employeeId)
         {
+            var user = await _userRepository.GetUserByEmployeeId(employeeId);
+
+            List<UserRole> userRoles;
             try
             {
-                var user = await _userRepository.GetUserByEmployeeId(employeeId);
-                var roleEntity = await _roleRepository.GetByNameAsync(role);
-                if (roleEntity == null) return false;
-                return await _userRoleRepository.UserHasRoleAsync(user.Id, roleEntity.Id);
+                userRoles = await _userRoleRepository.GetUserActiveRolesAsync(user.Id);
             }
             catch (KeyNotFoundException)
             {
-                return false;
+                throw new UnauthorizedAccessException("No active roles assigned.");
             }
+
+            var roles = userRoles
+                .Where(ur => InScopeRoles.Contains(ur.Role.Name))
+                .OrderBy(ur => Array.IndexOf(InScopeRoles, ur.Role.Name))
+                .Select(ur => ur.Role.Name)
+                .ToList();
+
+            if (roles.Count == 0)
+                throw new UnauthorizedAccessException("No in-scope roles assigned.");
+
+            return await BuildAuthUserDTOAsync(employeeId, user, roles.First().ToString(), roles);
+        }
+
+        public async Task<AuthUserDTO> SelectRoleAsync(string employeeId, Roles role)
+        {
+            var user = await _userRepository.GetUserByEmployeeId(employeeId);
+            var roleEntity = await _roleRepository.GetByNameAsync(role)
+                ?? throw new KeyNotFoundException($"Role {role} not found.");
+
+            var hasRole = await _userRoleRepository.UserHasRoleAsync(user.Id, roleEntity.Id);
+            if (!hasRole)
+                throw new UnauthorizedAccessException($"User does not have role {role}.");
+
+            List<UserRole> userRoles;
+            try
+            {
+                userRoles = await _userRoleRepository.GetUserActiveRolesAsync(user.Id);
+            }
+            catch (KeyNotFoundException)
+            {
+                userRoles = [];
+            }
+
+            var roles = userRoles
+                .Where(ur => InScopeRoles.Contains(ur.Role.Name))
+                .OrderBy(ur => Array.IndexOf(InScopeRoles, ur.Role.Name))
+                .Select(ur => ur.Role.Name)
+                .ToList();
+
+            return await BuildAuthUserDTOAsync(employeeId, user, role.ToString(), roles);
+        }
+
+        public async Task<AuthUserDTO> GetCurrentUserAsync(string employeeId, string role)
+        {
+            var user = await _userRepository.GetUserByEmployeeId(employeeId);
+
+            List<UserRole> userRoles;
+            try
+            {
+                userRoles = await _userRoleRepository.GetUserActiveRolesAsync(user.Id);
+            }
+            catch (KeyNotFoundException)
+            {
+                userRoles = [];
+            }
+
+            var roles = userRoles
+                .Where(ur => InScopeRoles.Contains(ur.Role.Name))
+                .OrderBy(ur => Array.IndexOf(InScopeRoles, ur.Role.Name))
+                .Select(ur => ur.Role.Name)
+                .ToList();
+
+            return await BuildAuthUserDTOAsync(employeeId, user, role, roles);
         }
 
         public Task<string> GenerateTokenAsync(string employeeId, Roles role)
@@ -72,14 +138,14 @@ namespace NAFServer.src.Application.Services
             return Task.FromResult(new JwtSecurityTokenHandler().WriteToken(token));
         }
 
-        public async Task<AuthUserDTO> GetCurrentUserAsync(string employeeId, string role)
+        private async Task<AuthUserDTO> BuildAuthUserDTOAsync(
+            string employeeId,
+            User user,
+            string activeRole,
+            List<Roles> roles)
         {
             var employee = await _employeeRepository.GetByIdAsync(employeeId)
                 ?? throw new ApplicationException($"Employee record not found for '{employeeId}'. Contact your administrator.");
-
-            var user = await _userRepository.GetUserByEmployeeId(employeeId);
-
-            var primaryRole = role;
 
             int locationId = 0;
             string location = "";
@@ -93,7 +159,8 @@ namespace NAFServer.src.Application.Services
 
             return new AuthUserDTO(
                 employeeId,
-                primaryRole,
+                activeRole,
+                roles.Select(r => r.ToString()).ToArray(),
                 $"{employee.FirstName} {employee.LastName}",
                 locationId,
                 location
