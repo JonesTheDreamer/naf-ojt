@@ -42,7 +42,8 @@
       "Bash(Get-ChildItem *)",
       "Bash(Select-Object Name)",
       "Bash(grep -E \"\\\\.cs$\")",
-      "PowerShell(Remove-Item *)"
+      "PowerShell(Remove-Item *)",
+      "Bash(Select-String -Pattern \"error CS\")"
     ]
   }
 }
