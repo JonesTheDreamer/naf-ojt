@@ -15,8 +15,6 @@ namespace NAFServer.src.Application.Services
         private readonly IConfiguration _config;
         private readonly IUserRepository _userRepository;
         private readonly IEmployeeRepository _employeeRepository;
-        private readonly IUserRoleRepository _userRoleRepository;
-        private readonly IRoleRepository _roleRepository;
         private readonly IUserLocationRepository _userLocationRepository;
 
         private static readonly Roles[] InScopeRoles = [Roles.ADMIN, Roles.REQUESTOR_APPROVER];
@@ -25,15 +23,11 @@ namespace NAFServer.src.Application.Services
             IConfiguration config,
             IUserRepository userRepository,
             IEmployeeRepository employeeRepository,
-            IUserRoleRepository userRoleRepository,
-            IRoleRepository roleRepository,
             IUserLocationRepository userLocationRepository)
         {
             _config = config;
             _userRepository = userRepository;
             _employeeRepository = employeeRepository;
-            _userRoleRepository = userRoleRepository;
-            _roleRepository = roleRepository;
             _userLocationRepository = userLocationRepository;
         }
 
@@ -41,17 +35,7 @@ namespace NAFServer.src.Application.Services
         {
             var user = await _userRepository.GetUserByEmployeeId(employeeId);
 
-            List<UserRole> userRoles;
-            try
-            {
-                userRoles = await _userRoleRepository.GetUserActiveRolesAsync(user.Id);
-            }
-            catch (KeyNotFoundException)
-            {
-                throw new UnauthorizedAccessException("No active roles assigned.");
-            }
-
-            var roles = userRoles
+            var roles = user.UserRoles
                 .Where(ur => InScopeRoles.Contains(ur.Role.Name))
                 .OrderBy(ur => Array.IndexOf(InScopeRoles, ur.Role.Name))
                 .Select(ur => ur.Role.Name)
@@ -66,24 +50,12 @@ namespace NAFServer.src.Application.Services
         public async Task<AuthUserDTO> SelectRoleAsync(string employeeId, Roles role)
         {
             var user = await _userRepository.GetUserByEmployeeId(employeeId);
-            var roleEntity = await _roleRepository.GetByNameAsync(role)
-                ?? throw new KeyNotFoundException($"Role {role} not found.");
 
-            var hasRole = await _userRoleRepository.UserHasRoleAsync(user.Id, roleEntity.Id);
+            var hasRole = user.UserRoles.Any(ur => ur.Role.Name == role);
             if (!hasRole)
                 throw new UnauthorizedAccessException($"User does not have role {role}.");
 
-            List<UserRole> userRoles;
-            try
-            {
-                userRoles = await _userRoleRepository.GetUserActiveRolesAsync(user.Id);
-            }
-            catch (KeyNotFoundException)
-            {
-                userRoles = [];
-            }
-
-            var roles = userRoles
+            var roles = user.UserRoles
                 .Where(ur => InScopeRoles.Contains(ur.Role.Name))
                 .OrderBy(ur => Array.IndexOf(InScopeRoles, ur.Role.Name))
                 .Select(ur => ur.Role.Name)
@@ -96,17 +68,7 @@ namespace NAFServer.src.Application.Services
         {
             var user = await _userRepository.GetUserByEmployeeId(employeeId);
 
-            List<UserRole> userRoles;
-            try
-            {
-                userRoles = await _userRoleRepository.GetUserActiveRolesAsync(user.Id);
-            }
-            catch (KeyNotFoundException)
-            {
-                userRoles = [];
-            }
-
-            var roles = userRoles
+            var roles = user.UserRoles
                 .Where(ur => InScopeRoles.Contains(ur.Role.Name))
                 .OrderBy(ur => Array.IndexOf(InScopeRoles, ur.Role.Name))
                 .Select(ur => ur.Role.Name)
