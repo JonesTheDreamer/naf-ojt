@@ -25,7 +25,8 @@ namespace NAFServer.src.API.Controllers
             try
             {
                 var dto = await _authService.LoginAsync(request.EmployeeId);
-                var activeRole = Enum.Parse<Roles>(dto.ActiveRole);
+                if (!Enum.TryParse<Roles>(dto.ActiveRole, out var activeRole))
+                    return StatusCode(500, "Invalid role returned by login service.");
                 var token = await _authService.GenerateTokenAsync(request.EmployeeId, activeRole);
                 SetAuthCookie(token);
                 return Ok(dto);
@@ -86,6 +87,7 @@ namespace NAFServer.src.API.Controllers
             Response.Cookies.Append("auth_token", token, new CookieOptions
             {
                 HttpOnly = true,
+                Secure = Request.IsHttps,
                 SameSite = SameSiteMode.Lax,
                 Expires = DateTimeOffset.UtcNow.AddHours(8),
                 Path = "/"
