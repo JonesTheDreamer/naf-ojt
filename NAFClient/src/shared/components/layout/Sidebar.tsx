@@ -1,6 +1,7 @@
 import { LogOut, User } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { cn } from "@/shared/utils/utils";
+import { useAuth } from "@/features/auth/AuthContext";
 
 export interface NavItem {
   label: string;
@@ -17,6 +18,16 @@ interface SidebarProps {
   onLogout?: () => void;
 }
 
+const ROLE_HOME: Record<string, string> = {
+  ADMIN: "/admin",
+  REQUESTOR_APPROVER: "/NAF",
+};
+
+const ROLE_LABELS: Record<string, string> = {
+  ADMIN: "Admin",
+  REQUESTOR_APPROVER: "Requestor",
+};
+
 export default function Sidebar({
   isOpen = true,
   currentUser = { name: "User" },
@@ -24,6 +35,15 @@ export default function Sidebar({
   onLogout,
 }: SidebarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, selectRole } = useAuth();
+
+  const handleRoleSwitch = async (role: string) => {
+    if (role === user?.activeRole) return;
+    await selectRole(role);
+    navigate(ROLE_HOME[role] ?? "/NAF");
+  };
+
   return (
     <aside
       className={cn(
@@ -31,6 +51,29 @@ export default function Sidebar({
         !isOpen && "-translate-x-full",
       )}
     >
+      {/* Role switcher — shown only when user has multiple roles */}
+      {user && user.roles.length > 1 && (
+        <div className="px-4 py-3 border-b border-gray-200">
+          <p className="text-xs text-gray-400 mb-2">Role</p>
+          <div className="flex flex-wrap gap-1.5">
+            {user.roles.map((role) => (
+              <button
+                key={role}
+                onClick={() => handleRoleSwitch(role)}
+                className={cn(
+                  "px-2.5 py-1 rounded-full text-xs font-medium transition-colors",
+                  role === user.activeRole
+                    ? "bg-gray-900 text-white"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200",
+                )}
+              >
+                {ROLE_LABELS[role] ?? role}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-2">
         <ul className="space-y-0.5 px-2">
