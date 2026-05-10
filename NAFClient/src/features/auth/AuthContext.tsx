@@ -7,6 +7,7 @@ interface AuthContextValue {
   user: AuthUser | null;
   isLoading: boolean;
   setUser: (user: AuthUser | null) => void;
+  selectRole: (role: string) => Promise<AuthUser>;
   logout: () => Promise<void>;
 }
 
@@ -24,13 +25,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
+  const selectRole = async (role: string): Promise<AuthUser> => {
+    const updated = await authApi.selectRole(role);
+    setUser(updated);
+    return updated;
+  };
+
   const logout = async () => {
     await authApi.logout();
     setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, setUser, logout }}>
+    <AuthContext.Provider value={{ user, isLoading, setUser, selectRole, logout }}>
       {children}
     </AuthContext.Provider>
   );

@@ -1,6 +1,7 @@
 export interface AuthUser {
   employeeId: string;
-  role: string;
+  activeRole: string;
+  roles: string[];
   name: string;
   locationId: number;
   location: string;
