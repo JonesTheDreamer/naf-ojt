@@ -2,6 +2,7 @@ import { api } from "@/shared/api/client";
 import type { NAF } from "@/shared/types/api/naf";
 import type { PagedResult } from "@/shared/types/common/pagedResult";
 import type {
+  AdminResourceRequestDTO,
   CreateUserDTO,
   ForImplementationItemDTO,
   LocationDTO,
@@ -41,6 +42,14 @@ export const adminApi = {
   getAdminNAFs: (locationId: number, status: string, page: number) =>
     api
       .get<PagedResult<NAF>>("/admin/nafs", { params: { locationId, status, page } })
+      .then((r) => r.data),
+
+  // Admin resource requests
+  getAdminResourceRequests: (locationId: number, progress: string, page: number) =>
+    api
+      .get<PagedResult<AdminResourceRequestDTO>>("/admin/resource-requests", {
+        params: { locationId, progress, page },
+      })
       .then((r) => r.data),
 
   // Implementation endpoints

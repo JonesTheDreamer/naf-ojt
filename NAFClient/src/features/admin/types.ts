@@ -1,3 +1,5 @@
+import type { Progress } from "@/shared/types/enum/progress";
+
 export interface ForImplementationItemDTO {
   id: string;
   nafId: string;
@@ -42,4 +44,15 @@ export interface UserRoleDetailDTO {
   isActive: boolean;
   dateAdded: string;
   dateRemoved: string | null;
+}
+
+export interface AdminResourceRequestDTO {
+  id: string;
+  nafId: string;
+  nafReference: string;
+  employeeName: string;
+  resourceName: string;
+  progress: Progress;
+  dateNeeded?: string;
+  createdAt: string;
 }
