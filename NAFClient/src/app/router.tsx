@@ -29,6 +29,12 @@ const ResourceDetailPage = lazy(
 const AdminResourceRequestsPage = lazy(
   () => import("@/features/admin/pages/AdminResourceRequestsPage"),
 );
+const HRNAFHistoryPage = lazy(
+  () => import("@/features/hr/pages/HRNAFHistoryPage"),
+);
+const HRCreateNAFPage = lazy(
+  () => import("@/features/hr/pages/HRCreateNAFPage"),
+);
 
 export function AppRouter() {
   return (
@@ -117,6 +123,24 @@ export function AppRouter() {
           element={
             <ProtectedRoute requiredRole="ADMIN">
               <AdminResourceRequestsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* HR routes */}
+        <Route
+          path={RoutesEnum.HR}
+          element={
+            <ProtectedRoute requiredRole="HR">
+              <HRNAFHistoryPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={RoutesEnum.HR_CREATE}
+          element={
+            <ProtectedRoute requiredRole="HR">
+              <HRCreateNAFPage />
             </ProtectedRoute>
           }
         />

@@ -7,12 +7,12 @@ import { columns } from "@/features/naf/components/nafColumns";
 import { useAdminNAFs } from "../hooks/useAdminNAFs";
 import { useAuth } from "@/features/auth/AuthContext";
 import type { NAF } from "@/shared/types/api/naf";
+import { CreateNAFDialog } from "@/features/naf/components/createNAFDialog";
 
 const STATUS_TABS = [
   { label: "All", value: "all" },
   { label: "Open", value: "open" },
   { label: "In Progress", value: "in_progress" },
-  { label: "For Screening", value: "for_screening" },
   { label: "Accomplished", value: "accomplished" },
 ] as const;
 
@@ -39,7 +39,12 @@ export default function AdminNAFListPage() {
   return (
     <AdminLayout>
       <div className="space-y-4">
-        <h1 className="text-2xl font-bold text-amber-500">Network Access Requests</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-amber-500">
+            Network Access Requests
+          </h1>
+          <CreateNAFDialog />
+        </div>
 
         <div className="flex gap-2 flex-wrap">
           {STATUS_TABS.map((tab) => (
