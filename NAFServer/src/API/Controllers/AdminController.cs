@@ -52,5 +52,14 @@ namespace NAFServer.src.API.Controllers
         {
             return Ok(await _nafService.GetNAFsByLocationPagedAsync(locationId, status, page));
         }
+
+        [HttpGet("resource-requests")]
+        public async Task<IActionResult> GetAdminResourceRequests(
+            [FromQuery] int locationId,
+            [FromQuery] string progress = "all",
+            [FromQuery][Range(1, int.MaxValue)] int page = 1)
+        {
+            return Ok(await _nafService.GetResourceRequestsByLocationPagedAsync(locationId, progress, page));
+        }
     }
 }
