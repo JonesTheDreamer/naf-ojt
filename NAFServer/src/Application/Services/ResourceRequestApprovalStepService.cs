@@ -1,4 +1,5 @@
-﻿using NAFServer.src.Application.Interfaces;
+﻿using Microsoft.Extensions.Logging;
+using NAFServer.src.Application.Interfaces;
 using NAFServer.src.Domain.Entities;
 using NAFServer.src.Domain.Enums;
 using NAFServer.src.Domain.Interface.Repository;
@@ -13,14 +14,16 @@ namespace NAFServer.src.Application.Services
         private readonly IResourceRequestRepository _resourceRequestRepository;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly INotificationService _notificationService;
+        private readonly ILogger<ResourceRequestApprovalStepService> _logger;
 
-        public ResourceRequestApprovalStepService(AppDbContext context, IResourceRequestStepRepository resourceRequestStepRepository, IResourceRequestRepository resourceRequestRepository, IEmployeeRepository employeeRepository, INotificationService notificationService)
+        public ResourceRequestApprovalStepService(AppDbContext context, IResourceRequestStepRepository resourceRequestStepRepository, IResourceRequestRepository resourceRequestRepository, IEmployeeRepository employeeRepository, INotificationService notificationService, ILogger<ResourceRequestApprovalStepService> logger)
         {
             _context = context;
             _resourceRequestStepRepository = resourceRequestStepRepository;
             _resourceRequestRepository = resourceRequestRepository;
             _employeeRepository = employeeRepository;
             _notificationService = notificationService;
+            _logger = logger;
         }
         public async Task<ResourceRequestApprovalStep> ApproveStepAsync(Guid stepId, string? comment)
         {
@@ -108,7 +111,10 @@ namespace NAFServer.src.Application.Services
                         }
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send approval notifications for NAF {NafId}", rr.NAFId);
+                }
 
                 return step;
             }
@@ -162,7 +168,10 @@ namespace NAFServer.src.Application.Services
                     );
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send rejection notification for NAF {NafId}", rr.NAFId);
+            }
 
             return step;
         }

@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NAFServer.src.Application.DTOs.Admin;
 using NAFServer.src.Application.DTOs.NAF;
 using NAFServer.src.Application.DTOs.ResourceRequest;
@@ -28,6 +29,7 @@ namespace NAFServer.src.Application.Services
         private readonly ICurrentUserService _currentUserService;
         private readonly IConfiguration _configuration;
         private readonly INotificationService _notificationService;
+        private readonly ILogger<NAFService> _logger;
         public NAFService
         (
             AppDbContext context,
@@ -44,7 +46,8 @@ namespace NAFServer.src.Application.Services
             IUserDepartmentRepository userDepartmentRepository,
             ICurrentUserService currentUserService,
             IConfiguration configuration,
-            INotificationService notificationService
+            INotificationService notificationService,
+            ILogger<NAFService> logger
         )
         {
             _context = context;
@@ -62,6 +65,7 @@ namespace NAFServer.src.Application.Services
             _currentUserService = currentUserService;
             _configuration = configuration;
             _notificationService = notificationService;
+            _logger = logger;
         }
 
         private async Task AuthorizeNAFAccessAsync(NAF naf)
@@ -195,21 +199,34 @@ namespace NAFServer.src.Application.Services
                     var supervisorId = await _notificationService.FindUserIdByEmployeeNumberAsync(employee.SupervisorId);
                     var deptHeadId = await _notificationService.FindUserIdByEmployeeNumberAsync(employee.DepartmentHeadId);
 
-                    var recipientIds = new HashSet<int>(adminIds);
-                    if (supervisorId.HasValue) recipientIds.Add(supervisorId.Value);
-                    if (deptHeadId.HasValue) recipientIds.Add(deptHeadId.Value);
-
-                    if (recipientIds.Count > 0)
+                    if (adminIds.Count > 0)
                     {
                         await _notificationService.CreateForUsersAsync(
-                            recipientIds.ToList(),
+                            adminIds,
                             "New NAF Submitted",
                             $"A new NAF has been submitted for {employee.FirstName} {employee.LastName}.",
                             $"/admin/NAF/{naf.Id}"
                         );
                     }
+
+                    var nonAdminRecipients = new List<int>();
+                    if (supervisorId.HasValue) nonAdminRecipients.Add(supervisorId.Value);
+                    if (deptHeadId.HasValue) nonAdminRecipients.Add(deptHeadId.Value);
+
+                    if (nonAdminRecipients.Count > 0)
+                    {
+                        await _notificationService.CreateForUsersAsync(
+                            nonAdminRecipients,
+                            "New NAF Submitted",
+                            $"A new NAF has been submitted for {employee.FirstName} {employee.LastName}.",
+                            $"/NAF/{naf.Id}"
+                        );
+                    }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send notifications for NAF {NafId}", naf.Id);
+                }
 
                 var nafDto = await _context.NAFs
                     .Where(n => n.Id == naf.Id)

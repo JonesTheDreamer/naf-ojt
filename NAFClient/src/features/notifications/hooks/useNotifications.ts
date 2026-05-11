@@ -9,7 +9,7 @@ import type { NotificationDTO, NotificationsResult } from "../types";
 
 const QUERY_KEY = ["notifications", 1] as const;
 
-const hubUrl = import.meta.env.VITE_API_URL.replace("/api", "") + "/hubs/notifications";
+const hubUrl = import.meta.env.VITE_API_URL.replace(/\/api\/?$/, "") + "/hubs/notifications";
 
 export function useNotifications() {
   const queryClient = useQueryClient();

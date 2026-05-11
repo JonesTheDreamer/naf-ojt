@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using NAFServer.src.Application.DTOs.Admin;
 using NAFServer.src.Application.DTOs.User;
 using NAFServer.src.Application.Interfaces;
@@ -16,6 +17,7 @@ namespace NAFServer.src.Application.Services
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly INotificationService _notificationService;
+        private readonly ILogger<AdminService> _logger;
 
         public AdminService(
             IUserRepository userRepository,
@@ -24,7 +26,8 @@ namespace NAFServer.src.Application.Services
             IUserDepartmentRepository userDepartmentRepository,
             IEmployeeRepository employeeRepository,
             IRoleRepository roleRepository,
-            INotificationService notificationService)
+            INotificationService notificationService,
+            ILogger<AdminService> logger)
         {
             _userRepository = userRepository;
             _userRoleRepository = userRoleRepository;
@@ -33,6 +36,7 @@ namespace NAFServer.src.Application.Services
             _employeeRepository = employeeRepository;
             _roleRepository = roleRepository;
             _notificationService = notificationService;
+            _logger = logger;
         }
 
         public async Task<List<UserDTO>> GetAllUsersInLocationAsync(int locationId)
@@ -134,7 +138,10 @@ namespace NAFServer.src.Application.Services
                     );
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send notification for new user {UserId}", user.Id);
+            }
         }
 
     }

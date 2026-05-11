@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NAFServer.src.Application.DTOs.ResourceManagement;
 using NAFServer.src.Application.Interfaces;
 using NAFServer.src.Domain.Entities;
@@ -13,12 +14,14 @@ namespace NAFServer.src.Application.Services
         private readonly AppDbContext _context;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly INotificationService _notificationService;
+        private readonly ILogger<ResourceManagementService> _logger;
 
-        public ResourceManagementService(AppDbContext context, IEmployeeRepository employeeRepository, INotificationService notificationService)
+        public ResourceManagementService(AppDbContext context, IEmployeeRepository employeeRepository, INotificationService notificationService, ILogger<ResourceManagementService> logger)
         {
             _context = context;
             _employeeRepository = employeeRepository;
             _notificationService = notificationService;
+            _logger = logger;
         }
 
         public async Task<List<AdminResourceListItemDTO>> GetAllResourcesAsync()
@@ -156,7 +159,10 @@ namespace NAFServer.src.Application.Services
                         );
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send notification for new resource {ResourceId}", resource.Id);
+                }
 
                 return resource.Id;
             }
@@ -232,7 +238,10 @@ namespace NAFServer.src.Application.Services
                         );
                     }
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send notification for workflow update on resource {ResourceId}", resourceId);
+                }
             }
             catch
             {
