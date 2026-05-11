@@ -20,17 +20,14 @@ const AdminNAFListPage = lazy(
 const AdminNAFDetailPage = lazy(
   () => import("@/features/admin/pages/AdminNAFDetailPage"),
 );
-const ForImplementationsPage = lazy(
-  () => import("@/features/admin/pages/ForImplementationsPage"),
-);
-const AdminImplementationDetailPage = lazy(
-  () => import("@/features/admin/pages/AdminImplementationDetailPage"),
-);
 const ResourceListPage = lazy(
   () => import("@/features/resource-management/pages/ResourceListPage"),
 );
 const ResourceDetailPage = lazy(
   () => import("@/features/resource-management/pages/ResourceDetailPage"),
+);
+const AdminResourceRequestsPage = lazy(
+  () => import("@/features/admin/pages/AdminResourceRequestsPage"),
 );
 
 export function AppRouter() {
@@ -84,22 +81,6 @@ export function AppRouter() {
           }
         />
         <Route
-          path={RoutesEnum.ADMIN_FOR_IMPLEMENTATIONS}
-          element={
-            <ProtectedRoute requiredRole="ADMIN">
-              <ForImplementationsPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path={RoutesEnum.ADMIN_IMPLEMENTATION_DETAIL}
-          element={
-            <ProtectedRoute requiredRole="ADMIN">
-              <AdminImplementationDetailPage />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path={RoutesEnum.ADMIN_USERS}
           element={
             <ProtectedRoute requiredRole="ADMIN">
@@ -128,6 +109,14 @@ export function AppRouter() {
           element={
             <ProtectedRoute requiredRole="ADMIN">
               <ResourceDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={RoutesEnum.ADMIN_RESOURCE_REQUESTS}
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <AdminResourceRequestsPage />
             </ProtectedRoute>
           }
         />

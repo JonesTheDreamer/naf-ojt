@@ -107,7 +107,6 @@ export function HistoryTimeline({
   );
 }
 
-// ── Additional info ───────────────────────────────────────────────────────────
 export function AdditionalInfoBlock({
   info,
 }: {
