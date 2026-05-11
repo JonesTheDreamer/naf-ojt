@@ -67,6 +67,9 @@ export function useNotifications() {
         };
       });
     },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
+    },
   });
 
   const markAllAsReadMutation = useMutation({
@@ -80,6 +83,9 @@ export function useNotifications() {
           unreadCount: 0,
         };
       });
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: QUERY_KEY });
     },
   });
 

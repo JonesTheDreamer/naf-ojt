@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Bell } from "lucide-react";
 import { Popover as PopoverPrimitive } from "radix-ui";
 import { useNavigate } from "react-router-dom";
@@ -13,14 +14,16 @@ function timeAgo(dateStr: string): string {
 }
 
 export function NotificationBell() {
+  const [open, setOpen] = useState(false);
   const navigate = useNavigate();
   const { notifications, unreadCount, isLoading, markAsRead, markAllAsRead } =
     useNotifications();
 
   return (
-    <PopoverPrimitive.Root>
+    <PopoverPrimitive.Root open={open} onOpenChange={setOpen}>
       <PopoverPrimitive.Trigger asChild>
         <button
+          type="button"
           className="relative p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
           aria-label="Notifications"
         >
@@ -43,6 +46,7 @@ export function NotificationBell() {
             <span className="text-sm font-semibold text-gray-800">Notifications</span>
             {unreadCount > 0 && (
               <button
+                type="button"
                 onClick={markAllAsRead}
                 className="text-xs text-amber-600 hover:text-amber-700 font-medium"
               >
@@ -62,12 +66,14 @@ export function NotificationBell() {
               {notifications.map((n) => (
                 <li key={n.id}>
                   <button
+                    type="button"
                     onClick={() => {
                       if (!n.isRead) markAsRead(n.id);
-                      navigate(n.link);
+                      setOpen(false);
+                      if (n.link) navigate(n.link);
                     }}
                     className={cn(
-                      "w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-50",
+                      "w-full text-left px-4 py-3 hover:bg-gray-50 transition-colors border-b border-gray-100",
                       !n.isRead && "border-l-4 border-l-amber-400 pl-3"
                     )}
                   >
