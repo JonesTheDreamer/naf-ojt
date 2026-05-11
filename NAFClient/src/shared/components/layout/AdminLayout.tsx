@@ -1,4 +1,4 @@
-import { Home, Users, FileText, Wrench, Box } from "lucide-react";
+import { Home, Users, FileText, ClipboardList, Box } from "lucide-react";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "./Layout";
@@ -7,7 +7,7 @@ import { useAuth } from "@/features/auth/AuthContext";
 const navItems = [
   { label: "Home", icon: <Home className="w-5 h-5" />, href: "/admin" },
   { label: "NAFs", icon: <FileText className="w-5 h-5" />, href: "/admin/NAF" },
-  { label: "Implementations", icon: <Wrench className="w-5 h-5" />, href: "/admin/for-implementations" },
+  { label: "Resource Requests", icon: <ClipboardList className="w-5 h-5" />, href: "/admin/resource-requests" },
   { label: "Users", icon: <Users className="w-5 h-5" />, href: "/admin/users" },
   { label: "Resources", icon: <Box className="w-5 h-5" />, href: "/admin/resources" },
 ];
