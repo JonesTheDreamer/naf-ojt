@@ -35,6 +35,7 @@ namespace NAFServer.src.Infrastructure.Persistence
         public DbSet<ResourceRequestHistory> ResourceRequestHistories { get; set; }
         public DbSet<ResourceGroup> ResourceGroups { get; set; }
         public DbSet<Location> Locations { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -177,6 +178,12 @@ namespace NAFServer.src.Infrastructure.Persistence
                 .HasMany(u => u.UserLocations)
                 .WithOne(ul => ul.User)
                 .HasForeignKey(ul => ul.UserId);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany()
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
