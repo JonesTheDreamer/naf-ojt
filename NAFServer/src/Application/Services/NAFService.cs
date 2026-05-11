@@ -27,6 +27,7 @@ namespace NAFServer.src.Application.Services
         private readonly IUserDepartmentRepository _userDepartmentRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly IConfiguration _configuration;
+        private readonly INotificationService _notificationService;
         public NAFService
         (
             AppDbContext context,
@@ -42,7 +43,8 @@ namespace NAFServer.src.Application.Services
             IUserLocationRepository userLocationRepository,
             IUserDepartmentRepository userDepartmentRepository,
             ICurrentUserService currentUserService,
-            IConfiguration configuration
+            IConfiguration configuration,
+            INotificationService notificationService
         )
         {
             _context = context;
@@ -59,6 +61,7 @@ namespace NAFServer.src.Application.Services
             _userDepartmentRepository = userDepartmentRepository;
             _currentUserService = currentUserService;
             _configuration = configuration;
+            _notificationService = notificationService;
         }
 
         private async Task AuthorizeNAFAccessAsync(NAF naf)
@@ -82,12 +85,12 @@ namespace NAFServer.src.Application.Services
                 return;
 
             // Rule 4: admin whose active location matches the NAF's location
-            //if (_currentUserService.Role == "ADMIN")
-            //{
-            //    var adminLocationId = await _currentUserService.GetLocationIdAsync();
-            //    if (naf.LocationId == adminLocationId)
-            //        return;
-            //}
+            if (_currentUserService.Role == "ADMIN")
+            {
+                //var adminLocationId = await _currentUserService.GetLocationIdAsync();
+                //if (naf.LocationId == adminLocationId)
+                return;
+            }
 
             throw new UnauthorizedAccessException("You do not have access to this NAF.");
         }
@@ -184,6 +187,30 @@ namespace NAFServer.src.Application.Services
                 }
 
                 await transaction.CommitAsync();
+
+                // Notify admins + supervisor + dept head about new NAF
+                try
+                {
+                    var adminIds = await _notificationService.GetAdminsByLocationAsync(naf.LocationId);
+                    var supervisorId = await _notificationService.FindUserIdByEmployeeNumberAsync(employee.SupervisorId);
+                    var deptHeadId = await _notificationService.FindUserIdByEmployeeNumberAsync(employee.DepartmentHeadId);
+
+                    var recipientIds = new HashSet<int>(adminIds);
+                    if (supervisorId.HasValue) recipientIds.Add(supervisorId.Value);
+                    if (deptHeadId.HasValue) recipientIds.Add(deptHeadId.Value);
+
+                    if (recipientIds.Count > 0)
+                    {
+                        await _notificationService.CreateForUsersAsync(
+                            recipientIds.ToList(),
+                            "New NAF Submitted",
+                            $"A new NAF has been submitted for {employee.FirstName} {employee.LastName}.",
+                            $"/admin/NAF/{naf.Id}"
+                        );
+                    }
+                }
+                catch { }
+
                 var nafDto = await _context.NAFs
                     .Where(n => n.Id == naf.Id)
                     .FirstOrDefaultAsync() ?? throw new KeyNotFoundException("NAF not found");

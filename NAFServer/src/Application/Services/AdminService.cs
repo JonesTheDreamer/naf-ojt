@@ -15,6 +15,7 @@ namespace NAFServer.src.Application.Services
         private readonly IUserDepartmentRepository _userDepartmentRepository;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IRoleRepository _roleRepository;
+        private readonly INotificationService _notificationService;
 
         public AdminService(
             IUserRepository userRepository,
@@ -22,7 +23,8 @@ namespace NAFServer.src.Application.Services
             IUserLocationRepository userLocationRepository,
             IUserDepartmentRepository userDepartmentRepository,
             IEmployeeRepository employeeRepository,
-            IRoleRepository roleRepository)
+            IRoleRepository roleRepository,
+            INotificationService notificationService)
         {
             _userRepository = userRepository;
             _userRoleRepository = userRoleRepository;
@@ -30,6 +32,7 @@ namespace NAFServer.src.Application.Services
             _userDepartmentRepository = userDepartmentRepository;
             _employeeRepository = employeeRepository;
             _roleRepository = roleRepository;
+            _notificationService = notificationService;
         }
 
         public async Task<List<UserDTO>> GetAllUsersInLocationAsync(int locationId)
@@ -116,6 +119,22 @@ namespace NAFServer.src.Application.Services
                 await _userRoleRepository.AddUserRoleAsync(user.Id, roleEntity.Id);
             }
             catch (KeyNotFoundException) { }
+
+            // Notify admins at the location
+            try
+            {
+                var adminIds = await _notificationService.GetAdminsByLocationAsync(dto.LocationId);
+                if (adminIds.Count > 0)
+                {
+                    await _notificationService.CreateForUsersAsync(
+                        adminIds,
+                        "New User Added",
+                        "A new user has been added to the system.",
+                        $"/admin/users/{user.Id}"
+                    );
+                }
+            }
+            catch { }
         }
 
     }

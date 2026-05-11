@@ -12,13 +12,15 @@ namespace NAFServer.src.Application.Services
         private readonly IResourceRequestStepRepository _resourceRequestStepRepository;
         private readonly IResourceRequestRepository _resourceRequestRepository;
         private readonly IEmployeeRepository _employeeRepository;
+        private readonly INotificationService _notificationService;
 
-        public ResourceRequestApprovalStepService(AppDbContext context, IResourceRequestStepRepository resourceRequestStepRepository, IResourceRequestRepository resourceRequestRepository, IEmployeeRepository employeeRepository)
+        public ResourceRequestApprovalStepService(AppDbContext context, IResourceRequestStepRepository resourceRequestStepRepository, IResourceRequestRepository resourceRequestRepository, IEmployeeRepository employeeRepository, INotificationService notificationService)
         {
             _context = context;
             _resourceRequestStepRepository = resourceRequestStepRepository;
             _resourceRequestRepository = resourceRequestRepository;
             _employeeRepository = employeeRepository;
+            _notificationService = notificationService;
         }
         public async Task<ResourceRequestApprovalStep> ApproveStepAsync(Guid stepId, string? comment)
         {
@@ -72,6 +74,42 @@ namespace NAFServer.src.Application.Services
 
                 await _context.SaveChangesAsync();
 
+                // Notify requestor and next approver
+                try
+                {
+                    var requestorUserId = await _notificationService.FindUserIdByEmployeeNumberAsync(rr.NAF.RequestorId);
+                    if (requestorUserId.HasValue)
+                    {
+                        await _notificationService.CreateForUsersAsync(
+                            new List<int> { requestorUserId.Value },
+                            "Resource Request Approved",
+                            "Your resource request has been approved.",
+                            $"/NAF/{rr.NAFId}"
+                        );
+                    }
+
+                    // Notify next approver (only if not all steps are accomplished)
+                    if (!rr.IsAccomplished())
+                    {
+                        var nextStep = rr.ResourceRequestsApprovalSteps
+                            .FirstOrDefault(s => s.StepOrder == rr.CurrentStep);
+                        if (nextStep?.ApproverId != null)
+                        {
+                            var nextApproverId = await _notificationService.FindUserIdByEmployeeNumberAsync(nextStep.ApproverId);
+                            if (nextApproverId.HasValue && nextApproverId.Value != requestorUserId)
+                            {
+                                await _notificationService.CreateForUsersAsync(
+                                    new List<int> { nextApproverId.Value },
+                                    "Resource Request Awaiting Your Approval",
+                                    "A resource request requires your approval.",
+                                    $"/admin/NAF/{rr.NAFId}"
+                                );
+                            }
+                        }
+                    }
+                }
+                catch { }
+
                 return step;
             }
             catch (Exception ex)
@@ -109,6 +147,22 @@ namespace NAFServer.src.Application.Services
             ));
 
             await _context.SaveChangesAsync();
+
+            // Notify requestor
+            try
+            {
+                var requestorUserId = await _notificationService.FindUserIdByEmployeeNumberAsync(rr.NAF.RequestorId);
+                if (requestorUserId.HasValue)
+                {
+                    await _notificationService.CreateForUsersAsync(
+                        new List<int> { requestorUserId.Value },
+                        "Resource Request Rejected",
+                        "Your resource request has been rejected.",
+                        $"/NAF/{rr.NAFId}"
+                    );
+                }
+            }
+            catch { }
 
             return step;
         }

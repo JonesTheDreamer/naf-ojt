@@ -12,11 +12,13 @@ namespace NAFServer.src.Application.Services
     {
         private readonly AppDbContext _context;
         private readonly IEmployeeRepository _employeeRepository;
+        private readonly INotificationService _notificationService;
 
-        public ResourceManagementService(AppDbContext context, IEmployeeRepository employeeRepository)
+        public ResourceManagementService(AppDbContext context, IEmployeeRepository employeeRepository, INotificationService notificationService)
         {
             _context = context;
             _employeeRepository = employeeRepository;
+            _notificationService = notificationService;
         }
 
         public async Task<List<AdminResourceListItemDTO>> GetAllResourcesAsync()
@@ -139,6 +141,23 @@ namespace NAFServer.src.Application.Services
                 }
 
                 await tx.CommitAsync();
+
+                // Notify all admins about new resource
+                try
+                {
+                    var adminIds = await _notificationService.GetAllAdminsAsync();
+                    if (adminIds.Count > 0)
+                    {
+                        await _notificationService.CreateForUsersAsync(
+                            adminIds,
+                            "New Resource Added",
+                            $"A new resource has been added to the system.",
+                            $"/admin/resources/{resource.Id}"
+                        );
+                    }
+                }
+                catch { }
+
                 return resource.Id;
             }
             catch
@@ -198,6 +217,22 @@ namespace NAFServer.src.Application.Services
                 await _context.SaveChangesAsync();
 
                 await tx.CommitAsync();
+
+                // Notify all admins about workflow template change
+                try
+                {
+                    var adminIds = await _notificationService.GetAllAdminsAsync();
+                    if (adminIds.Count > 0)
+                    {
+                        await _notificationService.CreateForUsersAsync(
+                            adminIds,
+                            "Resource Workflow Updated",
+                            $"An approval workflow has been updated.",
+                            $"/admin/resources/{resourceId}"
+                        );
+                    }
+                }
+                catch { }
             }
             catch
             {
