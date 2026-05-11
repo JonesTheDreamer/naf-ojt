@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using NAFServer.src.API.Hubs;
 using NAFServer.src.API.Middleware;
 using NAFServer.src.Application.Handlers.Interface;
 using NAFServer.src.Application.Handlers.ResourceRequestHandler;
@@ -112,6 +113,10 @@ builder.Services.AddScoped<IUserLocationService, UserLocationService>();
 builder.Services.AddScoped<IUserDepartmentService, UserDepartmentService>();
 builder.Services.AddScoped<IUserRoleService, UserRoleService>();
 
+builder.Services.AddSignalR();
+builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
+builder.Services.AddScoped<INotificationService, NotificationService>();
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
@@ -137,4 +142,5 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
+app.MapHub<NotificationHub>("/hubs/notifications");
 app.Run();
