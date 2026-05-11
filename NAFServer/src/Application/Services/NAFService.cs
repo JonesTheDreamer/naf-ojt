@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using NAFServer.src.Application.DTOs.Admin;
 using NAFServer.src.Application.DTOs.NAF;
 using NAFServer.src.Application.DTOs.ResourceRequest;
 using NAFServer.src.Application.Handlers.Interface;
@@ -81,12 +82,12 @@ namespace NAFServer.src.Application.Services
                 return;
 
             // Rule 4: admin whose active location matches the NAF's location
-            if (_currentUserService.Role == "ADMIN")
-            {
-                var adminLocationId = await _currentUserService.GetLocationIdAsync();
-                if (naf.LocationId == adminLocationId)
-                    return;
-            }
+            //if (_currentUserService.Role == "ADMIN")
+            //{
+            //    var adminLocationId = await _currentUserService.GetLocationIdAsync();
+            //    if (naf.LocationId == adminLocationId)
+            //        return;
+            //}
 
             throw new UnauthorizedAccessException("You do not have access to this NAF.");
         }
@@ -269,6 +270,60 @@ namespace NAFServer.src.Application.Services
         public async Task<PagedResult<NAFDTO>> GetNAFsByLocationPagedAsync(int locationId, string status, int page)
         {
             return await _nafRepository.GetNAFsByLocationPagedAsync(locationId, status, page);
+        }
+
+        public async Task<PagedResult<AdminResourceRequestDTO>> GetResourceRequestsByLocationPagedAsync(
+            int locationId, string progress, int page)
+        {
+            const int pageSize = 10;
+
+            var query = _context.ResourceRequests
+                .Include(rr => rr.NAF)
+                .Include(rr => rr.Resource)
+                .Where(rr => rr.NAF.LocationId == locationId);
+
+            if (!string.Equals(progress, "all", StringComparison.OrdinalIgnoreCase)
+                && Enum.TryParse<Domain.Enums.Progress>(progress, ignoreCase: true, out var parsedProgress))
+            {
+                query = query.Where(rr => rr.Progress == parsedProgress);
+            }
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderByDescending(rr => rr.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            var dtos = new List<AdminResourceRequestDTO>();
+            foreach (var rr in items)
+            {
+                var employee = await _employeeRepository.GetByIdAsync(rr.NAF.EmployeeId);
+                var employeeName = employee != null
+                    ? $"{employee.FirstName} {employee.LastName}".Trim()
+                    : rr.NAF.EmployeeId;
+
+                dtos.Add(new AdminResourceRequestDTO(
+                    rr.Id,
+                    rr.NAFId,
+                    rr.NAF.Reference,
+                    employeeName,
+                    rr.Resource.Name,
+                    (int)rr.Progress,
+                    rr.DateNeeded == default(DateTime) ? null : rr.DateNeeded,
+                    rr.CreatedAt
+                ));
+            }
+
+            return new PagedResult<AdminResourceRequestDTO>
+            {
+                Data = dtos,
+                TotalCount = totalCount,
+                PageSize = pageSize,
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
+            };
         }
     }
 }

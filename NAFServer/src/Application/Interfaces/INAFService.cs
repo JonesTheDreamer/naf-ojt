@@ -1,4 +1,5 @@
-﻿using NAFServer.src.Application.DTOs.NAF;
+using NAFServer.src.Application.DTOs.Admin;
+using NAFServer.src.Application.DTOs.NAF;
 using static NAFServer.src.Application.DTOs.Common.PaginatedDTO;
 
 namespace NAFServer.src.Application.Interfaces
@@ -15,5 +16,6 @@ namespace NAFServer.src.Application.Interfaces
         public Task<List<NAFDTO>> GetNAFByEmployeeIdAsync(string employeeId);
         Task<List<AddBasicResourceResultDTO>> AddBasicResourcesToNAFAsync(Guid nafId, List<BasicResourceWithDateDTO> resources);
         Task<PagedResult<NAFDTO>> GetNAFsByLocationPagedAsync(int locationId, string status, int page);
+        Task<PagedResult<AdminResourceRequestDTO>> GetResourceRequestsByLocationPagedAsync(int locationId, string progress, int page);
     }
 }
