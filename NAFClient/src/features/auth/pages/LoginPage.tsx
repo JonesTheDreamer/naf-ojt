@@ -10,6 +10,7 @@ import { useAuth } from "../AuthContext";
 const ROLE_HOME: Record<string, string> = {
   ADMIN: "/admin",
   REQUESTOR_APPROVER: "/NAF",
+  HR: "/hr",
 };
 
 export default function LoginPage() {

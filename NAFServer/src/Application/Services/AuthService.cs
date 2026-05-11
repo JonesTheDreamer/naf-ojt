@@ -17,7 +17,7 @@ namespace NAFServer.src.Application.Services
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IUserLocationRepository _userLocationRepository;
 
-        private static readonly Roles[] InScopeRoles = [Roles.ADMIN, Roles.REQUESTOR_APPROVER];
+        private static readonly Roles[] InScopeRoles = [Roles.ADMIN, Roles.REQUESTOR_APPROVER, Roles.HR];
 
         public AuthService(
             IConfiguration config,

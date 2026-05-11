@@ -87,6 +87,7 @@ export const useNAF = ({ employeeId, nafId }: UseNAFParams) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
       queryClient.invalidateQueries({ queryKey: ["employeeNAF"] });
+      queryClient.invalidateQueries({ queryKey: ["hr", "nafs"] });
       toast.success("NAF created successfully");
     },
     onError: () => {
