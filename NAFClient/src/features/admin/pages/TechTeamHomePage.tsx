@@ -1,12 +1,9 @@
 import AdminLayout from "@/shared/components/layout/AdminLayout";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useMyTasks } from "../hooks/useMyTasks";
-import { useForImplementations } from "../hooks/useForImplementations";
-
 export default function TechTeamHomePage() {
   const { user } = useAuth();
   const { myTasksQuery } = useMyTasks();
-  const { forImplementationsQuery } = useForImplementations(null);
 
   return (
     <AdminLayout>
@@ -17,12 +14,6 @@ export default function TechTeamHomePage() {
           <p className="text-sm text-muted-foreground">My Tasks</p>
           <p className="text-3xl font-bold">
             {myTasksQuery.isLoading ? "..." : (myTasksQuery.data?.length ?? 0)}
-          </p>
-        </div>
-        <div className="border rounded-lg p-4">
-          <p className="text-sm text-muted-foreground">For Implementations</p>
-          <p className="text-3xl font-bold">
-            {forImplementationsQuery.isLoading ? "..." : (forImplementationsQuery.data?.length ?? 0)}
           </p>
         </div>
       </div>
