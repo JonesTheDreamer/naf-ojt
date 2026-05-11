@@ -7,7 +7,12 @@ import {
 } from "@/components/ui/accordion";
 import { cn } from "@/shared/utils/utils";
 import { getDateUrgency } from "@/shared/utils/dateUrgency";
-import type { Resource, ResourceGroup, ResourceRequest, PurposeProps } from "@/shared/types/api/naf";
+import type {
+  Resource,
+  ResourceGroup,
+  ResourceRequest,
+  PurposeProps,
+} from "@/shared/types/api/naf";
 import { Status } from "@/shared/types/enum/status";
 import { Progress } from "@/shared/types/enum/progress";
 import { PROGRESS_CONFIG } from "../progressBadge";
@@ -15,8 +20,21 @@ import { PurposeHistoryModal } from "../purposeHistoryModal";
 import { DeleteConfirmDialog } from "../deleteConfirmDialog";
 import { ResubmitDialog } from "../resubmitDialog";
 import { ResourceIcon } from "./resourceRequestUtils";
-import { DateUrgencyBadge, PurposeBlock, HistoryTimeline, ImplementationBlock, ApprovalStepsBlock } from "./ResourceRequestContent";
-import { OpenActions, ReminderAction, DeactivateAction, RejectedActions, CancelledBadge, ApproverActions } from "./ResourceRequestActions";
+import {
+  DateUrgencyBadge,
+  PurposeBlock,
+  HistoryTimeline,
+  ImplementationBlock,
+  ApprovalStepsBlock,
+} from "./ResourceRequestContent";
+import {
+  OpenActions,
+  ReminderAction,
+  DeactivateAction,
+  RejectedActions,
+  CancelledBadge,
+  ApproverActions,
+} from "./ResourceRequestActions";
 import { ApproveDialog } from "./ApproveDialog";
 import { RejectDialog } from "./RejectDialog";
 import { ChangeResourceDialog } from "./ChangeResourceDialog";
@@ -25,14 +43,13 @@ import { DeactivateConfirmDialog } from "../deactivateConfirmDialog";
 import { ImplementationActionsBlock } from "./ImplementationActionsBlock";
 
 const PROGRESS_STRIP: Record<Progress, string> = {
-  [Progress.OPEN]:             "bg-amber-400",
-  [Progress.IN_PROGRESS]:      "bg-blue-500",
-  [Progress.FOR_SCREENING]:    "bg-purple-500",
-  [Progress.IMPLEMENTATION]:   "bg-teal-500",
-  [Progress.ACCOMPLISHED]:     "bg-emerald-500",
-  [Progress.REJECTED]:         "bg-red-400",
-  [Progress.NOT_ACCOMPLISHED]: "bg-gray-300",
-  [Progress.CANCELLED]:        "bg-gray-200",
+  [Progress.OPEN]: "bg-amber-400",
+  [Progress.IN_PROGRESS]: "bg-blue-500",
+  [Progress.FOR_SCREENING]: "bg-purple-500",
+  [Progress.IMPLEMENTATION]: "bg-teal-500",
+  [Progress.ACCOMPLISHED]: "bg-emerald-500",
+  [Progress.REJECTED]: "bg-red-400",
+  [Progress.CANCELLED]: "bg-gray-300",
 };
 
 interface ResourceRequestAccordionItemProps {
@@ -47,7 +64,11 @@ interface ResourceRequestAccordionItemProps {
   onDelete?: (requestId: string) => void;
   onRemind?: (requestId: string) => void;
   onDeactivate?: (requestId: string) => void;
-  onResubmit?: (requestId: string, nafId: string, purpose: PurposeProps) => void;
+  onResubmit?: (
+    requestId: string,
+    nafId: string,
+    purpose: PurposeProps,
+  ) => void;
   onCancel?: (requestId: string) => void;
   onChangeResource?: (requestId: string, newResourceId: number) => void;
   onApprove?: (requestId: string, remarks: string) => void;
@@ -92,7 +113,8 @@ export function ResourceRequestAccordionItem({
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [purposeHistoryOpen, setPurposeHistoryOpen] = useState(false);
-  const [changeResourceDialogOpen, setChangeResourceDialogOpen] = useState(false);
+  const [changeResourceDialogOpen, setChangeResourceDialogOpen] =
+    useState(false);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
 
   const progress = request.progress as unknown as Progress;
@@ -106,7 +128,9 @@ export function ResourceRequestAccordionItem({
   const rejectionHistory = request.steps
     .flatMap((s) => s.histories)
     .filter((h) => h.status === Status.REJECTED)
-    .sort((a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime())[0];
+    .sort(
+      (a, b) => new Date(b.actionAt).getTime() - new Date(a.actionAt).getTime(),
+    )[0];
   const rejectionReason = rejectionHistory?.reasonForRejection;
 
   const showHistory = progress !== Progress.OPEN;
@@ -116,6 +140,11 @@ export function ResourceRequestAccordionItem({
     !isApprover &&
     (resourceGroup?.canChangeWithoutApproval ?? false) &&
     groupResources.length > 0;
+
+  console.log(isApprover);
+  console.log(isCurrentApprover);
+
+  console.log(request);
 
   return (
     <>
@@ -134,7 +163,10 @@ export function ResourceRequestAccordionItem({
 
             {/* Trigger body */}
             <div className="flex items-center gap-3 flex-1 min-w-0 px-4 py-3 hover:bg-muted/20 transition-colors">
-              <ResourceIcon iconUrl={request.resource.iconUrl} name={request.resource.name} />
+              <ResourceIcon
+                iconUrl={request.resource.iconUrl}
+                name={request.resource.name}
+              />
               <span
                 className={cn(
                   "text-sm font-semibold flex-1 min-w-0 truncate text-left",
@@ -152,13 +184,14 @@ export function ResourceRequestAccordionItem({
                 )}
                 {request.isActive &&
                   progress !== Progress.ACCOMPLISHED &&
-                  progress !== Progress.NOT_ACCOMPLISHED && (
+                  progress !== Progress.CANCELLED && (
                     <DateUrgencyBadge dateNeeded={request.dateNeeded} />
                   )}
                 <span
                   className={cn(
                     "inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border",
-                    config?.className ?? "text-gray-500 bg-gray-50 border-gray-200",
+                    config?.className ??
+                      "text-gray-500 bg-gray-50 border-gray-200",
                   )}
                 >
                   {config?.label ?? String(progress)}
@@ -187,14 +220,19 @@ export function ResourceRequestAccordionItem({
                       <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider mb-1">
                         Reason for Rejection
                       </p>
-                      <p className="text-sm text-red-700/80">{rejectionReason}</p>
+                      <p className="text-sm text-red-700/80">
+                        {rejectionReason}
+                      </p>
                     </div>
                   )}
 
                   {progress === Progress.IMPLEMENTATION && (
                     <ImplementationBlock impl={request.implementation} />
                   )}
-                  {(onAccept || onSetToInProgress || onSetToDelayed || onSetToAccomplished) &&
+                  {(onAccept ||
+                    onSetToInProgress ||
+                    onSetToDelayed ||
+                    onSetToAccomplished) &&
                     progress === Progress.IMPLEMENTATION && (
                       <ImplementationActionsBlock
                         impl={request.implementation}
@@ -218,7 +256,9 @@ export function ResourceRequestAccordionItem({
                       isClaiming={isClaiming}
                     />
                   )}
-                  {showHistory && <HistoryTimeline histories={request.histories} />}
+                  {showHistory && (
+                    <HistoryTimeline histories={request.histories} />
+                  )}
                 </div>
               </div>
 
@@ -236,7 +276,9 @@ export function ResourceRequestAccordionItem({
                         />
                       )}
                       {progress === Progress.IMPLEMENTATION && (
-                        <ReminderAction onRemind={() => onRemind?.(request.id)} />
+                        <ReminderAction
+                          onRemind={() => onRemind?.(request.id)}
+                        />
                       )}
                     </>
                   )}
@@ -250,7 +292,9 @@ export function ResourceRequestAccordionItem({
                         />
                       )}
                       {progress === Progress.ACCOMPLISHED && isRequestor && (
-                        <DeactivateAction onDeactivate={() => setDeactivateDialogOpen(true)} />
+                        <DeactivateAction
+                          onDeactivate={() => setDeactivateDialogOpen(true)}
+                        />
                       )}
                       {progress === Progress.REJECTED &&
                         (request.cancelledAt ? (
@@ -262,10 +306,12 @@ export function ResourceRequestAccordionItem({
                           />
                         ))}
                       {progress === Progress.IMPLEMENTATION && (
-                        <ReminderAction onRemind={() => onRemind?.(request.id)} />
+                        <ReminderAction
+                          onRemind={() => onRemind?.(request.id)}
+                        />
                       )}
                       {canChangeResource &&
-                        progress !== Progress.NOT_ACCOMPLISHED &&
+                        progress !== Progress.CANCELLED &&
                         !request.cancelledAt && (
                           <div className="flex justify-end">
                             <button
@@ -290,7 +336,10 @@ export function ResourceRequestAccordionItem({
         open={editDialogOpen}
         onOpenChange={setEditDialogOpen}
         initialPurpose={initialPurpose}
-        onSubmit={(purpose) => { onEdit?.(request.id, request.nafId, purpose); setEditDialogOpen(false); }}
+        onSubmit={(purpose) => {
+          onEdit?.(request.id, request.nafId, purpose);
+          setEditDialogOpen(false);
+        }}
       />
       <PurposeHistoryModal
         open={purposeHistoryOpen}
@@ -302,24 +351,36 @@ export function ResourceRequestAccordionItem({
         open={resubmitDialogOpen}
         onOpenChange={setResubmitDialogOpen}
         initialPurpose={initialPurpose}
-        onSubmit={(purpose) => { onResubmit?.(request.id, request.nafId, { ...purpose }); setResubmitDialogOpen(false); }}
+        onSubmit={(purpose) => {
+          onResubmit?.(request.id, request.nafId, { ...purpose });
+          setResubmitDialogOpen(false);
+        }}
       />
       <DeleteConfirmDialog
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         resourceName={request.resource.name}
-        onConfirm={() => { onDelete?.(request.id); setDeleteDialogOpen(false); }}
+        onConfirm={() => {
+          onDelete?.(request.id);
+          setDeleteDialogOpen(false);
+        }}
       />
       <ApproveDialog
         open={approveDialogOpen}
         onOpenChange={setApproveDialogOpen}
-        onConfirm={(remarks) => { onApprove?.(request.id, remarks); setApproveDialogOpen(false); }}
+        onConfirm={(remarks) => {
+          onApprove?.(request.id, remarks);
+          setApproveDialogOpen(false);
+        }}
         isSubmitting={isSubmitting}
       />
       <RejectDialog
         open={rejectDialogOpen}
         onOpenChange={setRejectDialogOpen}
-        onConfirm={(reason) => { onReject?.(request.id, reason); setRejectDialogOpen(false); }}
+        onConfirm={(reason) => {
+          onReject?.(request.id, reason);
+          setRejectDialogOpen(false);
+        }}
         isSubmitting={isSubmitting}
       />
       <ChangeResourceDialog
@@ -327,14 +388,20 @@ export function ResourceRequestAccordionItem({
         onOpenChange={setChangeResourceDialogOpen}
         currentResourceName={request.resource.name}
         availableResources={groupResources}
-        onConfirm={(newResourceId) => { onChangeResource?.(request.id, newResourceId); setChangeResourceDialogOpen(false); }}
+        onConfirm={(newResourceId) => {
+          onChangeResource?.(request.id, newResourceId);
+          setChangeResourceDialogOpen(false);
+        }}
         isSubmitting={isSubmitting}
       />
       <DeactivateConfirmDialog
         open={deactivateDialogOpen}
         onOpenChange={setDeactivateDialogOpen}
         resourceName={request.resource.name}
-        onConfirm={() => { onDeactivate?.(request.id); setDeactivateDialogOpen(false); }}
+        onConfirm={() => {
+          onDeactivate?.(request.id);
+          setDeactivateDialogOpen(false);
+        }}
         isSubmitting={isSubmitting}
       />
     </>

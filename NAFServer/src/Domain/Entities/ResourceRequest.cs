@@ -111,7 +111,7 @@ namespace NAFServer.src.Domain.Entities
         public ResourceRequest Cancel()
         {
             if (CancelledAt.HasValue) throw new DomainException("Already cancelled");
-            Progress = Progress.NOT_ACCOMPLISHED;
+            Progress = Progress.CANCELLED;
             CancelledAt = DateTime.UtcNow;
             return this;
         }

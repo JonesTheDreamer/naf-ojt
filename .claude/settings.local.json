@@ -43,7 +43,8 @@
       "Bash(Select-Object Name)",
       "Bash(grep -E \"\\\\.cs$\")",
       "PowerShell(Remove-Item *)",
-      "Bash(Select-String -Pattern \"error CS\")"
+      "Bash(Select-String -Pattern \"error CS\")",
+      "PowerShell(dotnet tool list *)"
     ]
   }
 }

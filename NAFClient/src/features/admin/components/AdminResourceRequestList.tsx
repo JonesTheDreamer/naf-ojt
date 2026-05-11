@@ -12,6 +12,7 @@ import {
   rejectResourceRequest,
   claimScreeningStep,
 } from "@/features/naf/api";
+import { useAuth } from "@/features/auth";
 
 function extractErrorMessage(error: unknown, fallback: string): string {
   const data = (error as { response?: { data?: unknown } })?.response?.data;
@@ -23,14 +24,14 @@ function extractErrorMessage(error: unknown, fallback: string): string {
 
 interface AdminResourceRequestListProps {
   naf: NAF;
-  currentUser: string;
 }
 
 export function AdminResourceRequestList({
   naf,
-  currentUser,
 }: AdminResourceRequestListProps) {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
+  const currentUser = user?.employeeId ?? "";
   const nafQueryKey = ["naf", naf.id];
   const [filter, setFilter] = useState<ProgressFilter>("all");
   const [showInactive, setShowInactive] = useState(false);
@@ -146,9 +147,11 @@ export function AdminResourceRequestList({
           const currentStep = req.steps.find(
             (s) => s.stepOrder === req.currentStep,
           );
+          const stepApproverId = currentStep?.approverId;
           const isCurrentApprover =
-            currentStep?.approverId === currentUser &&
-            currentStep?.approverId !== null;
+            !!stepApproverId &&
+            !!currentUser &&
+            stepApproverId.trim().toLowerCase() === currentUser.trim().toLowerCase();
 
           return (
             <ResourceRequestAccordionItem

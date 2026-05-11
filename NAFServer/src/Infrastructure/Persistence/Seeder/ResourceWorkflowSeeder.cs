@@ -32,7 +32,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
             var microsoft365E1 = new Resource("Microsoft 365 (E1)", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/732/732221.png", false, false);
             var microsoft365E3 = new Resource("Microsoft 365 (E3)", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/732/732221.png", true, false);
             var microsoft365E5 = new Resource("Microsoft 365 (E5)", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/732/732221.png", true, false);
-            var microsoft365Business = new Resource("Microsoft 365 (Business Central)", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/732/732221.png", true, false);
+            var microsoft365Business = new Resource("Microsoft 365 (Business Standard)", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/732/732221.png", true, false);
 
             var groupEmail = new Resource("Group Email", "F9FFA4", "https://static.vecteezy.com/system/resources/thumbnails/052/933/905/small/white-envelope-icon-with-transparent-background-png.png", true, true);
             var sharedFolder = new Resource("Shared Folder", "FFD59E", "https://cdn-icons-png.flaticon.com/512/1383/1383970.png", true, true);

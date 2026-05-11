@@ -12,7 +12,7 @@ const STATUS_CONFIG: Record<
   { label: string; icon: React.ReactNode; className: string }
 > = {
   [Progress[Progress.ACCOMPLISHED]]: {
-    label: "Completed",
+    label: "Accomplished",
     icon: <CheckCircle2 className="h-3.5 w-3.5" />,
     className: "text-emerald-600 bg-emerald-50 border-emerald-200",
   },

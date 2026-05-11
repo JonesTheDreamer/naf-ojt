@@ -36,7 +36,7 @@ export function ImplementationActionsBlock({
             disabled={isSubmitting}
             onClick={() => onAccept(resourceRequestId)}
           >
-            Accept
+            Start Implementation
           </Button>
         )}
 

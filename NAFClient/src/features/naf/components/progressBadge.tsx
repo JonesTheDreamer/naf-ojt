@@ -30,10 +30,6 @@ export const PROGRESS_CONFIG: Record<
     label: "Accomplished",
     className: "text-emerald-600 bg-emerald-50 border-emerald-200",
   },
-  [Progress.NOT_ACCOMPLISHED]: {
-    label: "Not Accomplished",
-    className: "text-gray-500 bg-gray-50 border-gray-200",
-  },
   [Progress.CANCELLED]: {
     label: "Cancelled",
     className: "text-gray-400 bg-gray-50 border-gray-200",

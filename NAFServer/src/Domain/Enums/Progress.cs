@@ -8,7 +8,6 @@ namespace NAFServer.src.Domain.Enums
         IMPLEMENTATION, // 3 — technical team is working on it
         ACCOMPLISHED,   // 4 — delivered
         REJECTED,       // 5 — an approver rejected
-        NOT_ACCOMPLISHED, // 6 — requestor closed a rejected request
-        CANCELLED       // 7 — cancelled
+        CANCELLED       // 6 — requestor cancelled the request
     }
 }

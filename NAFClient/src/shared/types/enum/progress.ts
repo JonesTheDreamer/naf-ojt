@@ -5,6 +5,5 @@ export enum Progress {
   IMPLEMENTATION = 3,
   ACCOMPLISHED = 4,
   REJECTED = 5,
-  NOT_ACCOMPLISHED = 6,
-  CANCELLED = 7,
+  CANCELLED = 6,
 }

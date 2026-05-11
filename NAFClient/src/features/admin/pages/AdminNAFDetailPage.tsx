@@ -6,7 +6,6 @@ import { NAFDetailHeader } from "@/features/naf/components/NAFDetailHeader";
 import { AdminResourceRequestList } from "../components/AdminResourceRequestList";
 import { RoutesEnum } from "@/app/routesEnum";
 import { ProgressStatus } from "@/shared/types/api/naf";
-import { useAuth } from "@/features/auth";
 import { Button } from "@/components/ui/button";
 
 function formatDate(dateStr?: string | null) {
@@ -71,8 +70,6 @@ export default function AdminNAFDetailPage() {
   const navigate = useNavigate();
   const { nafQuery, isLoading, isError } = useNAF({ nafId });
   const naf = nafQuery.data;
-  const { user } = useAuth();
-  const currentUserId = user?.employeeId ?? "";
   const progressNum = naf?.progress as unknown as number;
 
   return (
@@ -127,7 +124,7 @@ export default function AdminNAFDetailPage() {
             </div>
 
             <NAFDetailHeader naf={naf} />
-            <AdminResourceRequestList naf={naf} currentUser={currentUserId} />
+            <AdminResourceRequestList naf={naf} />
           </>
         )}
       </div>

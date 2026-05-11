@@ -16,7 +16,6 @@ const PROGRESS_TABS = [
   { label: "Implementation", value: "IMPLEMENTATION" },
   { label: "Accomplished", value: "ACCOMPLISHED" },
   { label: "Rejected", value: "REJECTED" },
-  { label: "Not Accomplished", value: "NOT_ACCOMPLISHED" },
   { label: "Cancelled", value: "CANCELLED" },
 ] as const;
 

@@ -18,7 +18,7 @@ const FILTER_ORDER: Progress[] = [
   Progress.IMPLEMENTATION,
   Progress.ACCOMPLISHED,
   Progress.REJECTED,
-  Progress.NOT_ACCOMPLISHED,
+  Progress.CANCELLED,
 ];
 
 export function ResourceRequestFilterBar({

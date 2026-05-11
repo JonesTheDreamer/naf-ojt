@@ -193,7 +193,7 @@ export function ResourceRequestList({
   const pendingCount = (naf?.resourceRequests ?? []).filter(
     (r) =>
       r.progress !== Progress.ACCOMPLISHED &&
-      r.progress !== Progress.NOT_ACCOMPLISHED,
+      r.progress !== Progress.CANCELLED,
   ).length;
 
   const filteredRequests = (naf?.resourceRequests ?? []).filter((r) => {
