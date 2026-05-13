@@ -84,7 +84,7 @@ namespace NAFServer.src.Application.Services
         public async Task<SharedFolderDetailDTO?> AdminDetailAsync(int id, string? progress, int page)
         {
             var folder = await _context.SharedFolders.FindAsync(id);
-            if (folder == null) return null;
+            if (folder == null || !folder.IsActive) return null;
 
             string? ownerName = null;
             if (folder.OwnerId != null)
