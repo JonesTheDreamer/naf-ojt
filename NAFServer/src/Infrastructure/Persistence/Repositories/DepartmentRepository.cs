@@ -16,8 +16,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
 
         public async Task<Department> AddAsync(CreateDepartmentDTO department)
         {
-            var dept = await _context.Departments.FirstOrDefaultAsync(d => d.Code == department.Code);
-            if (dept != null)
+            if (await _context.Departments.AnyAsync(d => d.Code == department.Code))
                 throw new InvalidOperationException("Department already exists.");
 
             var entry = await _context.Departments.AddAsync(
@@ -31,7 +30,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
         {
             var dept = await _context.Departments.FirstOrDefaultAsync(d => d.Code == code);
             if (dept == null)
-                throw new InvalidOperationException("Department doesn't exist.");
+                throw new KeyNotFoundException("Department doesn't exist.");
 
             dept.SetToInactive();
             await _context.SaveChangesAsync();
@@ -55,6 +54,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             return await _context.Departments
                 .Include(d => d.DepartmentHead)
                 .Include(d => d.Location)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(d => d.Id == id)
                 ?? throw new KeyNotFoundException("No department found");
         }
@@ -64,6 +64,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             return await _context.Departments
                 .Include(d => d.DepartmentHead)
                 .Include(d => d.Location)
+                .AsNoTracking()
                 .FirstOrDefaultAsync(d => d.Code == code)
                 ?? throw new KeyNotFoundException("No department found");
         }
