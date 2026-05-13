@@ -32,10 +32,12 @@ namespace NAFServer.src.Infrastructure.Persistence
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<UserLocation> UserLocations { get; set; }
         public DbSet<UserDepartment> UserDepartments { get; set; }
+        public DbSet<DepartmentEmployee> DepartmentEmployees { get; set; }
         public DbSet<ResourceRequestHistory> ResourceRequestHistories { get; set; }
         public DbSet<ResourceGroup> ResourceGroups { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<AuditTrail> AuditTrails { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -173,6 +175,12 @@ namespace NAFServer.src.Infrastructure.Persistence
                 .HasMany(u => u.UserDepartments)
                 .WithOne(ud => ud.User)
                 .HasForeignKey(ud => ud.UserId);
+
+            modelBuilder.Entity<DepartmentEmployee>()
+                .HasOne(de => de.Department)
+                .WithMany()
+                .HasForeignKey(de => de.DepartmentId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<User>()
                 .HasMany(u => u.UserLocations)
