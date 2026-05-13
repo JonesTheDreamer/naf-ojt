@@ -11,6 +11,8 @@ export enum RoutesEnum {
   ADMIN_RESOURCES = "/admin/resources",
   ADMIN_RESOURCE_DETAIL = "/admin/resources/:resourceId",
   ADMIN_RESOURCE_REQUESTS = "/admin/resource-requests",
+  ADMIN_DEPARTMENTS = "/admin/departments",
+  ADMIN_DEPARTMENT_DETAIL = "/admin/departments/:departmentId",
 
   HR = "/hr",
   HR_CREATE = "/hr/create",

@@ -29,6 +29,12 @@ const ResourceDetailPage = lazy(
 const AdminResourceRequestsPage = lazy(
   () => import("@/features/admin/pages/AdminResourceRequestsPage"),
 );
+const DepartmentListPage = lazy(
+  () => import("@/features/admin/departments/pages/DepartmentListPage"),
+);
+const DepartmentDetailPage = lazy(
+  () => import("@/features/admin/departments/pages/DepartmentDetailPage"),
+);
 const HRNAFHistoryPage = lazy(
   () => import("@/features/hr/pages/HRNAFHistoryPage"),
 );
@@ -123,6 +129,22 @@ export function AppRouter() {
           element={
             <ProtectedRoute requiredRole="ADMIN">
               <AdminResourceRequestsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={RoutesEnum.ADMIN_DEPARTMENTS}
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <DepartmentListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={RoutesEnum.ADMIN_DEPARTMENT_DETAIL}
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <DepartmentDetailPage />
             </ProtectedRoute>
           }
         />

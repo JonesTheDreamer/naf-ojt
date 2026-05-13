@@ -1,4 +1,4 @@
-import { Home, Users, FileText, ClipboardList, Box } from "lucide-react";
+import { Home, Users, FileText, ClipboardList, Box, Building2 } from "lucide-react";
 import type { ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "./Layout";
@@ -10,6 +10,7 @@ const navItems = [
   { label: "Resource Requests", icon: <ClipboardList className="w-5 h-5" />, href: "/admin/resource-requests" },
   { label: "Users", icon: <Users className="w-5 h-5" />, href: "/admin/users" },
   { label: "Resources", icon: <Box className="w-5 h-5" />, href: "/admin/resources" },
+  { label: "Departments", icon: <Building2 className="w-5 h-5" />, href: "/admin/departments" },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
