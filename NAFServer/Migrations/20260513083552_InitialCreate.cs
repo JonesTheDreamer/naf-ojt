@@ -18,6 +18,7 @@ namespace NAFServer.Migrations
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Activity = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Entity = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
@@ -127,7 +128,8 @@ namespace NAFServer.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OwnerId = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -329,6 +331,7 @@ namespace NAFServer.Migrations
                     Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Message = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Link = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Entity = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     IsRead = table.Column<bool>(type: "bit", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -438,7 +441,7 @@ namespace NAFServer.Migrations
                     StepOrder = table.Column<int>(type: "int", nullable: false),
                     StepAction = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     ApproverRole = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    ApproverEntity = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ApproverEntity = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     ApprovalWorkflowTemplateId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>

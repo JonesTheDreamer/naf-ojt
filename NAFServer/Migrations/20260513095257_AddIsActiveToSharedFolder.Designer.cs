@@ -12,8 +12,8 @@ using NAFServer.src.Infrastructure.Persistence;
 namespace NAFServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260513055752_AddSharedFolderOwnerId")]
-    partial class AddSharedFolderOwnerId
+    [Migration("20260513095257_AddIsActiveToSharedFolder")]
+    partial class AddIsActiveToSharedFolder
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,7 +36,6 @@ namespace NAFServer.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ApproverEntity")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ApproverRole")
@@ -89,6 +88,10 @@ namespace NAFServer.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Activity")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Entity")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -379,6 +382,10 @@ namespace NAFServer.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Entity")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
@@ -712,6 +719,9 @@ namespace NAFServer.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()

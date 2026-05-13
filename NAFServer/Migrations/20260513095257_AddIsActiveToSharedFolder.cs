@@ -5,23 +5,24 @@
 namespace NAFServer.Migrations
 {
     /// <inheritdoc />
-    public partial class AddSharedFolderOwnerId : Migration
+    public partial class AddIsActiveToSharedFolder : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "OwnerId",
+            migrationBuilder.AddColumn<bool>(
+                name: "IsActive",
                 table: "SharedFolders",
-                type: "nvarchar(max)",
-                nullable: true);
+                type: "bit",
+                nullable: false,
+                defaultValue: false);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "OwnerId",
+                name: "IsActive",
                 table: "SharedFolders");
         }
     }

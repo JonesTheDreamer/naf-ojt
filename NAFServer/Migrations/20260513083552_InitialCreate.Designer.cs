@@ -12,7 +12,7 @@ using NAFServer.src.Infrastructure.Persistence;
 namespace NAFServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260513043337_InitialCreate")]
+    [Migration("20260513083552_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -36,7 +36,6 @@ namespace NAFServer.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ApproverEntity")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ApproverRole")
@@ -89,6 +88,10 @@ namespace NAFServer.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Activity")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Entity")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -379,6 +382,10 @@ namespace NAFServer.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Entity")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
@@ -715,6 +722,9 @@ namespace NAFServer.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("OwnerId")
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
