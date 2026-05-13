@@ -11,5 +11,6 @@ namespace NAFServer.src.Domain.Interface.Repository
         Task<User> GetUserByEmployeeId(string employeeId);
         Task<User> GetUserById(int userId);
         Task<User> ResolveUserByEmployeeId(string employeeId);
+        Task<User?> GetFirstUserWithRoleAsync(string roleName);
     }
 }

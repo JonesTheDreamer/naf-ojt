@@ -223,8 +223,6 @@ namespace NAFServer.src.Application.Services
 
             if (employee is null) throw new KeyNotFoundException();
 
-            //var resource = await _resourceRepository.GetResourceByIdAsync(request.ResourceId);
-
             var steps = await _approvalWorkflowStepsTemplateRepository.GetTemplateStepsByResourceId(request.ResourceId);
 
             var approvers = new List<ResourceRequestApprovalStep>();
@@ -252,21 +250,29 @@ namespace NAFServer.src.Application.Services
                         break;
 
                     case ApproverRole.DEPARTMENT_HEAD:
-                        approverId = step.ApproverEntity switch
+                        if (string.IsNullOrEmpty(step.ApproverEntity))
+                            approverId = employee.DepartmentHeadId;
+                        else
                         {
-                            "EMPLOYEE" => employee.DepartmentHeadId,
-                            _ => (await _departmentRepository.GetByIdAsync(int.Parse(step.ApproverEntity)))
-                            .DepartmentHeadId
-                        };
+                            var dept = await _departmentRepository.GetByCodeAsync(step.ApproverEntity);
+                            approverId = dept.DepartmentHeadId;
+                        }
                         break;
+
+                    case ApproverRole.SPECIFIC_EMPLOYEE:
+                        approverId = step.ApproverEntity;
+                        break;
+
+                    case ApproverRole.ROLE_BASED:
+                        var roleUser = await _userRepository.GetFirstUserWithRoleAsync(step.ApproverEntity!);
+                        approverId = roleUser?.EmployeeNumber;
+                        break;
+
                     case ApproverRole.TECHNICAL_HEAD:
                         var user = await _userRepository.GetUserByEmployeeId(employee.Id);
                         var activeLocation = await _userLocationRepository.GetUserActiveLocation(user.Id);
-                        var approver = await _userRepository.GetNetworkAdminOfLocation(activeLocation.LocationId);
-                        approverId = step.ApproverEntity switch
-                        {
-                            "EMPLOYEE" => approver.EmployeeNumber
-                        };
+                        var techHead = await _userRepository.GetNetworkAdminOfLocation(activeLocation.LocationId);
+                        approverId = techHead.EmployeeNumber;
                         break;
                 }
 
@@ -276,11 +282,11 @@ namespace NAFServer.src.Application.Services
                     if (!isExisting)
                     {
                         approvers.Add(new ResourceRequestApprovalStep(
-                             request.Id,
-                             approverId,
-                             step.StepOrder,
-                             step.StepAction
-                         ));
+                            request.Id,
+                            approverId,
+                            step.StepOrder,
+                            step.StepAction
+                        ));
                     }
                 }
             }

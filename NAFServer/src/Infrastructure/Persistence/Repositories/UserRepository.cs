@@ -111,5 +111,16 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
                 .FirstOrDefaultAsync(u => u.EmployeeNumber == employeeNumber)
                 ?? throw new KeyNotFoundException($"User not found");
         }
+
+        public async Task<User?> GetFirstUserWithRoleAsync(string roleName)
+        {
+            if (!Enum.TryParse<Roles>(roleName, ignoreCase: true, out var role))
+                return null;
+
+            return await _context.Users
+                .Include(u => u.Employee)
+                .FirstOrDefaultAsync(u =>
+                    u.UserRoles.Any(r => r.Role.Name == role && r.DateRemoved == null));
+        }
     }
 }

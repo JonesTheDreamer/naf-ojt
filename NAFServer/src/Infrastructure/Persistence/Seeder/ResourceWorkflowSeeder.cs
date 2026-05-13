@@ -84,15 +84,10 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
             var workflowStepsTemplates = new List<ApprovalWorkflowStepsTemplate>();
             foreach (var t in workflowTemplates)
             {
-                workflowStepsTemplates.Add(new ApprovalWorkflowStepsTemplate(t.Id, 1, StepAction.APPROVER, ApproverRole.DEPARTMENT_HEAD, "EMPLOYEE"));
-                if (t.Resource.Name != "Shared Folder")
-                {
-                    workflowStepsTemplates.Add(new ApprovalWorkflowStepsTemplate(t.Id, 2, StepAction.FOR_SCREENING, ApproverRole.TECHNICAL_HEAD, "EMPLOYEE"));
-                }
-                else
-                {
-                    workflowStepsTemplates.Add(new ApprovalWorkflowStepsTemplate(t.Id, 2, StepAction.APPROVER, ApproverRole.DEPARTMENT_HEAD, "FOLDER_OWNER"));
-                }
+                // Step 1: employee's own department head
+                workflowStepsTemplates.Add(new ApprovalWorkflowStepsTemplate(t.Id, 1, StepAction.APPROVER, ApproverRole.DEPARTMENT_HEAD, null));
+                // Step 2: unclaimed screening by any technical admin at the employee's location
+                workflowStepsTemplates.Add(new ApprovalWorkflowStepsTemplate(t.Id, 2, StepAction.FOR_SCREENING, ApproverRole.TECHNICAL_HEAD, null));
             }
 
             context.ApprovalWorkflowStepsTemplates.AddRange(workflowStepsTemplates);
