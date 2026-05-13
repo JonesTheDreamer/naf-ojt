@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NAFServer.src.Application.DTOs.ResourceRequest;
 using NAFServer.src.Application.Handlers.Interface;
 using NAFServer.src.Application.Interfaces;
@@ -26,7 +27,10 @@ namespace NAFServer.src.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IUserLocationRepository _userLocationRepository;
         private readonly IImplementationService _implementationService;
+        private readonly IAuditQueue _auditQueue;
         private readonly IResourceGroupRepository _resourceGroupRepository;
+        private readonly INotificationService _notificationService;
+        private readonly ILogger<ResourceRequestService> _logger;
 
         public ResourceRequestService(
             IResourceRequestRepository resourceRequestRepository,
@@ -41,6 +45,9 @@ namespace NAFServer.src.Application.Services
             IUserLocationRepository userLocationRepository,
             IImplementationService implementationService,
             IResourceGroupRepository resourceGroupRepository,
+            IAuditQueue auditQueue,
+            INotificationService notificationService,
+            ILogger<ResourceRequestService> logger,
             AppDbContext context
         )
         {
@@ -56,6 +63,9 @@ namespace NAFServer.src.Application.Services
             _userLocationRepository = userLocationRepository;
             _implementationService = implementationService;
             _resourceGroupRepository = resourceGroupRepository;
+            _auditQueue = auditQueue;
+            _notificationService = notificationService;
+            _logger = logger;
             _context = context;
         }
 
@@ -160,6 +170,39 @@ namespace NAFServer.src.Application.Services
 
                 var saved = await _resourceRequestRepository.GetByIdAsync(rr.Id);
 
+                // Notify & audit after commit
+                try
+                {
+                    var nafEmployee = await _employeeRepository.GetByIdAsync(naf.EmployeeId);
+                    var employeeName = nafEmployee != null
+                        ? $"{nafEmployee.FirstName} {nafEmployee.LastName}".Trim()
+                        : naf.EmployeeId;
+
+                    await _auditQueue.EnqueueAsync(new AuditTrail(
+                        $"{employeeName} requested {resource.Name} on NAF {naf.Reference}",
+                        "ResourceRequest"
+                    ));
+
+                    foreach (var approverStep in approvers.Where(a => a.ApproverId != null))
+                    {
+                        var approverUserId = await _notificationService.FindUserIdByEmployeeNumberAsync(approverStep.ApproverId);
+                        if (approverUserId.HasValue)
+                        {
+                            await _notificationService.CreateForUsersAsync(
+                                new List<int> { approverUserId.Value },
+                                "Resource Request Awaiting Your Approval",
+                                $"{employeeName} has requested access to {resource.Name}. Your approval is required.",
+                                $"/admin/NAF/{naf.Id}",
+                                "ResourceRequest"
+                            );
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send notifications for resource request on NAF {NafId}", naf.Id);
+                }
+
                 return ResourceRequestMapper.ToDTO(saved);
             }
             catch
@@ -208,7 +251,26 @@ namespace NAFServer.src.Application.Services
                 await _context.SaveChangesAsync();
                 var implementation = await _implementationService.CreateImplementationAsync(rr.Id);
                 await _context.SaveChangesAsync();
-                rr.Resource = resource;
+                await _context.Entry(rr).Reference(r => r.Resource).LoadAsync();
+
+                try
+                {
+                    var naf = await _nafRepository.GetByIdAsync(request.nafId);
+                    var nafEmployee = await _employeeRepository.GetByIdAsync(naf.EmployeeId);
+                    var employeeName = nafEmployee != null
+                        ? $"{nafEmployee.FirstName} {nafEmployee.LastName}".Trim()
+                        : naf.EmployeeId;
+
+                    await _auditQueue.EnqueueAsync(new AuditTrail(
+                        $"{employeeName} added basic resource {rr.Resource?.Name ?? request.resourceId.ToString()} to NAF {naf.Reference}",
+                        "ResourceRequest"
+                    ));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to enqueue audit for basic resource request {ResourceId}", request.resourceId);
+                }
+
                 return ResourceRequestMapper.ToDTO(rr);
             }
             catch (Exception ex)
@@ -338,6 +400,36 @@ namespace NAFServer.src.Application.Services
             ));
 
             await _context.SaveChangesAsync();
+
+            try
+            {
+                var nafEmployee = await _employeeRepository.GetByIdAsync(rr.NAF.EmployeeId);
+                var employeeName = nafEmployee != null
+                    ? $"{nafEmployee.FirstName} {nafEmployee.LastName}".Trim()
+                    : rr.NAF.EmployeeId;
+
+                await _auditQueue.EnqueueAsync(new AuditTrail(
+                    $"{employeeName} edited purpose for resource request {rr.Resource?.Name} on NAF {rr.NAF.Reference}",
+                    "ResourceRequest"
+                ));
+
+                var currentStepApproverUserId = await _notificationService.FindUserIdByEmployeeNumberAsync(currentStep.ApproverId);
+                if (currentStepApproverUserId.HasValue)
+                {
+                    await _notificationService.CreateForUsersAsync(
+                        new List<int> { currentStepApproverUserId.Value },
+                        "Resource Request Updated",
+                        $"{employeeName} has updated the purpose for their {rr.Resource?.Name} request.",
+                        $"/admin/NAF/{rr.NAFId}",
+                        "ResourceRequest"
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send notifications for purpose edit on request {RequestId}", requestId);
+            }
+
             return ResourceRequestMapper.ToDTO(rr);
         }
 
@@ -394,6 +486,23 @@ namespace NAFServer.src.Application.Services
                 await _context.SaveChangesAsync();
                 await transaction.CommitAsync();
 
+                try
+                {
+                    var nafEmployee = await _employeeRepository.GetByIdAsync(rr.NAF.EmployeeId);
+                    var employeeName = nafEmployee != null
+                        ? $"{nafEmployee.FirstName} {nafEmployee.LastName}".Trim()
+                        : rr.NAF.EmployeeId;
+
+                    await _auditQueue.EnqueueAsync(new AuditTrail(
+                        $"{employeeName} changed resource from {rr.Resource?.Name} to {resource.Name} on NAF {rr.NAF.Reference}",
+                        "ResourceRequest"
+                    ));
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to enqueue audit for resource change on request {RequestId}", requestId);
+                }
+
                 return toReturn;
             }
             catch (Exception ex)
@@ -411,10 +520,39 @@ namespace NAFServer.src.Application.Services
             (
                 rr.Id,
                 ResourceRequestAction.CANCELLED,
-                "Resource request edited"
+                "Resource request cancelled"
             ));
 
             await _context.SaveChangesAsync();
+
+            try
+            {
+                var nafEmployee = await _employeeRepository.GetByIdAsync(rr.NAF.EmployeeId);
+                var employeeName = nafEmployee != null
+                    ? $"{nafEmployee.FirstName} {nafEmployee.LastName}".Trim()
+                    : rr.NAF.EmployeeId;
+
+                await _auditQueue.EnqueueAsync(new AuditTrail(
+                    $"Resource request {rr.Resource?.Name} cancelled for {employeeName} on NAF {rr.NAF.Reference}",
+                    "ResourceRequest"
+                ));
+
+                var requestorUserId = await _notificationService.FindUserIdByEmployeeNumberAsync(rr.NAF.RequestorId);
+                if (requestorUserId.HasValue)
+                {
+                    await _notificationService.CreateForUsersAsync(
+                        new List<int> { requestorUserId.Value },
+                        "Resource Request Cancelled",
+                        $"The resource request for {rr.Resource?.Name} on NAF {rr.NAF.Reference} has been cancelled.",
+                        $"/NAF/{rr.NAFId}",
+                        "ResourceRequest"
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send notifications for cancel on request {RequestId}", requestId);
+            }
         }
 
         public async Task<ResourceRequestDTO> DeactivateAsync(Guid requestId)
@@ -429,6 +567,24 @@ namespace NAFServer.src.Application.Services
             ));
 
             await _context.SaveChangesAsync();
+
+            try
+            {
+                var nafEmployee = await _employeeRepository.GetByIdAsync(rr.NAF.EmployeeId);
+                var employeeName = nafEmployee != null
+                    ? $"{nafEmployee.FirstName} {nafEmployee.LastName}".Trim()
+                    : rr.NAF.EmployeeId;
+
+                await _auditQueue.EnqueueAsync(new AuditTrail(
+                    $"Resource request {rr.Resource?.Name} deactivated for {employeeName} on NAF {rr.NAF.Reference}",
+                    "ResourceRequest"
+                ));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to enqueue audit for deactivation of request {RequestId}", requestId);
+            }
+
             return ResourceRequestMapper.ToDTO(rr);
         }
 

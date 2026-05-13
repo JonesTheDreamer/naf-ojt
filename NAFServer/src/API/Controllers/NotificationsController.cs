@@ -44,7 +44,7 @@ namespace NAFServer.src.API.Controllers
             var unreadCount = await _notificationRepository.GetUnreadCountAsync(userId);
 
             var dtos = notifications.Select(n =>
-                new NotificationDTO(n.Id, n.Title, n.Message, n.Link, n.IsRead, n.CreatedAt)
+                new NotificationDTO(n.Id, n.Title, n.Message, n.Link, n.Entity, n.IsRead, n.CreatedAt)
             ).ToList();
 
             return Ok(new

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { ColumnDef } from "@tanstack/react-table";
 import AdminLayout from "@/shared/components/layout/AdminLayout";
@@ -17,7 +17,11 @@ const columns: ColumnDef<DepartmentDTO>[] = [
     cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
   },
   { accessorKey: "code", header: "Code" },
-  { accessorKey: "location", header: "Location", cell: ({ row }) => row.original.location || "—" },
+  {
+    accessorKey: "location",
+    header: "Location",
+    cell: ({ row }) => row.original.location || "—",
+  },
   {
     accessorKey: "departmentHeadId",
     header: "Department Head",
@@ -51,11 +55,18 @@ export default function DepartmentListPage() {
 
   const { data: departments = [], isLoading } = useDepartments(locationId);
 
+  console.log(locationsQuery.data);
+  useEffect(() => {
+    console.log(locationId);
+  }, [locationId]);
+
   return (
     <AdminLayout>
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-amber-500">Department Management</h1>
+          <h1 className="text-2xl font-bold text-amber-500">
+            Department Management
+          </h1>
           <AddDepartmentDialog locations={locationsQuery.data ?? []} />
         </div>
 
@@ -69,7 +80,9 @@ export default function DepartmentListPage() {
           >
             <option value="">All Locations</option>
             {locationsQuery.data?.map((l) => (
-              <option key={l.id} value={l.id}>{l.name}</option>
+              <option key={l.id} value={l.id}>
+                {l.name}
+              </option>
             ))}
           </select>
         </div>
@@ -80,7 +93,10 @@ export default function DepartmentListPage() {
           isLoading={isLoading}
           onRowClick={(d) =>
             navigate(
-              RoutesEnum.ADMIN_DEPARTMENT_DETAIL.replace(":departmentId", String(d.id)),
+              RoutesEnum.ADMIN_DEPARTMENT_DETAIL.replace(
+                ":departmentId",
+                String(d.id),
+              ),
             )
           }
           emptyMessage="No departments found."

@@ -82,7 +82,7 @@ export function AddResourceDialog({ naf, open, onOpenChange }: AddResourceDialog
     setGroupEmailEntries((prev) => [...prev, { _id: newEntry(), email: "", isNew: false, purpose: "", dateNeeded: "" }]);
 
   const addSharedFolderEntry = () =>
-    setSharedFolderEntries((prev) => [...prev, { _id: newEntry(), name: "", isNew: false, purpose: "", dateNeeded: "" }]);
+    setSharedFolderEntries((prev) => [...prev, { _id: newEntry(), folderId: null, folderName: "", purpose: "", dateNeeded: "" }]);
 
   const patchInternetEntry    = (_id: string, patch: Partial<InternetEntry>)    => setInternetEntries((p) => p.map((e) => e._id === _id ? { ...e, ...patch } : e));
   const patchGroupEmailEntry  = (_id: string, patch: Partial<GroupEmailEntry>)  => setGroupEmailEntries((p) => p.map((e) => e._id === _id ? { ...e, ...patch } : e));
@@ -94,7 +94,7 @@ export function AddResourceDialog({ naf, open, onOpenChange }: AddResourceDialog
       : e.internetResourceId !== null && e.purpose.trim().length > 0;
 
   const isGroupEmailEntryComplete  = (e: GroupEmailEntry)  => e.email.trim().length > 0 && e.purpose.trim().length > 0;
-  const isSharedFolderEntryComplete = (e: SharedFolderEntry) => e.name.trim().length > 0 && e.purpose.trim().length > 0;
+  const isSharedFolderEntryComplete = (e: SharedFolderEntry) => e.folderId !== null && e.purpose.trim().length > 0;
 
   const allSpecialHavePurpose = specialResources.every((r) => (r.purpose ?? "").trim().length > 0);
   const hasAnything = basicResources.length > 0 || specialResources.length > 0 || internetEntries.length > 0 || groupEmailEntries.length > 0 || sharedFolderEntries.length > 0;

@@ -5,6 +5,7 @@ namespace NAFServer.src.Application.DTOs.Notification
         string Title,
         string Message,
         string Link,
+        string Entity,
         bool IsRead,
         DateTime CreatedAt
     );

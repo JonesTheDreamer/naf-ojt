@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using NAFServer.src.Application.DTOs.Admin;
 using NAFServer.src.Application.DTOs.NAF;
 using NAFServer.src.Application.DTOs.ResourceRequest;
@@ -29,6 +28,7 @@ namespace NAFServer.src.Application.Services
         private readonly ICurrentUserService _currentUserService;
         private readonly IConfiguration _configuration;
         private readonly INotificationService _notificationService;
+        private readonly IAuditQueue _auditQueue;
         private readonly ILogger<NAFService> _logger;
         public NAFService
         (
@@ -47,6 +47,7 @@ namespace NAFServer.src.Application.Services
             ICurrentUserService currentUserService,
             IConfiguration configuration,
             INotificationService notificationService,
+            IAuditQueue auditQueue,
             ILogger<NAFService> logger
         )
         {
@@ -65,6 +66,7 @@ namespace NAFServer.src.Application.Services
             _currentUserService = currentUserService;
             _configuration = configuration;
             _notificationService = notificationService;
+            _auditQueue = auditQueue;
             _logger = logger;
         }
 
@@ -88,7 +90,13 @@ namespace NAFServer.src.Application.Services
             if (isApprover)
                 return;
 
-            // Rule 4: admin whose active location matches the NAF's location
+            // Rule 4: current user is the employee's supervisor or department head
+            var nafEmployee = await _employeeRepository.GetByIdAsync(naf.EmployeeId);
+            if (nafEmployee is not null &&
+                (nafEmployee.SupervisorId == currentUserId || nafEmployee.DepartmentHeadId == currentUserId))
+                return;
+
+            // Rule 5: admin whose active location matches the NAF's location
             if (_currentUserService.Role == "ADMIN")
             {
                 //var adminLocationId = await _currentUserService.GetLocationIdAsync();
@@ -205,7 +213,8 @@ namespace NAFServer.src.Application.Services
                             adminIds,
                             "New NAF Submitted",
                             $"A new NAF has been submitted for {employee.FirstName} {employee.LastName}.",
-                            $"/admin/NAF/{naf.Id}"
+                            $"/admin/NAF/{naf.Id}",
+                            "NAF"
                         );
                     }
 
@@ -219,9 +228,12 @@ namespace NAFServer.src.Application.Services
                             nonAdminRecipients,
                             "New NAF Submitted",
                             $"A new NAF has been submitted for {employee.FirstName} {employee.LastName}.",
-                            $"/NAF/{naf.Id}"
+                            $"/NAF/{naf.Id}",
+                            "NAF"
                         );
                     }
+
+                    await _auditQueue.EnqueueAsync(new AuditTrail($"NAF created for {employee.FirstName} {employee.LastName} with reference {naf.Reference}", "NAF"));
                 }
                 catch (Exception ex)
                 {
@@ -255,7 +267,29 @@ namespace NAFServer.src.Application.Services
         {
             var naf = await _nafRepository.GetByIdAsync(nafId);
             var employee = await _employeeRepository.GetByIdAsync(naf.EmployeeId);
+            var employeeName = employee != null ? $"{employee.FirstName} {employee.LastName}".Trim() : naf.EmployeeId;
             naf.DeactivateNAF();
+
+            try
+            {
+                var employeeUserId = await _notificationService.FindUserIdByEmployeeNumberAsync(naf.EmployeeId);
+                if (employeeUserId.HasValue)
+                {
+                    await _notificationService.CreateForUsersAsync(
+                        new List<int> { employeeUserId.Value },
+                        "NAF Deactivated",
+                        $"Your NAF ({naf.Reference}) has been deactivated.",
+                        $"/NAF/{naf.Id}",
+                        "NAF"
+                    );
+                }
+                await _auditQueue.EnqueueAsync(new AuditTrail($"NAF {naf.Reference} deactivated for {employeeName}", "NAF"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send notifications for NAF deactivation {NafId}", nafId);
+            }
+
             return NAFMapper.ToDTO(naf, employee);
         }
 
@@ -263,7 +297,29 @@ namespace NAFServer.src.Application.Services
         {
             var naf = await _nafRepository.GetByIdAsync(nafId);
             var employee = await _employeeRepository.GetByIdAsync(naf.EmployeeId);
+            var employeeName = employee != null ? $"{employee.FirstName} {employee.LastName}".Trim() : naf.EmployeeId;
             naf.ActivateNAF();
+
+            try
+            {
+                var employeeUserId = await _notificationService.FindUserIdByEmployeeNumberAsync(naf.EmployeeId);
+                if (employeeUserId.HasValue)
+                {
+                    await _notificationService.CreateForUsersAsync(
+                        new List<int> { employeeUserId.Value },
+                        "NAF Activated",
+                        $"Your NAF ({naf.Reference}) has been activated.",
+                        $"/NAF/{naf.Id}",
+                        "NAF"
+                    );
+                }
+                await _auditQueue.EnqueueAsync(new AuditTrail($"NAF {naf.Reference} activated for {employeeName}", "NAF"));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send notifications for NAF activation {NafId}", nafId);
+            }
+
             return NAFMapper.ToDTO(naf, employee);
         }
 
@@ -282,6 +338,9 @@ namespace NAFServer.src.Application.Services
         public async Task<List<AddBasicResourceResultDTO>> AddBasicResourcesToNAFAsync(Guid nafId, List<BasicResourceWithDateDTO> resources)
         {
             var results = new List<AddBasicResourceResultDTO>();
+            var naf = await _nafRepository.GetByIdAsync(nafId);
+            var employee = await _employeeRepository.GetByIdAsync(naf.EmployeeId);
+            var employeeName = employee != null ? $"{employee.FirstName} {employee.LastName}".Trim() : naf.EmployeeId;
 
             foreach (var resource in resources.DistinctBy(r => r.ResourceId))
             {
@@ -301,6 +360,11 @@ namespace NAFServer.src.Application.Services
                         new CreateResourceRequestDTO(nafId, resource.ResourceId, "Basic resource needed", null, resource.DateNeeded));
 
                     results.Add(new AddBasicResourceResultDTO(resource.ResourceId, true, null, rr));
+
+                    await _auditQueue.EnqueueAsync(new AuditTrail(
+                        $"{employeeName} added resource {rr.Resource?.Name ?? resource.ResourceId.ToString()} to NAF {naf.Reference}",
+                        "ResourceRequest"
+                    ));
                 }
                 catch (Exception ex)
                 {

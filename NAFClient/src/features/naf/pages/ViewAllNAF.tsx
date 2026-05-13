@@ -42,8 +42,10 @@ export default function ViewAllNAF() {
   const [subordinatePage, setSubordinatePage] = useState<number>(1);
   const [approvalPage, setApprovalPage] = useState<number>(1);
 
-  const { subordinateNAFsQuery, approverNAFsQuery, isLoading } =
-    useEmployeeNAF({ subordinatePage, approvalPage }, employeeId);
+  const { subordinateNAFsQuery, approverNAFsQuery, isLoading } = useEmployeeNAF(
+    { subordinatePage, approvalPage },
+    employeeId,
+  );
 
   const subordinateProps = toNAFProps(subordinateNAFsQuery.data, isLoading);
   const approverProps = toNAFProps(approverNAFsQuery.data, isLoading);
@@ -60,7 +62,7 @@ export default function ViewAllNAF() {
     <RequestorLayout>
       <div className="flex flex-col gap-2 md:flex-row md:justify-between">
         <p className="text-2xl text-amber-500 font-bold">
-          Network Access Requests
+          Network Access Forms
         </p>
         <div>
           <CreateNAFDialog />

@@ -32,8 +32,8 @@ BEGIN
 	D.DepartmentDesc,
 	E.EmployeeNumber AS DepartmentHeadId,
 	D.DepartmentACode
-    FROM [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] D
-    INNER JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] E
+    FROM  D
+    INNER JOIN  E
         ON E.FullName = D.DepartmentHead
     WHERE D.DepartmentCode = @DepartmentCode
       AND D.DepartmentHead IS NOT NULL
@@ -89,10 +89,10 @@ BEGIN
 	E.LocationDesc as Location,
 	S.EmployeeNumber AS SupervisorId,
 	D.EmployeeNumber AS DepartmentHeadId
-   	FROM [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] E
-    	INNER JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] S
+   	FROM  E
+    	INNER JOIN  S
         	ON S.FullName = E.SupervisorName
-	INNER JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] D
+	INNER JOIN  D
         	ON D.FullName = E.DepartmentHead
 	WHERE E.EmployeeNumber = @EmployeeNumber;
 END
@@ -144,11 +144,11 @@ BEGIN
         E.LocationDesc AS Location,
         V.EmployeeNumber AS SupervisorId,
         DH.EmployeeNumber AS DepartmentHeadId
-    FROM [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] V
-    INNER JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] E
+    FROM  V
+    INNER JOIN  E
         ON E.SupervisorId= V.EmployeeNumber
         OR E.DepartmentHead = V.FullName
-	LEFT JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] DH
+	LEFT JOIN  DH
     ON DH.FullName = E.DepartmentHead
     WHERE V.EmployeeNumber = @EmployeeNumber
 END
@@ -186,11 +186,11 @@ BEGIN
     -- Insert statements for procedure here
 	SELECT
         E.EmployeeNumber AS Id
-    FROM [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] V
-    INNER JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] E
+    FROM  V
+    INNER JOIN  E
         ON E.SupervisorId= V.EmployeeNumber
         OR E.DepartmentHead = V.FullName
-	LEFT JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] DH
+	LEFT JOIN  DH
     ON DH.FullName = E.DepartmentHead
     WHERE V.EmployeeNumber = @EmployeeNumber
 END
@@ -242,10 +242,10 @@ BEGIN
 	E.LocationDesc as Location,
 	S.EmployeeNumber AS SupervisorId,
 	D.EmployeeNumber AS DepartmentHeadId
-   	FROM [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] E
-    	INNER JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] S
+   	FROM  E
+    	INNER JOIN  S
         	ON S.FullName = E.SupervisorName
-	INNER JOIN [192.168.70.49].[PCV5_DMCI].[HRDEV].[EmployeeDetails] D
+	INNER JOIN  D
         	ON D.FullName = E.DepartmentHead
 	WHERE E.Status= 1
       AND (

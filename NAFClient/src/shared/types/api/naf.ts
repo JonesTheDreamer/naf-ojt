@@ -215,8 +215,6 @@ export interface GroupEmailItem {
 export interface SharedFolderItem {
   id: number;
   name: string;
-  remarks: string;
-  departmentId: string;
 }
 
 export interface AddBasicResourceResult {

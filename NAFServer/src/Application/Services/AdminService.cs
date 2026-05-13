@@ -134,7 +134,8 @@ namespace NAFServer.src.Application.Services
                         adminIds,
                         "New User Added",
                         "A new user has been added to the system.",
-                        $"/admin/users/{user.Id}"
+                        $"/admin/users/{user.Id}",
+                        "User"
                     );
                 }
             }

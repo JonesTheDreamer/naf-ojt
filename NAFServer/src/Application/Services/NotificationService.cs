@@ -26,14 +26,14 @@ namespace NAFServer.src.Application.Services
             _context = context;
         }
 
-        public async Task CreateForUsersAsync(List<int> userIds, string title, string message, string link)
+        public async Task CreateForUsersAsync(List<int> userIds, string title, string message, string link, string entity)
         {
             foreach (var userId in userIds.Distinct())
             {
-                var notification = new Notification(userId, title, message, link);
+                var notification = new Notification(userId, title, message, link, entity);
                 await _notificationRepository.CreateAsync(notification);
 
-                var dto = new NotificationDTO(notification.Id, title, message, link, false, notification.CreatedAt);
+                var dto = new NotificationDTO(notification.Id, title, message, link, entity, false, notification.CreatedAt);
                 await _hubContext.Clients.Group($"user-{userId}").SendAsync("ReceiveNotification", dto);
             }
         }

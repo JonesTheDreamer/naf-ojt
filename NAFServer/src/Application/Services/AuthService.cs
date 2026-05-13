@@ -16,24 +16,31 @@ namespace NAFServer.src.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IUserLocationRepository _userLocationRepository;
+        private readonly IAuditQueue _auditQueue;
 
         private static readonly Roles[] InScopeRoles = [Roles.ADMIN, Roles.REQUESTOR_APPROVER, Roles.HR];
 
-        public AuthService(
+        public AuthService
+        (
             IConfiguration config,
             IUserRepository userRepository,
             IEmployeeRepository employeeRepository,
-            IUserLocationRepository userLocationRepository)
+            IUserLocationRepository userLocationRepository,
+            IAuditQueue auditQueue
+        )
         {
             _config = config;
             _userRepository = userRepository;
             _employeeRepository = employeeRepository;
             _userLocationRepository = userLocationRepository;
+            _auditQueue = auditQueue;
         }
 
         public async Task<AuthUserDTO> LoginAsync(string employeeId)
         {
             var user = await _userRepository.GetUserByEmployeeId(employeeId);
+            var employee = await _employeeRepository.GetByIdAsync(employeeId);
+            var name = employee != null ? $"{employee.FirstName} {employee.LastName}".Trim() : employeeId;
 
             var roles = user.UserRoles
                 .Where(ur => ur.Role != null && InScopeRoles.Contains(ur.Role.Name))
@@ -44,12 +51,16 @@ namespace NAFServer.src.Application.Services
             if (roles.Count == 0)
                 throw new UnauthorizedAccessException("No in-scope roles assigned.");
 
+            await _auditQueue.EnqueueAsync(new AuditTrail($"{name} logged in", "Auth"));
+
             return await BuildAuthUserDTOAsync(employeeId, user, roles.First().ToString(), roles);
         }
 
         public async Task<AuthUserDTO> SelectRoleAsync(string employeeId, Roles role)
         {
             var user = await _userRepository.GetUserByEmployeeId(employeeId);
+            var employee = await _employeeRepository.GetByIdAsync(employeeId);
+            var name = employee != null ? $"{employee.FirstName} {employee.LastName}".Trim() : employeeId;
 
             var hasRole = user.UserRoles.Any(ur =>
                 ur.Role != null && ur.Role.Name == role && InScopeRoles.Contains(ur.Role.Name));
@@ -61,6 +72,8 @@ namespace NAFServer.src.Application.Services
                 .OrderBy(ur => Array.IndexOf(InScopeRoles, ur.Role.Name))
                 .Select(ur => ur.Role.Name)
                 .ToList();
+
+            await _auditQueue.EnqueueAsync(new AuditTrail($"{name} logged in as {role}", "Auth"));
 
             return await BuildAuthUserDTOAsync(employeeId, user, role.ToString(), roles);
         }

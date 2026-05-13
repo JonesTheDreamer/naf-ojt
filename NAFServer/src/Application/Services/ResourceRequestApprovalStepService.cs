@@ -4,6 +4,7 @@ using NAFServer.src.Domain.Entities;
 using NAFServer.src.Domain.Enums;
 using NAFServer.src.Domain.Interface.Repository;
 using NAFServer.src.Infrastructure.Persistence;
+using System.Collections.Generic;
 
 namespace NAFServer.src.Application.Services
 {
@@ -14,15 +15,24 @@ namespace NAFServer.src.Application.Services
         private readonly IResourceRequestRepository _resourceRequestRepository;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly INotificationService _notificationService;
+        private readonly IAuditQueue _auditQueue;
         private readonly ILogger<ResourceRequestApprovalStepService> _logger;
 
-        public ResourceRequestApprovalStepService(AppDbContext context, IResourceRequestStepRepository resourceRequestStepRepository, IResourceRequestRepository resourceRequestRepository, IEmployeeRepository employeeRepository, INotificationService notificationService, ILogger<ResourceRequestApprovalStepService> logger)
+        public ResourceRequestApprovalStepService(
+            AppDbContext context,
+            IResourceRequestStepRepository resourceRequestStepRepository,
+            IResourceRequestRepository resourceRequestRepository,
+            IEmployeeRepository employeeRepository,
+            INotificationService notificationService,
+            IAuditQueue auditQueue,
+            ILogger<ResourceRequestApprovalStepService> logger)
         {
             _context = context;
             _resourceRequestStepRepository = resourceRequestStepRepository;
             _resourceRequestRepository = resourceRequestRepository;
             _employeeRepository = employeeRepository;
             _notificationService = notificationService;
+            _auditQueue = auditQueue;
             _logger = logger;
         }
         public async Task<ResourceRequestApprovalStep> ApproveStepAsync(Guid stepId, string? comment)
@@ -77,17 +87,34 @@ namespace NAFServer.src.Application.Services
 
                 await _context.SaveChangesAsync();
 
-                // Notify requestor and next approver
+                // Notify requestor and next approver, and record audit
                 try
                 {
+                    var nafEmployee = await _employeeRepository.GetByIdAsync(rr.NAF.EmployeeId);
+                    var employeeName = nafEmployee != null
+                        ? $"{nafEmployee.FirstName} {nafEmployee.LastName}".Trim()
+                        : rr.NAF.EmployeeId;
+
+                    string approverName = step.ApproverId != null
+                        ? (await _employeeRepository.GetByIdAsync(step.ApproverId)) is { } a
+                            ? $"{a.FirstName} {a.LastName}".Trim()
+                            : step.ApproverId
+                        : "An approver";
+
+                    await _auditQueue.EnqueueAsync(new AuditTrail(
+                        $"{approverName} approved the {rr.Resource?.Name} request for {employeeName} on NAF {rr.NAF.Reference}",
+                        "ApprovalStep"
+                    ));
+
                     var requestorUserId = await _notificationService.FindUserIdByEmployeeNumberAsync(rr.NAF.RequestorId);
                     if (requestorUserId.HasValue)
                     {
                         await _notificationService.CreateForUsersAsync(
                             new List<int> { requestorUserId.Value },
                             "Resource Request Approved",
-                            "Your resource request has been approved.",
-                            $"/NAF/{rr.NAFId}"
+                            $"{approverName} approved the {rr.Resource?.Name} request for {employeeName}.",
+                            $"/NAF/{rr.NAFId}",
+                            "ApprovalStep"
                         );
                     }
 
@@ -104,8 +131,9 @@ namespace NAFServer.src.Application.Services
                                 await _notificationService.CreateForUsersAsync(
                                     new List<int> { nextApproverId.Value },
                                     "Resource Request Awaiting Your Approval",
-                                    "A resource request requires your approval.",
-                                    $"/admin/NAF/{rr.NAFId}"
+                                    $"{employeeName}'s request for {rr.Resource?.Name} is awaiting your approval.",
+                                    $"/admin/NAF/{rr.NAFId}",
+                                    "ApprovalStep"
                                 );
                             }
                         }
@@ -154,17 +182,34 @@ namespace NAFServer.src.Application.Services
 
             await _context.SaveChangesAsync();
 
-            // Notify requestor
+            // Notify requestor and record audit
             try
             {
+                var nafEmployee = await _employeeRepository.GetByIdAsync(rr.NAF.EmployeeId);
+                var employeeName = nafEmployee != null
+                    ? $"{nafEmployee.FirstName} {nafEmployee.LastName}".Trim()
+                    : rr.NAF.EmployeeId;
+
+                string approverName = step.ApproverId != null
+                    ? (await _employeeRepository.GetByIdAsync(step.ApproverId)) is { } a
+                        ? $"{a.FirstName} {a.LastName}".Trim()
+                        : step.ApproverId
+                    : "An approver";
+
+                await _auditQueue.EnqueueAsync(new AuditTrail(
+                    $"{approverName} rejected the {rr.Resource?.Name} request for {employeeName} on NAF {rr.NAF.Reference}",
+                    "ApprovalStep"
+                ));
+
                 var requestorUserId = await _notificationService.FindUserIdByEmployeeNumberAsync(rr.NAF.RequestorId);
                 if (requestorUserId.HasValue)
                 {
                     await _notificationService.CreateForUsersAsync(
                         new List<int> { requestorUserId.Value },
                         "Resource Request Rejected",
-                        "Your resource request has been rejected.",
-                        $"/NAF/{rr.NAFId}"
+                        $"{approverName} rejected the {rr.Resource?.Name} request for {employeeName}.",
+                        $"/NAF/{rr.NAFId}",
+                        "ApprovalStep"
                     );
                 }
             }
@@ -187,14 +232,48 @@ namespace NAFServer.src.Application.Services
 
             step.ClaimStep(adminEmployeeId);
 
+            var adminEmployee = await _employeeRepository.GetByIdAsync(adminEmployeeId);
+            var adminName = adminEmployee != null
+                ? $"{adminEmployee.FirstName} {adminEmployee.LastName}".Trim()
+                : adminEmployeeId;
+
             await _context.ResourceRequestHistories.AddAsync(new ResourceRequestHistory
             (
                 rr.Id,
                 ResourceRequestAction.EDITED,
-                $"Screening step claimed by {adminEmployeeId}"
+                $"Screening step claimed by {adminName}"
             ));
 
             await _context.SaveChangesAsync();
+
+            try
+            {
+                var nafEmployee = await _employeeRepository.GetByIdAsync(rr.NAF.EmployeeId);
+                var employeeName = nafEmployee != null
+                    ? $"{nafEmployee.FirstName} {nafEmployee.LastName}".Trim()
+                    : rr.NAF.EmployeeId;
+
+                await _auditQueue.EnqueueAsync(new AuditTrail(
+                    $"{adminName} claimed the screening step for {rr.Resource?.Name} request of {employeeName} on NAF {rr.NAF.Reference}",
+                    "ApprovalStep"
+                ));
+
+                var requestorUserId = await _notificationService.FindUserIdByEmployeeNumberAsync(rr.NAF.RequestorId);
+                if (requestorUserId.HasValue)
+                {
+                    await _notificationService.CreateForUsersAsync(
+                        new List<int> { requestorUserId.Value },
+                        "Resource Request Under Screening",
+                        $"{adminName} has claimed the screening step for {employeeName}'s {rr.Resource?.Name} request.",
+                        $"/NAF/{rr.NAFId}",
+                        "ApprovalStep"
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send notifications for claim step {StepId}", stepId);
+            }
 
             return step;
         }

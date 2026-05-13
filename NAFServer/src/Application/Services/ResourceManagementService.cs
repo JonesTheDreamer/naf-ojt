@@ -155,7 +155,8 @@ namespace NAFServer.src.Application.Services
                             adminIds,
                             "New Resource Added",
                             $"A new resource has been added to the system.",
-                            $"/admin/resources/{resource.Id}"
+                            $"/admin/resources/{resource.Id}",
+                            "Resource"
                         );
                     }
                 }
@@ -234,7 +235,8 @@ namespace NAFServer.src.Application.Services
                             adminIds,
                             "Resource Workflow Updated",
                             $"An approval workflow has been updated.",
-                            $"/admin/resources/{resourceId}"
+                            $"/admin/resources/{resourceId}",
+                            "Resource"
                         );
                     }
                 }

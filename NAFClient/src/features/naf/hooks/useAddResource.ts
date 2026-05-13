@@ -7,7 +7,6 @@ import {
 import {
   createResourceRequest,
   findOrCreateGroupEmail,
-  findOrCreateSharedFolder,
 } from "../api";
 import { toast } from "sonner";
 
@@ -36,8 +35,8 @@ export type GroupEmailEntry = {
 
 export type SharedFolderEntry = {
   _id: string;
-  name: string;
-  isNew: boolean;
+  folderId: number | null;
+  folderName: string;
   purpose: string;
   dateNeeded: string;
 };
@@ -180,16 +179,13 @@ export const useAddResource = () => {
 
     params.sharedFolderEntries.forEach((entry) => {
       specialTasks.push(
-        findOrCreateSharedFolder(entry.name.trim())
-          .then(({ id }) =>
-            createResourceRequest({
-              nafId: params.nafId,
-              resourceId: SHARED_FOLDER_RESOURCE_ID,
-              purpose: entry.purpose,
-              additionalInfo: { SharedFolderId: id },
-              dateNeeded: entry.dateNeeded || null,
-            }),
-          )
+        createResourceRequest({
+          nafId: params.nafId,
+          resourceId: SHARED_FOLDER_RESOURCE_ID,
+          purpose: entry.purpose,
+          additionalInfo: { SharedFolderId: entry.folderId },
+          dateNeeded: entry.dateNeeded || null,
+        })
           .then(() => {
             anySuccess = true;
           })
