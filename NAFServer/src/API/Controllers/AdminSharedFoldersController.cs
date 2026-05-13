@@ -52,7 +52,7 @@ namespace NAFServer.src.API.Controllers
                 return BadRequest("Name is required.");
 
             var result = await _service.AdminCreateAsync(dto.Name, dto.OwnerId);
-            return Created($"api/admin/shared-folders/{result.Id}", result);
+            return Created($"/api/admin/shared-folders/{result.Id}", result);
         }
 
         [HttpPut("{id:int}")]
