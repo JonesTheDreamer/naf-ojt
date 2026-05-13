@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { RoutesEnum } from "@/app/routesEnum";
 import { Pencil, PowerOff } from "lucide-react";
 import AdminLayout from "@/shared/components/layout/AdminLayout";
 import { TablePagination } from "@/features/naf/components/tablePagination";
@@ -115,7 +116,7 @@ export default function SharedFolderListPage() {
                     key={folder.id}
                     className="hover:bg-muted/20 transition-colors cursor-pointer"
                     onClick={() =>
-                      navigate(`/admin/resources/shared-folders/${folder.id}`)
+                      navigate(RoutesEnum.ADMIN_SHARED_FOLDER_DETAIL.replace(":id", String(folder.id)))
                     }
                   >
                     <td className="px-4 py-3 font-medium">{folder.name}</td>

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { RoutesEnum } from "@/app/routesEnum";
 import { ArrowLeft } from "lucide-react";
 import AdminLayout from "@/shared/components/layout/AdminLayout";
 import { TablePagination } from "@/features/naf/components/tablePagination";
@@ -45,7 +46,7 @@ export default function SharedFolderDetailPage() {
         {/* Back */}
         <button
           type="button"
-          onClick={() => navigate("/admin/resources/shared-folders")}
+          onClick={() => navigate(RoutesEnum.ADMIN_SHARED_FOLDERS)}
           className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

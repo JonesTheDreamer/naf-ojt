@@ -35,6 +35,15 @@ const DepartmentListPage = lazy(
 const DepartmentDetailPage = lazy(
   () => import("@/features/admin/departments/pages/DepartmentDetailPage"),
 );
+const AuditTrailPage = lazy(
+  () => import("@/features/audit-trail/pages/AuditTrailPage"),
+);
+const SharedFolderListPage = lazy(
+  () => import("@/features/shared-folders/pages/SharedFolderListPage"),
+);
+const SharedFolderDetailPage = lazy(
+  () => import("@/features/shared-folders/pages/SharedFolderDetailPage"),
+);
 const HRNAFHistoryPage = lazy(
   () => import("@/features/hr/pages/HRNAFHistoryPage"),
 );
@@ -145,6 +154,30 @@ export function AppRouter() {
           element={
             <ProtectedRoute requiredRole="ADMIN">
               <DepartmentDetailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={RoutesEnum.ADMIN_AUDIT_TRAIL}
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <AuditTrailPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={RoutesEnum.ADMIN_SHARED_FOLDERS}
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <SharedFolderListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={RoutesEnum.ADMIN_SHARED_FOLDER_DETAIL}
+          element={
+            <ProtectedRoute requiredRole="ADMIN">
+              <SharedFolderDetailPage />
             </ProtectedRoute>
           }
         />

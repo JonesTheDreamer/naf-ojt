@@ -8,6 +8,7 @@ export interface NavItem {
   label: string;
   icon: React.ReactNode;
   href: string;
+  className?: string;
 }
 
 interface SidebarProps {
@@ -90,6 +91,7 @@ export default function Sidebar({
                   to={item.href}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors",
+                    item.className,
                     isActive
                       ? "bg-gray-100 text-gray-900"
                       : "text-gray-600 hover:bg-gray-50 hover:text-gray-900",
