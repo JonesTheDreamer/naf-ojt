@@ -12,14 +12,15 @@ namespace NAFServer.src.Application.Services
         {
             _departmentRepository = departmentRepository;
         }
-        public Task<DepartmentDTO> CreateDepartmentAsync(CreateDepartmentDTO req)
+        public async Task<DepartmentDTO> CreateDepartmentAsync(CreateDepartmentDTO req)
         {
-            throw new NotImplementedException();
+            var department = await _departmentRepository.AddAsync(req);
+            return DepartmentMapper.ToDTO(department);
         }
 
-        public async Task<List<DepartmentDTO>> GetAllDepartmentsAsync()
+        public async Task<List<DepartmentDTO>> GetAllDepartmentsAsync(int? locationId = null)
         {
-            return DepartmentMapper.ListToDTO(await _departmentRepository.GetAllAsync());
+            return DepartmentMapper.ListToDTO(await _departmentRepository.GetAllAsync(locationId));
         }
 
         public async Task<DepartmentDTO> GetDepartmentByCodeAsync(string code)
