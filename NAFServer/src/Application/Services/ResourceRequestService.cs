@@ -274,6 +274,14 @@ namespace NAFServer.src.Application.Services
                         var techHead = await _userRepository.GetNetworkAdminOfLocation(activeLocation.LocationId);
                         approverId = techHead.EmployeeNumber;
                         break;
+
+                    case ApproverRole.RESOURCE_OWNER:
+                        if (request.AdditionalInfo is SharedFolderRequestInfo sfInfo)
+                        {
+                            var folder = await _context.SharedFolders.FindAsync(sfInfo.SharedFolderId);
+                            approverId = folder?.OwnerId;
+                        }
+                        break;
                 }
 
                 if (approverId is not null)

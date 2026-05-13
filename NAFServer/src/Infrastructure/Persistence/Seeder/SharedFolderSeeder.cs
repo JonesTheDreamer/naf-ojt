@@ -6,12 +6,12 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
     {
         public static async Task SeedAsync(AppDbContext context)
         {
-            if (context.Resources.Any()) return;
-            var ags = new SharedFolder("AGS");
-            var accounting = new SharedFolder("Accounting");
-            var commonFileAccounting = new SharedFolder("Common File Accounting");
-            var audit = new SharedFolder("Audit");
-            var commonFileAudit = new SharedFolder("Common File Audit");
+            if (context.SharedFolders.Any()) return;
+            var ags = new SharedFolder("AGS", "EMP00101");
+            var accounting = new SharedFolder("Accounting", "EMP00052");
+            var commonFileAccounting = new SharedFolder("Common File Accounting", "EMP00052");
+            var audit = new SharedFolder("Audit", "EMP00051");
+            var commonFileAudit = new SharedFolder("Common File Audit", "EMP00051");
             //var analab = new SharedFolder("Analab", "Individual Folder (User)");
             //var commonFileAnalab = new SharedFolder("Common File Analab", "Shared Folder For Files");
             //var cwd = new SharedFolder("CWWD", "Individual Folder (User)");

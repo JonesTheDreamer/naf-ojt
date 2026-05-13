@@ -12,8 +12,8 @@ using NAFServer.src.Infrastructure.Persistence;
 namespace NAFServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260511091713_AddNotifications")]
-    partial class AddNotifications
+    [Migration("20260513043337_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -80,6 +80,26 @@ namespace NAFServer.Migrations
                     b.ToTable("ApprovalWorkflowTemplates");
                 });
 
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.AuditTrail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Activity")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuditTrails");
+                });
+
             modelBuilder.Entity("NAFServer.src.Domain.Entities.Department", b =>
                 {
                     b.Property<int>("Id")
@@ -113,6 +133,37 @@ namespace NAFServer.Migrations
                     b.HasIndex("LocationId");
 
                     b.ToTable("Departments");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.DepartmentEmployee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateRemoved")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.ToTable("DepartmentEmployees");
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.Employee", b =>
@@ -907,6 +958,17 @@ namespace NAFServer.Migrations
                     b.Navigation("DepartmentHead");
 
                     b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.DepartmentEmployee", b =>
+                {
+                    b.HasOne("NAFServer.src.Domain.Entities.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.InternetResource", b =>

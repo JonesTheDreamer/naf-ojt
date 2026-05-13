@@ -12,8 +12,8 @@ using NAFServer.src.Infrastructure.Persistence;
 namespace NAFServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260506071133_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260513055752_AddSharedFolderOwnerId")]
+    partial class AddSharedFolderOwnerId
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -80,6 +80,26 @@ namespace NAFServer.Migrations
                     b.ToTable("ApprovalWorkflowTemplates");
                 });
 
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.AuditTrail", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Activity")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("AuditTrails");
+                });
+
             modelBuilder.Entity("NAFServer.src.Domain.Entities.Department", b =>
                 {
                     b.Property<int>("Id")
@@ -113,6 +133,37 @@ namespace NAFServer.Migrations
                     b.HasIndex("LocationId");
 
                     b.ToTable("Departments");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.DepartmentEmployee", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DateAdded")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DateRemoved")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("EmployeeId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.ToTable("DepartmentEmployees");
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.Employee", b =>
@@ -317,6 +368,41 @@ namespace NAFServer.Migrations
                     b.HasIndex("LocationId");
 
                     b.ToTable("NAFs");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier")
+                        .HasDefaultValueSql("NEWSEQUENTIALID()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Link")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.Resource", b =>
@@ -631,6 +717,9 @@ namespace NAFServer.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("OwnerId")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("SharedFolders");
@@ -874,6 +963,17 @@ namespace NAFServer.Migrations
                     b.Navigation("Location");
                 });
 
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.DepartmentEmployee", b =>
+                {
+                    b.HasOne("NAFServer.src.Domain.Entities.Department", "Department")
+                        .WithMany()
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+                });
+
             modelBuilder.Entity("NAFServer.src.Domain.Entities.InternetResource", b =>
                 {
                     b.HasOne("NAFServer.src.Domain.Entities.InternetPurpose", "Purpose")
@@ -902,6 +1002,17 @@ namespace NAFServer.Migrations
                     b.Navigation("Department");
 
                     b.Navigation("Location");
+                });
+
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.Notification", b =>
+                {
+                    b.HasOne("NAFServer.src.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.Resource", b =>

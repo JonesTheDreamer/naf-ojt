@@ -7,5 +7,6 @@
         SPECIFIC_EMPLOYEE,   // Fixed approver — ApproverEntity: employee ID
         ROLE_BASED,          // Any user with a given role — ApproverEntity: role name (ADMIN, HR, etc.)
         TECHNICAL_HEAD,      // Network admin at employee's location
+        RESOURCE_OWNER,      // Owner stored on the requested resource instance (e.g. SharedFolder.OwnerId)
     }
 }
