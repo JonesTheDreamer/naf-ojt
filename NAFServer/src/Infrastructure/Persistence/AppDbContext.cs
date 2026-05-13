@@ -192,6 +192,10 @@ namespace NAFServer.src.Infrastructure.Persistence
                 .WithMany()
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<SharedFolder>()
+                .Property(sf => sf.IsActive)
+                .HasDefaultValue(true);
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
