@@ -1,7 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import {
   Dialog,
   DialogContent,
@@ -9,9 +7,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { searchEmployees } from "@/shared/api/employeeService";
-import type { Employee } from "@/shared/types/api/employee";
 import { useDepartmentMutations } from "../hooks/useDepartments";
+import { useDepartmentEmployees } from "../hooks/useDepartmentEmployees";
+import type { DepartmentEmployeeDTO } from "../types";
 
 interface Props {
   departmentId: number;
@@ -19,52 +17,25 @@ interface Props {
 
 export function ChangeDepartmentHeadDialog({ departmentId }: Props) {
   const [open, setOpen] = useState(false);
-  const [employeeId, setEmployeeId] = useState("");
+  const [selected, setSelected] = useState<DepartmentEmployeeDTO | null>(null);
   const [error, setError] = useState("");
-  const [lookup, setLookup] = useState<{
-    state: "idle" | "loading" | "found" | "not_found";
-    employee: Employee | null;
-  }>({ state: "idle", employee: null });
 
   const { changeHeadMutation } = useDepartmentMutations();
-
-  useEffect(() => {
-    if (!employeeId.trim()) {
-      setLookup({ state: "idle", employee: null });
-      return;
-    }
-    const timer = setTimeout(async () => {
-      setLookup({ state: "loading", employee: null });
-      try {
-        const results = await searchEmployees(employeeId.trim());
-        const match = results.find((e) => e.id === employeeId.trim());
-        setLookup(
-          match
-            ? { state: "found", employee: match }
-            : { state: "not_found", employee: null },
-        );
-      } catch {
-        setLookup({ state: "not_found", employee: null });
-      }
-    }, 400);
-    return () => clearTimeout(timer);
-  }, [employeeId]);
+  const { data: employees = [], isLoading } = useDepartmentEmployees(departmentId);
 
   const reset = () => {
-    setEmployeeId("");
+    setSelected(null);
     setError("");
-    setLookup({ state: "idle", employee: null });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-    if (lookup.state !== "found") {
-      setError("Employee not found.");
+  const handleSave = async () => {
+    if (!selected) {
+      setError("Please select an employee.");
       return;
     }
+    setError("");
     try {
-      await changeHeadMutation.mutateAsync({ id: departmentId, employeeId });
+      await changeHeadMutation.mutateAsync({ id: departmentId, employeeId: selected.employeeId });
       reset();
       setOpen(false);
     } catch {
@@ -81,23 +52,47 @@ export function ChangeDepartmentHeadDialog({ departmentId }: Props) {
         <DialogHeader>
           <DialogTitle>Change Department Head</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-4">
-          <div className="flex flex-col gap-1">
-            <Label>Employee ID</Label>
-            <Input value={employeeId} onChange={(e) => setEmployeeId(e.target.value)} placeholder="e.g. EMP001" required />
-            {lookup.state === "loading" && <p className="text-xs text-muted-foreground">Looking up employee…</p>}
-            {lookup.state === "found" && lookup.employee && (
-              <p className="text-xs text-green-700">
-                {lookup.employee.firstName} {lookup.employee.lastName} · {lookup.employee.position}
-              </p>
-            )}
-            {lookup.state === "not_found" && <p className="text-xs text-red-500">Employee not found</p>}
-          </div>
+        <div className="flex flex-col gap-4 mt-4">
+          <p className="text-sm text-muted-foreground">Select a department employee to be the new department head.</p>
+          {isLoading ? (
+            <p className="text-sm text-muted-foreground">Loading employees…</p>
+          ) : employees.length === 0 ? (
+            <p className="text-sm text-muted-foreground">No employees assigned to this department.</p>
+          ) : (
+            <div className="flex flex-col gap-1 max-h-64 overflow-y-auto rounded-md border">
+              {employees.map((emp) => (
+                <button
+                  key={emp.employeeId}
+                  type="button"
+                  onClick={() => setSelected(emp)}
+                  className={`flex items-center justify-between px-4 py-2.5 text-left text-sm transition-colors hover:bg-muted/60 ${
+                    selected?.employeeId === emp.employeeId
+                      ? "bg-amber-50 border-l-2 border-amber-500"
+                      : "border-l-2 border-transparent"
+                  }`}
+                >
+                  <span className="font-medium">
+                    {emp.firstName} {emp.middleName ? `${emp.middleName} ` : ""}{emp.lastName}
+                  </span>
+                  <span className="text-xs text-muted-foreground">{emp.position}</span>
+                </button>
+              ))}
+            </div>
+          )}
           {error && <p className="text-sm text-red-500">{error}</p>}
-          <Button type="submit" disabled={changeHeadMutation.isPending} className="w-full">
-            {changeHeadMutation.isPending ? "Saving…" : "Save"}
-          </Button>
-        </form>
+          <div className="flex justify-end gap-2">
+            <Button variant="ghost" size="sm" onClick={() => { reset(); setOpen(false); }}>
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              disabled={!selected || changeHeadMutation.isPending}
+              onClick={handleSave}
+            >
+              {changeHeadMutation.isPending ? "Saving…" : "Save"}
+            </Button>
+          </div>
+        </div>
       </DialogContent>
     </Dialog>
   );
