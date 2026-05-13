@@ -12,7 +12,7 @@ const navItems = [
   { label: "Resources", icon: <Box className="w-5 h-5" />, href: "/admin/resources" },
   { label: "Departments", icon: <Building2 className="w-5 h-5" />, href: "/admin/departments" },
   { label: "Audit Trail", icon: <ScrollText className="w-5 h-5" />, href: "/admin/audit-trail" },
-  { label: "Shared Folders", icon: <FolderOpen className="w-4 h-4" />, href: "/admin/resources/shared-folders", className: "pl-7" },
+  { label: "Shared Folders", icon: <FolderOpen className="w-5 h-5" />, href: "/admin/resources/shared-folders", className: "pl-7" },
 ];
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
