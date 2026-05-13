@@ -7,6 +7,7 @@ import { useSharedFolders } from "../hooks/useSharedFolders";
 import { useSharedFolderMutations } from "../hooks/useSharedFolderMutations";
 import { SharedFolderFormDialog } from "../components/SharedFolderFormDialog";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import type { SharedFolderDTO } from "../types";
 
 export default function SharedFolderListPage() {
@@ -15,6 +16,7 @@ export default function SharedFolderListPage() {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [confirmDelete, setConfirmDelete] = useState<SharedFolderDTO | null>(null);
+  const [deactivateError, setDeactivateError] = useState("");
 
   const { data, isLoading } = useSharedFolders(search, page);
   const { deleteMutation } = useSharedFolderMutations();
@@ -31,8 +33,13 @@ export default function SharedFolderListPage() {
   };
 
   const handleDeactivate = async (folder: SharedFolderDTO) => {
-    await deleteMutation.mutateAsync(folder.id);
-    setConfirmDelete(null);
+    setDeactivateError("");
+    try {
+      await deleteMutation.mutateAsync(folder.id);
+      setConfirmDelete(null);
+    } catch {
+      setDeactivateError("Failed to deactivate. Please try again.");
+    }
   };
 
   return (
@@ -116,8 +123,12 @@ export default function SharedFolderListPage() {
                       {folder.ownerName ?? <span className="italic text-muted-foreground/60">No owner</span>}
                     </td>
                     <td className="px-4 py-3">
-                      <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 text-green-800 border border-green-200">
-                        Active
+                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                        folder.isActive
+                          ? "bg-green-100 text-green-800 border border-green-200"
+                          : "bg-gray-100 text-gray-500 border border-gray-200"
+                      }`}>
+                        {folder.isActive ? "Active" : "Inactive"}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -166,29 +177,30 @@ export default function SharedFolderListPage() {
       </div>
 
       {/* Deactivate confirmation */}
-      {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-card rounded-xl border border-border p-6 shadow-xl max-w-sm w-full space-y-4">
-            <p className="font-semibold">Deactivate folder?</p>
-            <p className="text-sm text-muted-foreground">
-              Deactivate <strong>{confirmDelete.name}</strong>? Existing access requests will not be affected.
-            </p>
-            <div className="flex justify-end gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(null)}>
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                variant="destructive"
-                disabled={deleteMutation.isPending}
-                onClick={() => handleDeactivate(confirmDelete)}
-              >
-                {deleteMutation.isPending ? "Deactivating…" : "Deactivate"}
-              </Button>
-            </div>
+      <Dialog open={!!confirmDelete} onOpenChange={(open) => { if (!open) { setConfirmDelete(null); setDeactivateError(""); } }}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Deactivate folder?</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-muted-foreground">
+            Deactivate <strong>{confirmDelete?.name}</strong>? Existing access requests will not be affected.
+          </p>
+          {deactivateError && <p className="text-sm text-red-500">{deactivateError}</p>}
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="ghost" size="sm" onClick={() => setConfirmDelete(null)}>
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              disabled={deleteMutation.isPending}
+              onClick={() => confirmDelete && handleDeactivate(confirmDelete)}
+            >
+              {deleteMutation.isPending ? "Deactivating…" : "Deactivate"}
+            </Button>
           </div>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
     </AdminLayout>
   );
 }
