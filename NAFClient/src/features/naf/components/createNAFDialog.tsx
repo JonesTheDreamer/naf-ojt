@@ -94,10 +94,14 @@ function EmptyEmployeeState() {
   );
 }
 
-export function CreateNAFDialog() {
+interface CreateNAFDialogProps {
+  initialEmployee?: Employee;
+}
+
+export function CreateNAFDialog({ initialEmployee }: CreateNAFDialogProps = {}) {
   const { user } = useAuth();
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
-    null,
+    initialEmployee ?? null,
   );
   const [open, setOpen] = useState(false);
   const [showEmployeeHasNAFAlert, setShowEmployeeHasNAFAlert] = useState(false);
@@ -138,7 +142,7 @@ export function CreateNAFDialog() {
   };
 
   const reset = () => {
-    setSelectedEmployee(null);
+    setSelectedEmployee(initialEmployee ?? null);
     setShowEmployeeHasNAFAlert(false);
     setHardwareId(0);
     setDateNeeded("");
