@@ -8,10 +8,12 @@ using NAFServer.src.Application.Handlers.ResourceRequestHandler;
 using NAFServer.src.Application.Interfaces;
 using NAFServer.src.Application.Services;
 using NAFServer.src.Domain.Interface.Repository;
+using NAFServer.src.Infrastructure.BackgroundServices;
 using NAFServer.src.Infrastructure.Helper;
 using NAFServer.src.Infrastructure.Persistence;
 using NAFServer.src.Infrastructure.Persistence.Repositories;
 using NAFServer.src.Infrastructure.Persistence.Seeder;
+using NAFServer.src.Infrastructure.Queues;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -115,6 +117,8 @@ builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<IUserLocationService, UserLocationService>();
 builder.Services.AddScoped<IUserDepartmentService, UserDepartmentService>();
 builder.Services.AddScoped<IUserRoleService, UserRoleService>();
+builder.Services.AddSingleton<IAuditQueue, AuditQueue>();
+builder.Services.AddHostedService<AuditWorker>();
 
 builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
@@ -126,6 +130,7 @@ using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     await EmployeeDepartmentSeeder.SeedAsync(context);
+    await DepartmentEmployeeSeeder.SeedAsync(context);
     await ResourceWorkflowSeeder.SeedAsync(context);
     await SharedFolderSeeder.SeedAsync(context);
     await InternetResourceSeeder.SeedAsync(context);
