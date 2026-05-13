@@ -15,7 +15,7 @@ namespace NAFServer.Migrations
                 table: "SharedFolders",
                 type: "bit",
                 nullable: false,
-                defaultValue: false);
+                defaultValue: true);
         }
 
         /// <inheritdoc />
