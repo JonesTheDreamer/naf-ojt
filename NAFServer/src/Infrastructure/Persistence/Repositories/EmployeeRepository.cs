@@ -46,5 +46,21 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
                 .AsNoTracking()
                 .ToListAsync();
         }
+
+        // FUTURE: When transitioning from stored procedures to a local DB view,
+        // replace the SP-based methods above with EF queries against the view.
+        // Example for fetching employees by department:
+        //
+        // public async Task<List<Employee>> GetByDepartmentAsync(string departmentCode)
+        // {
+        //     return await _context.Employees
+        //         .FromSqlRaw(
+        //             "SELECT * FROM vw_DepartmentEmployees WHERE DepartmentCode = {0}",
+        //             departmentCode)
+        //         .ToListAsync();
+        // }
+        //
+        // Also update GetByIdAsync and SearchEmployee to query the Employees table
+        // (or view) directly instead of calling stored procedures.
     }
 }
