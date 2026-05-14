@@ -55,7 +55,8 @@ export default function AdminNAFListPage() {
     navigate(`/admin/NAF/${naf.id}`);
   };
 
-  const selectValue = locationId === null ? ALL_SITES_VALUE : String(locationId);
+  const selectValue =
+    locationId === null ? ALL_SITES_VALUE : String(locationId);
 
   return (
     <AdminLayout>
