@@ -2,6 +2,7 @@ import { api } from "@/shared/api/client";
 import type { NAF } from "@/shared/types/api/naf";
 import type { PagedResult } from "@/shared/types/common/pagedResult";
 import type {
+  AdminForScreeningItem,
   AdminResourceRequestDTO,
   CreateUserDTO,
   ForImplementationItemDTO,
@@ -39,9 +40,11 @@ export const adminApi = {
     api.delete(`/user-roles/${userId}/remove/${roleId}`).then((r) => r.data),
 
   // Admin NAF list (new)
-  getAdminNAFs: (locationId: number, status: string, page: number) =>
+  getAdminNAFs: (locationId: number | null, status: string, page: number) =>
     api
-      .get<PagedResult<NAF>>("/admin/nafs", { params: { locationId, status, page } })
+      .get<PagedResult<NAF>>("/admin/nafs", {
+        params: { ...(locationId !== null && { locationId }), status, page },
+      })
       .then((r) => r.data),
 
   // Admin resource requests
@@ -49,6 +52,13 @@ export const adminApi = {
     api
       .get<PagedResult<AdminResourceRequestDTO>>("/admin/resource-requests", {
         params: { locationId, progress, page },
+      })
+      .then((r) => r.data),
+
+  getForScreening: (locationId: number) =>
+    api
+      .get<AdminForScreeningItem[]>("/admin/resource-requests/for-screening", {
+        params: { locationId },
       })
       .then((r) => r.data),
 
