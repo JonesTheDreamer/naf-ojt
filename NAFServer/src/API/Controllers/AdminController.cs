@@ -50,11 +50,17 @@ namespace NAFServer.src.API.Controllers
 
         [HttpGet("nafs")]
         public async Task<IActionResult> GetAdminNAFs(
-            [FromQuery] int locationId,
+            [FromQuery] int? locationId = null,
             [FromQuery] string status = "all",
             [FromQuery][Range(1, int.MaxValue)] int page = 1)
         {
             return Ok(await _nafService.GetNAFsByLocationPagedAsync(locationId, status, page));
+        }
+
+        [HttpGet("resource-requests/for-screening")]
+        public async Task<IActionResult> GetForScreening([FromQuery] int locationId)
+        {
+            return Ok(await _nafService.GetForScreeningAsync(locationId));
         }
 
         [HttpGet("resource-requests")]
