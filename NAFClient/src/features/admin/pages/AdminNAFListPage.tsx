@@ -31,7 +31,9 @@ export default function AdminNAFListPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [locationId, setLocationId] = useState<number | null>(user?.locationId ?? null);
+  const [locationId, setLocationId] = useState<number | null>(
+    user?.locationId ?? null,
+  );
   const [status, setStatus] = useState<string>("all");
   const [page, setPage] = useState(1);
 
