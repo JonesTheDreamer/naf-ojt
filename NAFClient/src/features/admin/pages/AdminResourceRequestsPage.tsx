@@ -58,12 +58,13 @@ export default function AdminResourceRequestsPage() {
           )}
         </div>
 
-        <ForScreeningSection
-          locationId={locationId}
-          currentEmployeeId={employeeId}
-        />
-
-        <ForImplementationSection locationId={locationId} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <ForScreeningSection
+            locationId={locationId}
+            currentEmployeeId={employeeId}
+          />
+          <ForImplementationSection locationId={locationId} />
+        </div>
 
         <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
           <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
