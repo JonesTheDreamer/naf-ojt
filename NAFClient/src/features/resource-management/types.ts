@@ -13,7 +13,7 @@ export interface WorkflowStep {
   stepOrder: number;
   stepAction: string;
   approverRole: string;
-  approverEntity: string;
+  approverEntity: string | null;
 }
 
 export interface WorkflowTemplateVersion {

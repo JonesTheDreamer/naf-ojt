@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NAFServer.src.Domain.Entities;
 using NAFServer.src.Domain.Interface;
 namespace NAFServer.src.Infrastructure.Persistence
@@ -53,6 +54,29 @@ namespace NAFServer.src.Infrastructure.Persistence
                     idProperty.ValueGenerated = Microsoft.EntityFrameworkCore.Metadata.ValueGenerated.OnAdd;
 
                     idProperty.SetDefaultValueSql("NEWSEQUENTIALID()");
+                }
+            }
+
+            // Mark all DateTime columns as UTC when read back from SQL Server.
+            // SQL Server has no timezone info, so EF Core reads DateTimeKind.Unspecified.
+            // Without this, System.Text.Json omits the 'Z' suffix and browsers misinterpret
+            // the values as local time instead of UTC.
+            var utcConverter = new ValueConverter<DateTime, DateTime>(
+                v => v.Kind == DateTimeKind.Utc ? v : v.ToUniversalTime(),
+                v => DateTime.SpecifyKind(v, DateTimeKind.Utc));
+
+            var nullableUtcConverter = new ValueConverter<DateTime?, DateTime?>(
+                v => v.HasValue ? (v.Value.Kind == DateTimeKind.Utc ? v : v.Value.ToUniversalTime()) : v,
+                v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v);
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                foreach (var property in entityType.GetProperties())
+                {
+                    if (property.ClrType == typeof(DateTime))
+                        property.SetValueConverter(utcConverter);
+                    else if (property.ClrType == typeof(DateTime?))
+                        property.SetValueConverter(nullableUtcConverter);
                 }
             }
 

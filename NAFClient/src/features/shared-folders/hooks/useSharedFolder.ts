@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { sharedFoldersApi } from "../api";
 
 export function useSharedFolder(id: number, progress: string, page: number) {
@@ -10,5 +10,6 @@ export function useSharedFolder(id: number, progress: string, page: number) {
         page,
       }),
     enabled: !!id,
+    placeholderData: keepPreviousData,
   });
 }

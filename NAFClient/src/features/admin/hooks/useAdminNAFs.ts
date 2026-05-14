@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { adminApi } from "../api";
 
 export function useAdminNAFs(
@@ -8,8 +8,8 @@ export function useAdminNAFs(
 ) {
   const nafQuery = useQuery({
     queryKey: ["admin", "nafs", locationId, status, page],
-    queryFn: () => adminApi.getAdminNAFs(locationId!, status, page),
-    enabled: locationId != null,
+    queryFn: () => adminApi.getAdminNAFs(locationId, status, page),
+    placeholderData: keepPreviousData,
   });
 
   return { nafQuery };

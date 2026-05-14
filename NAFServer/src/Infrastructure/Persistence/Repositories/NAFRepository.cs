@@ -221,11 +221,13 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             };
         }
 
-        public async Task<PagedResult<NAFDTO>> GetNAFsByLocationPagedAsync(int locationId, string status, int page)
+        public async Task<PagedResult<NAFDTO>> GetNAFsByLocationPagedAsync(int? locationId, string status, int page)
         {
             int pageSize = 20;
 
-            var query = _context.NAFs.Where(n => n.LocationId == locationId);
+            var query = locationId.HasValue
+                ? _context.NAFs.Where(n => n.LocationId == locationId.Value)
+                : _context.NAFs.AsQueryable();
 
             switch (status.ToLower())
             {

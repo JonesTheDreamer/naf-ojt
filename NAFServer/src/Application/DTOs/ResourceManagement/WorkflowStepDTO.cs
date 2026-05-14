@@ -4,6 +4,6 @@ namespace NAFServer.src.Application.DTOs.ResourceManagement
         int StepOrder,
         string StepAction,
         string ApproverRole,
-        string ApproverEntity
+        string? ApproverEntity
     );
 }

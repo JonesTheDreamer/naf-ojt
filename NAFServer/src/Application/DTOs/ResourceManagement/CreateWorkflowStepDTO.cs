@@ -6,6 +6,6 @@ namespace NAFServer.src.Application.DTOs.ResourceManagement
         [Range(1, int.MaxValue)] int StepOrder,
         [Required] string StepAction,
         [Required] string ApproverRole,
-        [Required] string ApproverEntity
+        string? ApproverEntity
     );
 }

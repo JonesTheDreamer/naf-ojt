@@ -17,7 +17,7 @@ export default function SharedFolderDetailPage() {
   const [activeProgress, setActiveProgress] = useState("all");
   const [accessPage, setAccessPage] = useState(1);
 
-  const { data, isLoading } = useSharedFolder(folderId, activeProgress, accessPage);
+  const { data, isLoading, isFetching } = useSharedFolder(folderId, activeProgress, accessPage);
 
   const handleProgressChange = (value: string) => {
     setActiveProgress(value);
@@ -82,7 +82,7 @@ export default function SharedFolderDetailPage() {
         {/* Access list */}
         <SharedFolderAccessList
           entries={data.accessList.data}
-          isLoading={false}
+          isLoading={isFetching}
           activeProgress={activeProgress}
           onProgressChange={handleProgressChange}
           totalCount={data.accessList.totalCount}

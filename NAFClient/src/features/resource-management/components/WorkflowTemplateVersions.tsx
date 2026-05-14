@@ -114,7 +114,7 @@ export function WorkflowTemplateVersions({ versions }: WorkflowTemplateVersionsP
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0">
                               <User className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-xs font-medium truncate max-w-32">{s.approverEntity}</span>
+                              <span className="text-xs font-medium truncate max-w-32">{s.approverEntity || "—"}</span>
                             </div>
                           </div>
                         </div>

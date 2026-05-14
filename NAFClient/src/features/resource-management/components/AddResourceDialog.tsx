@@ -50,7 +50,16 @@ export function AddResourceDialog({ open, onOpenChange }: AddResourceDialogProps
 
   const { mutate, isPending } = useCreateResource();
 
-  const isValid = name.trim().length > 0 && (!isSpecial || steps.every((s) => s.stepAction && s.approverRole && s.approverEntity.trim()));
+  const ENTITY_REQUIRED_ROLES = ["SPECIFIC_EMPLOYEE", "ROLE_BASED"];
+  const isValid =
+    name.trim().length > 0 &&
+    (!isSpecial ||
+      steps.every(
+        (s) =>
+          s.stepAction &&
+          s.approverRole &&
+          (!ENTITY_REQUIRED_ROLES.includes(s.approverRole) || s.approverEntity.trim()),
+      ));
 
   const handleSubmit = () => {
     if (!isValid) return;

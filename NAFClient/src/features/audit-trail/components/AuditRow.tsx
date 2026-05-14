@@ -1,7 +1,18 @@
 import { getEntityMeta } from "./entityConfig";
 import type { AuditTrailDTO } from "../types";
 
-function formatTimestamp(ts: string): string {
+// function formatTimestamp(ts: string): string {
+//   return new Date(ts).toLocaleString("en-PH", {
+//     year: "numeric",
+//     month: "short",
+//     day: "numeric",
+//     hour: "2-digit",
+//     minute: "2-digit",
+//     second: "2-digit",
+//   });
+// }
+
+function convertDateTime(ts: string): string {
   return new Date(ts).toLocaleString("en-PH", {
     year: "numeric",
     month: "short",
@@ -10,17 +21,6 @@ function formatTimestamp(ts: string): string {
     minute: "2-digit",
     second: "2-digit",
   });
-}
-
-function convertDateTime(ts: string): string {
-  return new Intl.DateTimeFormat("en-US", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  }).format(new Date(ts));
 }
 
 interface AuditRowProps {
@@ -40,9 +40,9 @@ export function AuditRow({ entry }: AuditRowProps) {
 
       <div className="flex-1 min-w-0">
         <p className="text-sm text-foreground leading-snug">{entry.activity}</p>
-        <p className="text-xs text-muted-foreground mt-0.5">
+        {/* <p className="text-xs text-muted-foreground mt-0.5">
           {formatTimestamp(entry.timestamp)}
-        </p>
+        </p> */}
       </div>
 
       <div className="flex flex-col items-end gap-1 shrink-0">

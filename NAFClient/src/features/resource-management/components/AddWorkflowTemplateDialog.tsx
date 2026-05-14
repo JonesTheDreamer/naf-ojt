@@ -29,7 +29,15 @@ export function AddWorkflowTemplateDialog({
   ]);
   const { mutate, isPending } = useAddWorkflowTemplate();
 
-  const isValid = steps.length > 0 && steps.every((s) => s.stepAction && s.approverRole && s.approverEntity.trim());
+  const ENTITY_REQUIRED_ROLES = ["SPECIFIC_EMPLOYEE", "ROLE_BASED"];
+  const isValid =
+    steps.length > 0 &&
+    steps.every(
+      (s) =>
+        s.stepAction &&
+        s.approverRole &&
+        (!ENTITY_REQUIRED_ROLES.includes(s.approverRole) || s.approverEntity.trim()),
+    );
 
   const handleSubmit = () => {
     if (!isValid) return;
