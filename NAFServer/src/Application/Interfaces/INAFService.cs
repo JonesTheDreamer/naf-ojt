@@ -6,6 +6,7 @@ namespace NAFServer.src.Application.Interfaces
 {
     public interface INAFService
     {
+        Task<List<AdminForScreeningItemDTO>> GetForScreeningAsync(int locationId);
         public Task<NAFDTO> GetNAFByIdAsync(Guid id);
         public Task<NAFDTO> CreateAsync(CreateNAFRequestDTO request);
         public Task<PagedResult<NAFDTO>> GetNAFsUnderEmployeeAsync(string employeeId, int page);
@@ -15,7 +16,7 @@ namespace NAFServer.src.Application.Interfaces
         public Task<bool> EmployeeHasNAFForDepartmentAsync(string employeeId, int departmentId);
         public Task<List<NAFDTO>> GetNAFByEmployeeIdAsync(string employeeId);
         Task<List<AddBasicResourceResultDTO>> AddBasicResourcesToNAFAsync(Guid nafId, List<BasicResourceWithDateDTO> resources);
-        Task<PagedResult<NAFDTO>> GetNAFsByLocationPagedAsync(int locationId, string status, int page);
+        Task<PagedResult<NAFDTO>> GetNAFsByLocationPagedAsync(int? locationId, string status, int page);
         Task<PagedResult<AdminResourceRequestDTO>> GetResourceRequestsByLocationPagedAsync(int locationId, string progress, int page);
     }
 }

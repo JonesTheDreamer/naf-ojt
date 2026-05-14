@@ -375,7 +375,7 @@ namespace NAFServer.src.Application.Services
             return results;
         }
 
-        public async Task<PagedResult<NAFDTO>> GetNAFsByLocationPagedAsync(int locationId, string status, int page)
+        public async Task<PagedResult<NAFDTO>> GetNAFsByLocationPagedAsync(int? locationId, string status, int page)
         {
             return await _nafRepository.GetNAFsByLocationPagedAsync(locationId, status, page);
         }
@@ -432,6 +432,43 @@ namespace NAFServer.src.Application.Services
                 CurrentPage = page,
                 TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize)
             };
+        }
+
+        public async Task<List<AdminForScreeningItemDTO>> GetForScreeningAsync(int locationId)
+        {
+            var requests = await _context.ResourceRequests
+                .Where(rr => rr.Progress == Domain.Enums.Progress.FOR_SCREENING && rr.NAF.LocationId == locationId)
+                .Include(rr => rr.NAF)
+                .Include(rr => rr.Resource)
+                .Include(rr => rr.ResourceRequestsApprovalSteps)
+                .AsNoTracking()
+                .ToListAsync();
+
+            var result = new List<AdminForScreeningItemDTO>();
+            foreach (var rr in requests)
+            {
+                var employee = await _employeeRepository.GetByIdAsync(rr.NAF.EmployeeId);
+                var employeeName = employee != null
+                    ? $"{employee.FirstName} {employee.LastName}".Trim()
+                    : rr.NAF.EmployeeId;
+
+                var currentStep = rr.ResourceRequestsApprovalSteps
+                    .FirstOrDefault(s => s.StepOrder == rr.CurrentStep);
+
+                if (currentStep == null) continue;
+
+                result.Add(new AdminForScreeningItemDTO(
+                    rr.Id,
+                    rr.NAFId,
+                    rr.NAF.Reference,
+                    employeeName,
+                    rr.Resource.Name,
+                    rr.DateNeeded == default(DateTime) ? null : rr.DateNeeded,
+                    currentStep.Id,
+                    currentStep.ApproverId
+                ));
+            }
+            return result;
         }
     }
 }
