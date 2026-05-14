@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Wrench, CheckCircle } from "lucide-react";
 import { ImplementationStatus } from "@/shared/types/enum/status";
 import { Progress } from "@/shared/types/enum/progress";
 import type { NAF, ResourceRequest } from "@/shared/types/api/naf";
@@ -14,6 +15,8 @@ import { useMyImplementationTasks } from "../hooks/useMyImplementationTasks";
 interface ForImplementationSectionProps {
   locationId: number | null;
 }
+
+type Tab = "unassigned" | "mine";
 
 type FlatItem = {
   nafId: string;
@@ -36,20 +39,29 @@ function flattenNAFs(nafs: NAF[]): FlatItem[] {
   );
 }
 
-function implStatusBadge(status: ImplementationStatus) {
+function ImplStatusBadge({ status }: { status: ImplementationStatus }) {
   if (status === ImplementationStatus.IN_PROGRESS)
     return (
-      <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">
+      <span className="inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-700 dark:bg-blue-950/40 dark:text-blue-400">
         In Progress
       </span>
     );
   if (status === ImplementationStatus.DELAYED)
     return (
-      <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-800">
+      <span className="inline-flex items-center rounded-full bg-yellow-100 px-2 py-0.5 text-xs font-medium text-yellow-700 dark:bg-yellow-950/40 dark:text-yellow-400">
         Delayed
       </span>
     );
   return null;
+}
+
+function EmptyState({ message }: { message: string }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-8 gap-2">
+      <CheckCircle className="w-8 h-8 text-muted-foreground/25" />
+      <p className="text-sm text-muted-foreground">{message}</p>
+    </div>
+  );
 }
 
 export function ForImplementationSection({
@@ -58,7 +70,7 @@ export function ForImplementationSection({
   const qc = useQueryClient();
   const { data: forImplNafs = [] } = useForImplementation(locationId);
   const { data: myTaskNafs = [] } = useMyImplementationTasks();
-
+  const [tab, setTab] = useState<Tab>("unassigned");
   const [delayTarget, setDelayTarget] = useState<string | null>(null);
 
   const unassigned = flattenNAFs(forImplNafs).filter(
@@ -123,54 +135,81 @@ export function ForImplementationSection({
     setToDelayed.isPending ||
     setToAccomplished.isPending;
 
-  return (
-    <div className="space-y-4 rounded-xl border border-border bg-card p-4 shadow-sm">
-      <h2 className="text-base font-semibold">
-        For Implementation
-        <span className="ml-2 text-sm font-normal text-muted-foreground">
-          · {total}
-        </span>
-      </h2>
+  const tabs: { key: Tab; label: string; count: number }[] = [
+    { key: "unassigned", label: "Unassigned", count: unassigned.length },
+    { key: "mine", label: "My Tasks", count: myTasks.length },
+  ];
 
-      <div className="space-y-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          Unassigned
-        </p>
-        {unassigned.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No unassigned implementation requests.
-          </p>
-        ) : (
-          unassigned.map(({ nafReference, employeeName, rr }) => (
-            <ActionCard
-              key={rr.id}
-              employeeName={employeeName}
-              resourceName={rr.resource.name}
-              nafReference={nafReference}
-              dateNeeded={rr.dateNeeded}
-              actions={
-                <Button
-                  size="sm"
-                  className="bg-amber-500 hover:bg-amber-600 text-white"
-                  disabled={isSubmitting}
-                  onClick={() => assignToMe.mutate(rr.id)}
-                >
-                  Claim
-                </Button>
-              }
-            />
-          ))
+  return (
+    <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-4 border-b border-border">
+        <div className="flex items-center gap-3">
+          <div className="rounded-lg p-2 bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400">
+            <Wrench className="w-4 h-4" />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold leading-none">
+              For Implementation
+            </h2>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Claim and manage implementation tasks
+            </p>
+          </div>
+        </div>
+        {total > 0 && (
+          <span className="rounded-full bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400 px-2.5 py-0.5 text-xs font-medium tabular-nums">
+            {total}
+          </span>
         )}
       </div>
 
-      <div className="space-y-2">
-        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          My Tasks
-        </p>
-        {myTasks.length === 0 ? (
-          <p className="text-sm text-muted-foreground">
-            No implementation tasks assigned to you.
-          </p>
+      <div className="flex gap-1 px-5 pt-3 border-b border-border">
+        {tabs.map((t) => (
+          <button
+            key={t.key}
+            onClick={() => setTab(t.key)}
+            className={`pb-2.5 px-1 text-xs font-medium transition-colors border-b-2 -mb-px ${
+              tab === t.key
+                ? "border-blue-500 text-blue-600"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {t.label}
+            <span className="ml-1.5 tabular-nums text-[11px] opacity-70">
+              ({t.count})
+            </span>
+          </button>
+        ))}
+      </div>
+
+      <div className="p-4 space-y-2">
+        {tab === "unassigned" ? (
+          unassigned.length === 0 ? (
+            <EmptyState message="No unassigned implementation requests." />
+          ) : (
+            unassigned.map(({ nafReference, employeeName, rr }) => (
+              <ActionCard
+                key={rr.id}
+                employeeName={employeeName}
+                resourceName={rr.resource.name}
+                nafReference={nafReference}
+                dateNeeded={rr.dateNeeded}
+                accent="amber"
+                actions={
+                  <Button
+                    size="sm"
+                    className="bg-amber-500 hover:bg-amber-600 text-white"
+                    disabled={isSubmitting}
+                    onClick={() => assignToMe.mutate(rr.id)}
+                  >
+                    Claim
+                  </Button>
+                }
+              />
+            ))
+          )
+        ) : myTasks.length === 0 ? (
+          <EmptyState message="No implementation tasks assigned to you." />
         ) : (
           myTasks.map(({ nafReference, employeeName, rr }) => {
             const status =
@@ -182,7 +221,8 @@ export function ForImplementationSection({
                 resourceName={rr.resource.name}
                 nafReference={nafReference}
                 dateNeeded={rr.dateNeeded}
-                badge={implStatusBadge(status)}
+                accent="blue"
+                badge={<ImplStatusBadge status={status} />}
                 actions={
                   <>
                     {status === ImplementationStatus.IN_PROGRESS && (

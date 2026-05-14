@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { MapPin, List } from "lucide-react";
 import AdminLayout from "@/shared/components/layout/AdminLayout";
 import { DataTable } from "@/shared/components/ui/datatable";
 import { TablePagination } from "@/features/naf/components/tablePagination";
@@ -45,7 +46,17 @@ export default function AdminResourceRequestsPage() {
   return (
     <AdminLayout>
       <div className="space-y-6">
-        <h1 className="text-2xl font-bold text-amber-500">Resource Requests</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-amber-500">
+            Resource Requests
+          </h1>
+          {user?.location && (
+            <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
+              <MapPin className="w-3.5 h-3.5" />
+              <span>{user.location}</span>
+            </div>
+          )}
+        </div>
 
         <ForScreeningSection
           locationId={locationId}
@@ -54,38 +65,56 @@ export default function AdminResourceRequestsPage() {
 
         <ForImplementationSection locationId={locationId} />
 
-        <div className="space-y-4">
-        <div className="flex gap-2 flex-wrap">
-          {PROGRESS_TABS.map((tab) => (
-            <button
-              key={tab.value}
-              onClick={() => handleProgressChange(tab.value)}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-                progress === tab.value
-                  ? "bg-amber-500 text-white"
-                  : "bg-muted text-muted-foreground hover:bg-muted/80"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
+          <div className="flex items-center gap-3 px-5 py-4 border-b border-border">
+            <div className="rounded-lg p-2 bg-muted text-muted-foreground">
+              <List className="w-4 h-4" />
+            </div>
+            <div>
+              <h2 className="text-sm font-semibold leading-none">
+                All Resource Requests
+              </h2>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {result?.totalCount != null
+                  ? `${result.totalCount} total`
+                  : "Browse and filter all requests"}
+              </p>
+            </div>
+          </div>
 
-        <DataTable
-          columns={resourceRequestColumns}
-          data={result?.data ?? []}
-          isLoading={query.isLoading}
-          onRowClick={handleRowClick}
-          emptyMessage="No resource requests found."
-        />
+          <div className="flex gap-1.5 flex-wrap px-5 py-3 border-b border-border">
+            {PROGRESS_TABS.map((tab) => (
+              <button
+                key={tab.value}
+                onClick={() => handleProgressChange(tab.value)}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  progress === tab.value
+                    ? "bg-amber-500 text-white"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-        <TablePagination
-          currentPage={result?.currentPage ?? 1}
-          totalPages={result?.totalPages ?? 1}
-          totalCount={result?.totalCount ?? 0}
-          pageSize={result?.pageSize ?? 10}
-          onPageChange={setPage}
-        />
+          <div className="p-4 space-y-4">
+            <DataTable
+              columns={resourceRequestColumns}
+              data={result?.data ?? []}
+              isLoading={query.isLoading}
+              onRowClick={handleRowClick}
+              emptyMessage="No resource requests found."
+            />
+
+            <TablePagination
+              currentPage={result?.currentPage ?? 1}
+              totalPages={result?.totalPages ?? 1}
+              totalCount={result?.totalCount ?? 0}
+              pageSize={result?.pageSize ?? 10}
+              onPageChange={setPage}
+            />
+          </div>
         </div>
       </div>
     </AdminLayout>
