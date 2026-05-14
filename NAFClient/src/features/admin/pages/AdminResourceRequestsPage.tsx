@@ -6,6 +6,8 @@ import { TablePagination } from "@/features/naf/components/tablePagination";
 import { useAdminResourceRequests } from "../hooks/useAdminResourceRequests";
 import { resourceRequestColumns } from "../components/resourceRequestColumns";
 import { useAuth } from "@/features/auth/AuthContext";
+import { ForScreeningSection } from "../components/ForScreeningSection";
+import { ForImplementationSection } from "../components/ForImplementationSection";
 import type { AdminResourceRequestDTO } from "../types";
 
 const PROGRESS_TABS = [
@@ -23,6 +25,7 @@ export default function AdminResourceRequestsPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const locationId = user?.locationId ?? null;
+  const employeeId = user?.employeeId ?? "";
 
   const [progress, setProgress] = useState<string>("all");
   const [page, setPage] = useState(1);
@@ -41,9 +44,17 @@ export default function AdminResourceRequestsPage() {
 
   return (
     <AdminLayout>
-      <div className="space-y-4">
+      <div className="space-y-6">
         <h1 className="text-2xl font-bold text-amber-500">Resource Requests</h1>
 
+        <ForScreeningSection
+          locationId={locationId}
+          currentEmployeeId={employeeId}
+        />
+
+        <ForImplementationSection locationId={locationId} />
+
+        <div className="space-y-4">
         <div className="flex gap-2 flex-wrap">
           {PROGRESS_TABS.map((tab) => (
             <button
@@ -75,6 +86,7 @@ export default function AdminResourceRequestsPage() {
           pageSize={result?.pageSize ?? 10}
           onPageChange={setPage}
         />
+        </div>
       </div>
     </AdminLayout>
   );
