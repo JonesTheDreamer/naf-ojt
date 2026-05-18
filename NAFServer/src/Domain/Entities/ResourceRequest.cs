@@ -119,6 +119,7 @@ namespace NAFServer.src.Domain.Entities
         public ResourceRequest DeactivateResourceRequest()
         {
             IsActive = false;
+            Progress = Progress.DEACTIVATED;
             return this;
         }
         public ResourceRequest ActivateResourceRequest()

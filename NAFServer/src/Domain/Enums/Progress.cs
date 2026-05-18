@@ -2,12 +2,13 @@ namespace NAFServer.src.Domain.Enums
 {
     public enum Progress
     {
-        OPEN,           // 0 — no approvers yet
-        IN_PROGRESS,    // 1 — waiting for next approver
-        FOR_SCREENING,  // 2 — awaiting technical screening
-        IMPLEMENTATION, // 3 — technical team is working on it
-        ACCOMPLISHED,   // 4 — delivered
-        REJECTED,       // 5 — an approver rejected
-        CANCELLED       // 6 — requestor cancelled the request
+        OPEN,           // 0
+        IN_PROGRESS,    // 1
+        FOR_SCREENING,  // 2
+        IMPLEMENTATION, // 3
+        ACCOMPLISHED,   // 4
+        REJECTED,       // 5
+        CANCELLED,      // 6
+        DEACTIVATED     // 7
     }
 }
