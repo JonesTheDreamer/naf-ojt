@@ -50,6 +50,7 @@ const PROGRESS_STRIP: Record<Progress, string> = {
   [Progress.ACCOMPLISHED]: "bg-emerald-500",
   [Progress.REJECTED]: "bg-red-400",
   [Progress.CANCELLED]: "bg-gray-300",
+  [Progress.DEACTIVATED]: "bg-slate-300",
 };
 
 interface ResourceRequestAccordionItemProps {
