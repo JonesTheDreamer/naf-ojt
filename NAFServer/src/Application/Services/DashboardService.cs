@@ -98,7 +98,100 @@ namespace NAFServer.src.Application.Services
             return new DashboardStatsDTO(recentByStatus, beyondDeadlineCount, resourceAccessCounts);
         }
 
-        public Task<DashboardAverageTimeDTO> GetAverageTimeAsync(int? locationId)
-            => throw new NotImplementedException();
+        public async Task<DashboardAverageTimeDTO> GetAverageTimeAsync(int? locationId)
+        {
+            var cacheKey = $"dashboard:avg-time:{locationId?.ToString() ?? "all"}";
+            var options = new MemoryCacheEntryOptions()
+                .SetAbsoluteExpiration(TimeSpan.FromHours(8));
+
+            return await _cacheService.GetOrSetAsync(cacheKey, async () =>
+            {
+                // Load accomplished requests that have a completed implementation
+                var requests = await _context.ResourceRequests
+                    .Include(rr => rr.NAF)
+                    .Include(rr => rr.ResourceRequestImplementation)
+                    .Where(rr => rr.Progress == Progress.ACCOMPLISHED)
+                    .Where(rr => rr.ResourceRequestImplementation != null
+                              && rr.ResourceRequestImplementation.AccomplishedAt != null)
+                    .Where(rr => locationId == null || rr.NAF.LocationId == locationId)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                if (!requests.Any())
+                    return new DashboardAverageTimeDTO(0, null, null, null, null, null);
+
+                var requestIds = requests.Select(r => r.Id).ToList();
+
+                // Resolve approval step histories via step IDs
+                var steps = await _context.ResourceRequestApprovalSteps
+                    .Where(s => requestIds.Contains(s.ResourceRequestId))
+                    .Select(s => new { s.Id, s.ResourceRequestId })
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                var stepIdToRequestId = steps.ToDictionary(s => s.Id, s => s.ResourceRequestId);
+                var stepIdList = steps.Select(s => s.Id).ToList();
+
+                var histories = await _context.ResourceRequestApprovalStepHistories
+                    .Where(h => stepIdList.Contains(h.ResourceRequestApprovalStepId))
+                    .Select(h => new { h.ResourceRequestApprovalStepId, h.ActionAt })
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                // Group action timestamps by ResourceRequestId
+                var actionsByRequestId = histories
+                    .GroupBy(h => stepIdToRequestId[h.ResourceRequestApprovalStepId])
+                    .ToDictionary(g => g.Key, g => g.Select(h => h.ActionAt).ToList());
+
+                var overallDurations = new List<double>();
+                var openToApprovalDurations = new List<double>();
+                var approvalToScreeningDurations = new List<double>();
+                var screeningToImplDurations = new List<double>();
+                var implToAccomplishedDurations = new List<double>();
+
+                foreach (var rr in requests)
+                {
+                    var impl = rr.ResourceRequestImplementation;
+                    if (impl?.AccomplishedAt == null) continue;
+
+                    // Overall: request created → implementation accomplished
+                    overallDurations.Add((impl.AccomplishedAt.Value - rr.CreatedAt).TotalDays);
+
+                    if (actionsByRequestId.TryGetValue(rr.Id, out var actions) && actions.Any())
+                    {
+                        // Open → first approval action
+                        var firstAction = actions.Min();
+                        openToApprovalDurations.Add((firstAction - rr.CreatedAt).TotalDays);
+
+                        // Last approval action → implementation assigned (CreatedAt of impl)
+                        if (impl.CreatedAt != default(DateTime))
+                        {
+                            var lastAction = actions.Max();
+                            approvalToScreeningDurations.Add((impl.CreatedAt - lastAction).TotalDays);
+                        }
+                    }
+
+                    // Implementation assigned → accepted (start working)
+                    if (impl.CreatedAt != default(DateTime) && impl.AcceptedAt.HasValue)
+                        screeningToImplDurations.Add((impl.AcceptedAt.Value - impl.CreatedAt).TotalDays);
+
+                    // Accepted → accomplished
+                    if (impl.AcceptedAt.HasValue)
+                        implToAccomplishedDurations.Add((impl.AccomplishedAt.Value - impl.AcceptedAt.Value).TotalDays);
+                }
+
+                static double? Avg(List<double> list) =>
+                    list.Count > 0 ? Math.Round(list.Average(), 1) : null;
+
+                return new DashboardAverageTimeDTO(
+                    requests.Count,
+                    overallDurations.Count > 0 ? Math.Round(overallDurations.Average(), 1) : null,
+                    Avg(openToApprovalDurations),
+                    Avg(approvalToScreeningDurations),
+                    Avg(screeningToImplDurations),
+                    Avg(implToAccomplishedDurations)
+                );
+            }, options);
+        }
     }
 }
