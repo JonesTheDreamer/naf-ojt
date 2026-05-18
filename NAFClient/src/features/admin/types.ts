@@ -68,3 +68,24 @@ export interface AdminForScreeningItem {
   stepClaimedBy: string | null;
 }
 
+export interface ResourceAccessCountDTO {
+  resourceId: number;
+  resourceName: string;
+  count: number;
+}
+
+export interface DashboardStatsDTO {
+  recentByStatus: Record<string, AdminResourceRequestDTO[]>;
+  beyondDeadlineCount: number;
+  resourceAccessCounts: ResourceAccessCountDTO[];
+}
+
+export interface DashboardAverageTimeDTO {
+  sampleCount: number;
+  overallAvgDays: number | null;
+  openToApprovalAvgDays: number | null;
+  approvalToScreeningAvgDays: number | null;
+  screeningToImplementationAvgDays: number | null;
+  implementationToAccomplishedAvgDays: number | null;
+}
+

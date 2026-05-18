@@ -5,6 +5,8 @@ import type {
   AdminForScreeningItem,
   AdminResourceRequestDTO,
   CreateUserDTO,
+  DashboardAverageTimeDTO,
+  DashboardStatsDTO,
   ForImplementationItemDTO,
   LocationDTO,
   UserDTO,
@@ -59,6 +61,20 @@ export const adminApi = {
     api
       .get<AdminForScreeningItem[]>("/admin/resource-requests/for-screening", {
         params: { locationId },
+      })
+      .then((r) => r.data),
+
+  getDashboardStats: (locationId: number | null) =>
+    api
+      .get<DashboardStatsDTO>("/admin/dashboard/stats", {
+        params: locationId !== null ? { locationId } : {},
+      })
+      .then((r) => r.data),
+
+  getDashboardAverageTime: (locationId: number | null) =>
+    api
+      .get<DashboardAverageTimeDTO>("/admin/dashboard/average-time", {
+        params: locationId !== null ? { locationId } : {},
       })
       .then((r) => r.data),
 
