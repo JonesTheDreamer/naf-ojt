@@ -15,12 +15,18 @@ namespace NAFServer.src.API.Controllers
     {
         private readonly IAdminService _adminService;
         private readonly INAFService _nafService;
+        private readonly IDashboardService _dashboardService;
         private readonly AppDbContext _context;
 
-        public AdminController(IAdminService adminService, INAFService nafService, AppDbContext context)
+        public AdminController(
+            IAdminService adminService,
+            INAFService nafService,
+            IDashboardService dashboardService,
+            AppDbContext context)
         {
             _adminService = adminService;
             _nafService = nafService;
+            _dashboardService = dashboardService;
             _context = context;
         }
 
@@ -70,6 +76,18 @@ namespace NAFServer.src.API.Controllers
             [FromQuery][Range(1, int.MaxValue)] int page = 1)
         {
             return Ok(await _nafService.GetResourceRequestsByLocationPagedAsync(locationId, progress, page));
+        }
+
+        [HttpGet("dashboard/stats")]
+        public async Task<IActionResult> GetDashboardStats([FromQuery] int? locationId)
+        {
+            return Ok(await _dashboardService.GetStatsAsync(locationId));
+        }
+
+        [HttpGet("dashboard/average-time")]
+        public async Task<IActionResult> GetDashboardAverageTime([FromQuery] int? locationId)
+        {
+            return Ok(await _dashboardService.GetAverageTimeAsync(locationId));
         }
 
         [HttpGet("audit-trails")]
