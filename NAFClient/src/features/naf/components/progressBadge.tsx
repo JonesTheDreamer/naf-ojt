@@ -34,6 +34,10 @@ export const PROGRESS_CONFIG: Record<
     label: "Cancelled",
     className: "text-gray-400 bg-gray-50 border-gray-200",
   },
+  [Progress.DEACTIVATED]: {
+    label: "Deactivated",
+    className: "text-slate-400 bg-slate-50 border-slate-200",
+  },
 };
 
 export function ProgressBadge({
