@@ -28,10 +28,14 @@ export function DepartmentEmployeeTable({ departmentId, employees }: Props) {
     firstName: dto.firstName,
     middleName: dto.middleName ?? undefined,
     lastName: dto.lastName,
+    fullName: [dto.firstName, dto.middleName, dto.lastName].filter(Boolean).join(" "),
     status: "Active",
     company: "",
     position: dto.position,
     location: "",
+    departmentId: "",
+    departmentDesc: "",
+    departmentHead: "",
   });
 
   return (
