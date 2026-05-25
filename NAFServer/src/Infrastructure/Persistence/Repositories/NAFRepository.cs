@@ -50,7 +50,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
         {
             int pageSize = PaginationConstants.PageSize;
 
-            var employees = await _employeeRepository.GetEmployeeSubordinates(employeeId);
+            var employees = await _employeeRepository.GetSubordinatesAsync(employeeId);
             if (employees == null || !employees.Any())
             {
                 return new PagedResult<NAFDTO>

@@ -50,14 +50,9 @@ namespace NAFServer.src.Application.Services
 
         public async Task<List<int>> GetAdminsByLocationAsync(int locationId)
         {
-            var adminUserIds = await _context.UserRoles
+            return await _context.UserRoles
                 .Where(ur => ur.IsActive && ur.Role.Name == Roles.ADMIN)
                 .Select(ur => ur.UserId)
-                .ToListAsync();
-
-            return await _context.UserLocations
-                .Where(ul => ul.LocationId == locationId && ul.IsActive && adminUserIds.Contains(ul.UserId))
-                .Select(ul => ul.UserId)
                 .Distinct()
                 .ToListAsync();
         }

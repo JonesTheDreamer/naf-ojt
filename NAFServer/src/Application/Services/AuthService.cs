@@ -15,7 +15,6 @@ namespace NAFServer.src.Application.Services
         private readonly IConfiguration _config;
         private readonly IUserRepository _userRepository;
         private readonly IEmployeeRepository _employeeRepository;
-        private readonly IUserLocationRepository _userLocationRepository;
         private readonly IAuditQueue _auditQueue;
 
         private static readonly Roles[] InScopeRoles = [Roles.ADMIN, Roles.REQUESTOR_APPROVER, Roles.HR];
@@ -25,14 +24,12 @@ namespace NAFServer.src.Application.Services
             IConfiguration config,
             IUserRepository userRepository,
             IEmployeeRepository employeeRepository,
-            IUserLocationRepository userLocationRepository,
             IAuditQueue auditQueue
         )
         {
             _config = config;
             _userRepository = userRepository;
             _employeeRepository = employeeRepository;
-            _userLocationRepository = userLocationRepository;
             _auditQueue = auditQueue;
         }
 
@@ -123,23 +120,13 @@ namespace NAFServer.src.Application.Services
             var employee = await _employeeRepository.GetByIdAsync(employeeId)
                 ?? throw new ApplicationException($"Employee record not found for '{employeeId}'. Contact your administrator.");
 
-            int locationId = 0;
-            string location = "";
-            try
-            {
-                var userLocation = await _userLocationRepository.GetUserActiveLocation(user.Id);
-                locationId = userLocation.LocationId;
-                location = userLocation.Location?.Name ?? "";
-            }
-            catch (KeyNotFoundException) { }
-
             return new AuthUserDTO(
                 employeeId,
                 activeRole,
                 roles.Select(r => r.ToString()).ToArray(),
                 $"{employee.FirstName} {employee.LastName}",
-                locationId,
-                location
+                0,
+                ""
             );
         }
     }

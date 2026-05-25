@@ -8,13 +8,10 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
     public class UserRepository : IUserRepository
     {
         private readonly AppDbContext _context;
-        //private readonly CacheService _cacheService;
-        //private readonly string cacheKey = "user_";
 
         public UserRepository(AppDbContext context)
         {
             _context = context;
-            //_cacheService = cacheService;
         }
 
         public async Task<List<User>> GetAllAsync()
@@ -26,7 +23,6 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
         {
             return await _context.Users
                 .Include(u => u.Employee)
-                .Where(u => u.UserLocations.Any(ul => ul.LocationId == locationId && ul.IsActive))
                 .ToListAsync();
         }
 
@@ -42,44 +38,11 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
         {
             return await _context.Users
                 .Include(u => u.Employee)
-
-                .Include(u => u.UserLocations
-                    .Where(ul => ul.IsActive))
-                    .ThenInclude(ul => ul.Location)
-
                 .Include(u => u.UserRoles
                     .Where(ur => ur.IsActive))
                     .ThenInclude(ur => ur.Role)
-
-                .Include(u => u.UserDepartments
-                    .Where(ud => ud.IsActive))
-                    .ThenInclude(ud => ud.Department)
-
-                .FirstOrDefaultAsync(u => u.EmployeeNumber == employeeId) ?? throw new KeyNotFoundException("User not found"); ;
-        }
-
-        public async Task<User> SetUserToInactive(int userId)
-        {
-            var user = await _context.Users
-                .Include(u => u.Employee)
-                .FirstOrDefaultAsync(u => u.Id == userId)
-                ?? throw new KeyNotFoundException($"User {userId} not found");
-
-            user.SetUserToInactive();
-            await _context.SaveChangesAsync();
-            return user;
-        }
-
-        public async Task<User> SetUserToActive(int userId)
-        {
-            var user = await _context.Users
-                .Include(u => u.Employee)
-                .FirstOrDefaultAsync(u => u.Id == userId)
-                ?? throw new KeyNotFoundException($"User {userId} not found");
-
-            user.SetUserToActive();
-            await _context.SaveChangesAsync();
-            return user;
+                .FirstOrDefaultAsync(u => u.EmployeeNumber == employeeId)
+                ?? throw new KeyNotFoundException("User not found");
         }
 
         public async Task<User> AddAsync(User user)
@@ -89,18 +52,11 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             return user;
         }
 
-        //public async Task<User>
-
         public async Task<User> GetNetworkAdminOfLocation(int locationId)
         {
             return await _context.Users
                 .Include(u => u.Employee)
-                .Where
-                (
-                    u =>
-                    u.UserLocations.Any(l => l.LocationId == locationId) &&
-                    u.UserRoles.Any(r => r.Role.Name == Roles.ADMIN && r.DateRemoved == null)
-                )
+                .Where(u => u.UserRoles.Any(r => r.Role.Name == Roles.ADMIN && r.DateRemoved == null))
                 .FirstAsync();
         }
 
@@ -109,7 +65,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             return await _context.Users
                 .Include(u => u.Employee)
                 .FirstOrDefaultAsync(u => u.EmployeeNumber == employeeNumber)
-                ?? throw new KeyNotFoundException($"User not found");
+                ?? throw new KeyNotFoundException("User not found");
         }
 
         public async Task<User?> GetFirstUserWithRoleAsync(string roleName)

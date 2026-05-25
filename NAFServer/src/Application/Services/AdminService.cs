@@ -12,8 +12,6 @@ namespace NAFServer.src.Application.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IUserRoleRepository _userRoleRepository;
-        private readonly IUserLocationRepository _userLocationRepository;
-        private readonly IUserDepartmentRepository _userDepartmentRepository;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly INotificationService _notificationService;
@@ -22,8 +20,6 @@ namespace NAFServer.src.Application.Services
         public AdminService(
             IUserRepository userRepository,
             IUserRoleRepository userRoleRepository,
-            IUserLocationRepository userLocationRepository,
-            IUserDepartmentRepository userDepartmentRepository,
             IEmployeeRepository employeeRepository,
             IRoleRepository roleRepository,
             INotificationService notificationService,
@@ -31,8 +27,6 @@ namespace NAFServer.src.Application.Services
         {
             _userRepository = userRepository;
             _userRoleRepository = userRoleRepository;
-            _userLocationRepository = userLocationRepository;
-            _userDepartmentRepository = userDepartmentRepository;
             _employeeRepository = employeeRepository;
             _roleRepository = roleRepository;
             _notificationService = notificationService;
@@ -41,20 +35,11 @@ namespace NAFServer.src.Application.Services
 
         public async Task<List<UserDTO>> GetAllUsersInLocationAsync(int locationId)
         {
-            List<UserLocation> userLocations;
-            try
-            {
-                userLocations = await _userLocationRepository.GetUserLocationsByLocationIdAsync(locationId);
-            }
-            catch (KeyNotFoundException)
-            {
-                return new List<UserDTO>();
-            }
-
+            var users = await _userRepository.GetAllAsync();
             var result = new List<UserDTO>();
-            foreach (var ul in userLocations.Where(ul => ul.IsActive))
+
+            foreach (var user in users)
             {
-                var user = ul.User;
                 var employee = await _employeeRepository.GetByIdAsync(user.EmployeeNumber);
                 if (employee == null) continue;
 
@@ -68,13 +53,6 @@ namespace NAFServer.src.Application.Services
                     activeRoles = new List<UserRole>();
                 }
 
-                UserDepartment? activeDept = null;
-                try
-                {
-                    activeDept = await _userDepartmentRepository.GetUserActiveDepartment(user.Id);
-                }
-                catch (KeyNotFoundException) { }
-
                 result.Add(new UserDTO(
                     user.Id,
                     user.EmployeeNumber,
@@ -83,10 +61,10 @@ namespace NAFServer.src.Application.Services
                     employee.MiddleName,
                     employee.Company,
                     employee.Position ?? "",
-                    activeDept?.DepartmentId ?? 0,
-                    activeDept?.Department?.Name ?? "",
-                    ul.LocationId,
-                    ul.Location?.Name ?? "",
+                    0,
+                    "",
+                    locationId,
+                    "",
                     activeRoles.Select(r => r.Role.Name.ToString()).ToList()
                 ));
             }
@@ -111,12 +89,6 @@ namespace NAFServer.src.Application.Services
                 user = new User(employeeId);
                 await _userRepository.AddAsync(user);
             }
-
-            try
-            {
-                await _userLocationRepository.AddUserCurrentLocation(user.Id, dto.LocationId);
-            }
-            catch (KeyNotFoundException) { }
 
             try
             {
