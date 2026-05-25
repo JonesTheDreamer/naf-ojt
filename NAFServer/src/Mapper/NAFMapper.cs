@@ -9,6 +9,22 @@ using NAFServer.src.Mapper.Helper;
 
 public static class NAFMapper
 {
+    public static EmployeeDTO ToEmployeeDTO(Employee e) => new(
+        e.Id,
+        e.FirstName,
+        e.MiddleName,
+        e.LastName,
+        e.FullName,
+        e.Status,
+        e.Company,
+        e.Position,
+        e.Location,
+        e.SupervisorId,
+        e.DepartmentId,
+        e.DepartmentDesc,
+        e.DepartmentHead
+    );
+
     public static NAFDTO ToDTO(NAF naf, Employee emp) => ToDTO(naf, emp, null);
 
     public static NAFDTO ToDTO(NAF naf, Employee emp, Dictionary<string, Employee>? approvers)

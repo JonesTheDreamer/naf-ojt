@@ -10,5 +10,6 @@ namespace NAFServer.src.Domain.Interface.Repository
         Task<List<Employee>> SearchAsync(string match);
         Task<List<Employee>> GetByDepartmentAsync(string departmentId);
         Task<DepartmentView?> GetDepartmentByIdAsync(string departmentId);
+        Task<List<DepartmentView>> GetAllDepartmentsAsync();
     }
 }
