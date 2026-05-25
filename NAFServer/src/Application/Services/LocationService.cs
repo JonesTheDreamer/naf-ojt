@@ -1,4 +1,4 @@
-﻿using NAFServer.src.Domain.Entities;
+using NAFServer.src.Domain.Entities;
 using NAFServer.src.Domain.Interface.Repository;
 using NAFServer.src.Infrastructure.Persistence;
 
@@ -25,29 +25,19 @@ namespace NAFServer.src.Application.Services
             _context = context;
         }
 
-        public async Task<Location> CreateAsync(string name)
-        {
-            return await _locationRepository.CreateAsync(name);
-        }
+        public Task<Location> CreateAsync(string name)
+            => _locationRepository.CreateAsync(name);
 
-        public async Task<List<Location>> GetAllAsync()
-        {
-            return await _locationRepository.GetAllAsync();
-        }
+        public Task<List<Location>> GetAllAsync()
+            => _locationRepository.GetAllAsync();
 
-        public async Task<Location> GetByIdAsync(int locationId)
-        {
-            return await _locationRepository.GetByIdAsync(locationId);
-        }
+        public Task<Location?> GetByIdAsync(int locationId)
+            => _locationRepository.GetByIdAsync(locationId);
 
-        public async Task<Location> GetByNameAsync(string name)
-        {
-            return await _locationRepository.GetByNameAsync(name);
-        }
+        public Task<Location?> GetByNameAsync(string name)
+            => _locationRepository.GetByNameAsync(name);
 
-        public Task<List<Location>> RecacheAllAsync()
-        {
-            throw new NotImplementedException();
-        }
+        public Task<Location> UpdateAllowWeekendAsync(int id, bool allowWeekend)
+            => _locationRepository.UpdateAllowWeekendAsync(id, allowWeekend);
     }
 }

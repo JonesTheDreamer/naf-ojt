@@ -1,9 +1,9 @@
-﻿namespace NAFServer.src.Application.DTOs.Location
+namespace NAFServer.src.Application.DTOs.Location
 {
-    public record LocationDTO
-    (
+    public record LocationDTO(
         int Id,
         string Name,
-        bool IsActive
+        bool IsActive,
+        bool AllowWeekendDateNeeded
     );
 }

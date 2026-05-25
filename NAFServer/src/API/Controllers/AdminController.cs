@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using NAFServer.src.Application.DTOs.Admin;
 using NAFServer.src.Application.Interfaces;
 using NAFServer.src.Infrastructure.Persistence;
+using NAFServer.src.Infrastructure.Persistence.HostedServices;
 using System.ComponentModel.DataAnnotations;
 
 namespace NAFServer.src.API.Controllers
@@ -88,6 +89,13 @@ namespace NAFServer.src.API.Controllers
         public async Task<IActionResult> GetDashboardAverageTime([FromQuery] int? locationId)
         {
             return Ok(await _dashboardService.GetAverageTimeAsync(locationId));
+        }
+
+        [HttpPost("cache/refresh")]
+        public async Task<IActionResult> RefreshCache([FromServices] EmployeeCacheHostedService cacheService)
+        {
+            await cacheService.RefreshAsync();
+            return NoContent();
         }
 
         [HttpGet("audit-trails")]

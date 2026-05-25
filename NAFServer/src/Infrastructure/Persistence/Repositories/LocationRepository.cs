@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using NAFServer.src.Domain.Entities;
 using NAFServer.src.Domain.Interface.Repository;
 using NAFServer.src.Infrastructure.Helper;
@@ -22,10 +22,16 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             _cache.GetOrSetAsync(AllKey, () => _context.Locations.ToListAsync(),
                 new() { AbsoluteExpirationRelativeToNow = Ttl });
 
-        public async Task<List<Location>> RecacheAllAsync()
+        public async Task<Location?> GetByIdAsync(int id)
         {
-            _cache.Remove(AllKey);
-            return await GetAllAsync();
+            var locations = await GetAllAsync();
+            return locations.FirstOrDefault(l => l.Id == id);
+        }
+
+        public async Task<Location?> GetByNameAsync(string name)
+        {
+            var locations = await GetAllAsync();
+            return locations.FirstOrDefault(l => l.Name == name);
         }
 
         public async Task<Location> CreateAsync(string name)
@@ -37,18 +43,14 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             return entity;
         }
 
-        public async Task<Location> GetByIdAsync(int id)
+        public async Task<Location> UpdateAllowWeekendAsync(int id, bool allowWeekend)
         {
-            var locations = await GetAllAsync();
-            return locations.FirstOrDefault(l => l.Id == id)
-                ?? throw new KeyNotFoundException("Location not found");
-        }
-
-        public async Task<Location> GetByNameAsync(string name)
-        {
-            var locations = await GetAllAsync();
-            return locations.FirstOrDefault(l => l.Name == name)
-                ?? throw new KeyNotFoundException("Location not found");
+            var location = await _context.Locations.FindAsync(id)
+                ?? throw new KeyNotFoundException($"Location {id} not found.");
+            location.AllowWeekendDateNeeded = allowWeekend;
+            await _context.SaveChangesAsync();
+            _cache.Remove(AllKey);
+            return location;
         }
     }
 }
