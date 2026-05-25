@@ -184,6 +184,7 @@ export function AddResourceDialog({ naf, open, onOpenChange }: AddResourceDialog
                 availableBasic={availableBasic}
                 basicResources={basicResources}
                 onChange={setBasicResources}
+                locationId={naf.locationId ?? undefined}
               />
             )}
 
@@ -193,6 +194,7 @@ export function AddResourceDialog({ naf, open, onOpenChange }: AddResourceDialog
                 basicResources={specialResources}
                 onChange={setSpecialResources}
                 requiresPurpose
+                locationId={naf.locationId ?? undefined}
               />
             )}
 

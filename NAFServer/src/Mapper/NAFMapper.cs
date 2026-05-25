@@ -38,6 +38,7 @@ public static class NAFMapper
             naf.CreatedAt,
             naf.UpdatedAt,
             naf.DepartmentId.ToString(),
+            naf.LocationId,
             naf.ResourceRequests.Select(rr =>
             {
 

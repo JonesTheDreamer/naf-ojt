@@ -13,6 +13,7 @@ export interface NAF extends Entity<string> {
   createdAt: string;
   updatedAt: string;
   departmentId: string;
+  locationId: number;
   resourceRequests: ResourceRequest[];
 }
 

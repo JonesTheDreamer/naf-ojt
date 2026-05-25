@@ -1,6 +1,8 @@
 import { api } from "@/shared/api/client";
 import type { NAF } from "@/shared/types/api/naf";
 import type { PagedResult } from "@/shared/types/common/pagedResult";
+import type { Location } from "@/shared/types/api/location";
+import type { ResourceRequestAllowance } from "@/shared/types/api/resourceRequestAllowance";
 import type {
   AdminForScreeningItem,
   AdminResourceRequestDTO,
@@ -102,4 +104,10 @@ export const adminApi = {
 
   setToAccomplished: (implementationId: string) =>
     api.patch(`/implementations/${implementationId}/accomplished`).then((r) => r.data),
+
+  getAdminLocations: () =>
+    api.get<Location[]>("/admin/locations").then((r) => r.data),
+
+  getAllowances: () =>
+    api.get<ResourceRequestAllowance[]>("/admin/resource-allowances").then((r) => r.data),
 };

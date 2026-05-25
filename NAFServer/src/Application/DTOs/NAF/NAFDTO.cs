@@ -16,6 +16,7 @@ namespace NAFServer.src.Application.DTOs.NAF
         DateTime CreatedAt,
         DateTime UpdatedAt,
         string DepartmentId,
+        int LocationId,
         List<ResourceRequestDTO> ResourceRequests
     );
 }
