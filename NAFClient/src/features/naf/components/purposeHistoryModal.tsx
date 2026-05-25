@@ -32,7 +32,7 @@ export function PurposeHistoryModal({
             reasonForRejection: h.reasonForRejection,
             actionAt: h.actionAt,
             approverId: step.approverId,
-            approverName: step.approverName,
+            approverName: step.approver?.name ?? null,
             stepOrder: step.stepOrder,
           },
         ]),

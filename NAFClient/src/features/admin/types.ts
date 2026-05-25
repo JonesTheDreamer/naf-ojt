@@ -82,10 +82,10 @@ export interface DashboardStatsDTO {
 
 export interface DashboardAverageTimeDTO {
   sampleCount: number;
-  overallAvgDays: number | null;
-  openToApprovalAvgDays: number | null;
-  approvalToScreeningAvgDays: number | null;
-  screeningToImplementationAvgDays: number | null;
-  implementationToAccomplishedAvgDays: number | null;
+  overallAvgMinutes: number | null;
+  openToApprovalAvgMinutes: number | null;
+  approvalToScreeningAvgMinutes: number | null;
+  screeningToImplementationAvgMinutes: number | null;
+  implementationToAccomplishedAvgMinutes: number | null;
 }
 

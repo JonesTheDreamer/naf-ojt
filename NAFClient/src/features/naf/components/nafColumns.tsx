@@ -54,10 +54,10 @@ function RequestBadges({ requests }: { requests: ResourceRequest[] }) {
           className="inline-flex items-center justify-center px-3 py-0.5 rounded-full text-xs font-medium w-fit min-w-[70px] text-center"
           style={{
             backgroundColor: req.resource.color
-              ? `#${req.resource.color}`
+              ? `${req.resource.color}`
               : "#93c5fd",
             color: getContrastColor(
-              req.resource.color ? `#${req.resource.color}` : "#93c5fd",
+              req.resource.color ? `${req.resource.color}` : "#93c5fd",
             ),
           }}
         >

@@ -2,13 +2,16 @@
 using NAFServer.src.Application.DTOs.ResourceRequestApprovalStep;
 using NAFServer.src.Application.DTOs.ResourceRequestApprovalStepHistory;
 using NAFServer.src.Domain.Entities;
+using NAFServer.src.Domain.Enums;
 using NAFServer.src.Mapper.Helper;
 
 namespace NAFServer.src.Mapper
 {
     public class ResourceRequestMapper
     {
-        public static ResourceRequestDTO ToDTO(ResourceRequest rr)
+        public static ResourceRequestDTO ToDTO(ResourceRequest rr) => ToDTO(rr, null);
+
+        public static ResourceRequestDTO ToDTO(ResourceRequest rr, Dictionary<string, Employee>? approvers)
         {
             return new ResourceRequestDTO(
                      rr.Id,
@@ -52,7 +55,9 @@ namespace NAFServer.src.Mapper
                              s.StepOrder,
                              s.StepAction,
                              s.ApproverId,
-                             null,
+                             s.ApproverId is not null && approvers?.TryGetValue(s.ApproverId, out var approver) == true
+                                 ? new EmployeeApproverDTO($"{approver.FirstName} {approver.LastName}".Trim(), approver.Location ?? "", approver.DepartmentDesc)
+                                 : s.StepAction == StepAction.FOR_SCREENING ? new EmployeeApproverDTO("Technical Team", "", null) : null,
                              s.Progress,
                              s.ApprovedAt,
                              s.Histories

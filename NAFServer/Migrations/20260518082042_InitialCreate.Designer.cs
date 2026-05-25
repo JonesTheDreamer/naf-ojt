@@ -12,8 +12,8 @@ using NAFServer.src.Infrastructure.Persistence;
 namespace NAFServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260518051734_AddDeactivatedProgress")]
-    partial class AddDeactivatedProgress
+    [Migration("20260518082042_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

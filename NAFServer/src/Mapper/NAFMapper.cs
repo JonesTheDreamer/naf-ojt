@@ -11,7 +11,7 @@ public static class NAFMapper
 {
     public static NAFDTO ToDTO(NAF naf, Employee emp) => ToDTO(naf, emp, null);
 
-    public static NAFDTO ToDTO(NAF naf, Employee emp, Dictionary<string, string>? approverNames)
+    public static NAFDTO ToDTO(NAF naf, Employee emp, Dictionary<string, Employee>? approvers)
     {
         return new NAFDTO(
             naf.Id,
@@ -86,9 +86,9 @@ public static class NAFMapper
                         s.StepOrder,
                         s.StepAction,
                         s.ApproverId,
-                        s.ApproverId is not null
-                            ? approverNames?.GetValueOrDefault(s.ApproverId)
-                            : s.StepAction == StepAction.FOR_SCREENING ? "Technical Team" : null,
+                        s.ApproverId is not null && approvers?.TryGetValue(s.ApproverId, out var approver) == true
+                            ? new EmployeeApproverDTO($"{approver.FirstName} {approver.LastName}".Trim(), approver.Location ?? "", approver.DepartmentDesc)
+                            : s.StepAction == StepAction.FOR_SCREENING ? new EmployeeApproverDTO("Technical Team", "", null) : null,
                         s.Progress,
                         s.ApprovedAt,
                         s.Histories.Select(h => new ResourceRequestApprovalStepHistoryDTO(

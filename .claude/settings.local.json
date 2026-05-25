@@ -45,7 +45,10 @@
       "PowerShell(Remove-Item *)",
       "Bash(Select-String -Pattern \"error CS\")",
       "PowerShell(dotnet tool list *)",
-      "PowerShell(grep *)"
+      "PowerShell(grep *)",
+      "Skill(superpowers:writing-plans)",
+      "Skill(superpowers:subagent-driven-development)",
+      "Skill(superpowers:verification-before-completion)"
     ]
   }
 }

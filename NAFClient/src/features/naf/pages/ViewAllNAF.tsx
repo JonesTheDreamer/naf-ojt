@@ -1,7 +1,6 @@
 import { useState, useCallback } from "react";
 import { useEmployeeNAF } from "../hooks/useNAF";
 import RequestorLayout from "@/components/layout/RequestorLayout";
-import { CreateNAFDialog } from "../components/createNAFDialog";
 import type { Employee } from "@/shared/types/api/employee";
 import NAFListPage from "../components/nafList";
 import type { PagedResult } from "@/shared/types/common/pagedResult";
@@ -64,9 +63,9 @@ export default function ViewAllNAF() {
         <p className="text-2xl text-amber-500 font-bold">
           Network Access Forms
         </p>
-        <div>
+        {/* <div>
           <CreateNAFDialog />
-        </div>
+        </div> */}
       </div>
 
       <NAFListPage

@@ -1,14 +1,31 @@
 import { useState } from "react";
-import { ChevronDown, ChevronRight, CheckCircle2, Eye, User } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronRight,
+  CheckCircle2,
+  Eye,
+  User,
+} from "lucide-react";
 import type { WorkflowTemplateVersion } from "../types";
 
 interface WorkflowTemplateVersionsProps {
   versions: WorkflowTemplateVersion[];
 }
 
-const ACTION_CONFIG: Record<string, { label: string; icon: typeof CheckCircle2; color: string }> = {
-  APPROVER: { label: "Approval", icon: CheckCircle2, color: "text-emerald-600 bg-emerald-50 border-emerald-200" },
-  FOR_SCREENING: { label: "Screening", icon: Eye, color: "text-blue-600 bg-blue-50 border-blue-200" },
+const ACTION_CONFIG: Record<
+  string,
+  { label: string; icon: typeof CheckCircle2; color: string }
+> = {
+  APPROVER: {
+    label: "Approval",
+    icon: CheckCircle2,
+    color: "text-emerald-600 bg-emerald-50 border-emerald-200",
+  },
+  FOR_SCREENING: {
+    label: "Screening",
+    icon: Eye,
+    color: "text-blue-600 bg-blue-50 border-blue-200",
+  },
 };
 
 const ROLE_LABELS: Record<string, string> = {
@@ -18,15 +35,19 @@ const ROLE_LABELS: Record<string, string> = {
   TECHNICAL_HEAD: "Tech Head",
 };
 
-export function WorkflowTemplateVersions({ versions }: WorkflowTemplateVersionsProps) {
+export function WorkflowTemplateVersions({
+  versions,
+}: WorkflowTemplateVersionsProps) {
   const [expanded, setExpanded] = useState<Set<string>>(
-    new Set(versions.filter((v) => v.isActive).map((v) => v.id))
+    new Set(versions.filter((v) => v.isActive).map((v) => v.id)),
   );
 
   if (versions.length === 0) {
     return (
       <div className="rounded-xl border border-dashed px-5 py-8 text-center">
-        <p className="text-sm text-muted-foreground">No workflow templates defined.</p>
+        <p className="text-sm text-muted-foreground">
+          No workflow templates defined.
+        </p>
       </div>
     );
   }
@@ -61,7 +82,9 @@ export function WorkflowTemplateVersions({ versions }: WorkflowTemplateVersionsP
                 </span>
                 <div className="text-left">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold">Version {v.version}</span>
+                    <span className="text-sm font-semibold">
+                      Version {v.version}
+                    </span>
                     {v.isActive && (
                       <span className="text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-full bg-amber-500 text-white">
                         Active
@@ -89,10 +112,14 @@ export function WorkflowTemplateVersions({ versions }: WorkflowTemplateVersionsP
 
                   <div className="space-y-3">
                     {v.steps.map((s) => {
-                      const config = ACTION_CONFIG[s.stepAction] ?? ACTION_CONFIG.APPROVER;
+                      const config =
+                        ACTION_CONFIG[s.stepAction] ?? ACTION_CONFIG.APPROVER;
                       const Icon = config.icon;
                       return (
-                        <div key={s.stepOrder} className="flex items-start gap-3 relative">
+                        <div
+                          key={s.stepOrder}
+                          className="flex items-start gap-3 relative"
+                        >
                           {/* Node */}
                           <div
                             className={`flex items-center justify-center w-7 h-7 rounded-full border-2 text-xs font-bold shrink-0 bg-white z-10
@@ -104,17 +131,22 @@ export function WorkflowTemplateVersions({ versions }: WorkflowTemplateVersionsP
                           {/* Card */}
                           <div className="flex-1 rounded-lg border bg-white px-3 py-2 flex items-center justify-between gap-3">
                             <div className="flex items-center gap-2 min-w-0">
-                              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-semibold uppercase tracking-wide shrink-0 ${config.color}`}>
+                              <span
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[10px] font-semibold uppercase tracking-wide shrink-0 ${config.color}`}
+                              >
                                 <Icon className="h-3 w-3" />
                                 {config.label}
                               </span>
                               <span className="text-xs text-muted-foreground truncate">
-                                {ROLE_LABELS[s.approverRole] ?? s.approverRole.replace(/_/g, " ")}
+                                {ROLE_LABELS[s.approverRole] ??
+                                  s.approverRole.replace(/_/g, " ")}
                               </span>
                             </div>
                             <div className="flex items-center gap-1.5 shrink-0">
                               <User className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-xs font-medium truncate max-w-32">{s.approverEntity || "—"}</span>
+                              <span className="text-xs font-medium truncate max-w-32">
+                                {s.approverEntity || ""}
+                              </span>
                             </div>
                           </div>
                         </div>

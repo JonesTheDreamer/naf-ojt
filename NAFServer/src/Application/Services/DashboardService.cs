@@ -1,11 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using NAFServer.src.Application.DTOs.Admin;
 using NAFServer.src.Application.Interfaces;
 using NAFServer.src.Domain.Enums;
 using NAFServer.src.Domain.Interface.Repository;
 using NAFServer.src.Infrastructure.Helper;
 using NAFServer.src.Infrastructure.Persistence;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace NAFServer.src.Application.Services
 {
@@ -115,6 +115,7 @@ namespace NAFServer.src.Application.Services
                               && rr.ResourceRequestImplementation.AccomplishedAt != null)
                     .Where(rr => locationId == null || rr.NAF.LocationId == locationId)
                     .AsNoTracking()
+                    .Take(50)
                     .ToListAsync();
 
                 if (!requests.Any())
@@ -154,38 +155,33 @@ namespace NAFServer.src.Application.Services
                     var impl = rr.ResourceRequestImplementation;
                     if (impl?.AccomplishedAt == null) continue;
 
-                    // Overall: request created → implementation accomplished
-                    overallDurations.Add((impl.AccomplishedAt.Value - rr.CreatedAt).TotalDays);
+                    overallDurations.Add((impl.AccomplishedAt.Value - rr.CreatedAt).TotalMinutes);
 
                     if (actionsByRequestId.TryGetValue(rr.Id, out var actions) && actions.Any())
                     {
-                        // Open → first approval action
                         var firstAction = actions.Min();
-                        openToApprovalDurations.Add((firstAction - rr.CreatedAt).TotalDays);
+                        openToApprovalDurations.Add((firstAction - rr.CreatedAt).TotalMinutes);
 
-                        // Last approval action → implementation assigned (CreatedAt of impl)
-                        if (impl.CreatedAt != default(DateTime))
+                        if (impl.AcceptedAt.HasValue)
                         {
                             var lastAction = actions.Max();
-                            approvalToScreeningDurations.Add((impl.CreatedAt - lastAction).TotalDays);
+                            approvalToScreeningDurations.Add((impl.AcceptedAt.Value - lastAction).TotalMinutes);
                         }
                     }
 
-                    // Implementation assigned → accepted (start working)
                     if (impl.CreatedAt != default(DateTime) && impl.AcceptedAt.HasValue)
-                        screeningToImplDurations.Add((impl.AcceptedAt.Value - impl.CreatedAt).TotalDays);
+                        screeningToImplDurations.Add((impl.AcceptedAt.Value - impl.CreatedAt).TotalMinutes);
 
-                    // Accepted → accomplished
                     if (impl.AcceptedAt.HasValue)
-                        implToAccomplishedDurations.Add((impl.AccomplishedAt.Value - impl.AcceptedAt.Value).TotalDays);
+                        implToAccomplishedDurations.Add((impl.AccomplishedAt.Value - impl.AcceptedAt.Value).TotalMinutes);
                 }
 
                 static double? Avg(List<double> list) =>
-                    list.Count > 0 ? Math.Round(list.Average(), 1) : null;
+                    list.Count > 0 ? Math.Round(list.Average()) : null;
 
                 return new DashboardAverageTimeDTO(
                     requests.Count,
-                    overallDurations.Count > 0 ? Math.Round(overallDurations.Average(), 1) : null,
+                    overallDurations.Count > 0 ? Math.Round(overallDurations.Average()) : null,
                     Avg(openToApprovalDurations),
                     Avg(approvalToScreeningDurations),
                     Avg(screeningToImplDurations),

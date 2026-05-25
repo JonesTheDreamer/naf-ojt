@@ -5,6 +5,7 @@ using NAFServer.src.Application.DTOs.ResourceRequest;
 using NAFServer.src.Application.Handlers.Interface;
 using NAFServer.src.Application.Interfaces;
 using NAFServer.src.Domain.Entities;
+using NAFServer.src.Domain.Enums;
 using NAFServer.src.Domain.Interface.Repository;
 using NAFServer.src.Infrastructure.Persistence;
 using static NAFServer.src.Application.DTOs.Common.PaginatedDTO;
@@ -124,15 +125,15 @@ namespace NAFServer.src.Application.Services
                 .Distinct()
                 .ToList();
 
-            var approverNames = new Dictionary<string, string>();
+            var approvers = new Dictionary<string, Employee>();
             foreach (var approverId in approverIds)
             {
                 var approver = await _employeeRepository.GetByIdAsync(approverId!);
                 if (approver != null)
-                    approverNames[approverId!] = $"{approver.FirstName} {approver.LastName}".Trim();
+                    approvers[approverId!] = approver;
             }
 
-            return NAFMapper.ToDTO(naf, user.Employee, approverNames);
+            return NAFMapper.ToDTO(naf, user.Employee, approvers);
         }
 
         public async Task<NAFDTO> CreateAsync(CreateNAFRequestDTO request)
@@ -390,7 +391,12 @@ namespace NAFServer.src.Application.Services
                 .Include(rr => rr.Resource)
                 .Where(rr => rr.NAF.LocationId == locationId);
 
-            if (!string.Equals(progress, "all", StringComparison.OrdinalIgnoreCase)
+            if (string.Equals(progress, "beyond_deadline", StringComparison.OrdinalIgnoreCase))
+            {
+                var today = DateTime.Today;
+                query = query.Where(rr => rr.DateNeeded != null && rr.DateNeeded != default(DateTime) && rr.DateNeeded < today && rr.Progress != Progress.ACCOMPLISHED);
+            }
+            else if (!string.Equals(progress, "all", StringComparison.OrdinalIgnoreCase)
                 && Enum.TryParse<Domain.Enums.Progress>(progress, ignoreCase: true, out var parsedProgress))
             {
                 query = query.Where(rr => rr.Progress == parsedProgress);

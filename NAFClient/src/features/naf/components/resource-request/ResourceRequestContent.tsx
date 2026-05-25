@@ -412,8 +412,15 @@ export function ApprovalStepsBlock({
                           : "text-foreground",
                       )}
                     >
-                      {step.approverName ?? step.approverId ?? "—"}
+                      {step.approver?.name ?? step.approverId ?? "—"}
                     </p>
+                    {step.approver && (step.approver.location || step.approver.department) && (
+                      <p className="text-[10px] text-muted-foreground truncate">
+                        {[step.approver.location, step.approver.department]
+                          .filter(Boolean)
+                          .join(" · ")}
+                      </p>
+                    )}
                     <p className="text-[10px] text-muted-foreground">
                       {isUnclaimedScreening
                         ? `${actionLabel} · Awaiting claim`

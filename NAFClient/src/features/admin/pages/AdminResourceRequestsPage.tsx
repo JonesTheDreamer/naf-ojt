@@ -20,6 +20,7 @@ const PROGRESS_TABS = [
   { label: "Accomplished", value: "ACCOMPLISHED" },
   { label: "Rejected", value: "REJECTED" },
   { label: "Cancelled", value: "CANCELLED" },
+  { label: "Beyond Deadline", value: "beyond_deadline" },
 ] as const;
 
 export default function AdminResourceRequestsPage() {
@@ -76,19 +77,27 @@ export default function AdminResourceRequestsPage() {
           </div>
 
           <div className="flex gap-1.5 flex-wrap px-5 py-3 border-b border-border">
-            {PROGRESS_TABS.map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => handleProgressChange(tab.value)}
-                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
-                  progress === tab.value
-                    ? "bg-amber-500 text-white"
-                    : "bg-muted text-muted-foreground hover:bg-muted/80"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
+            {PROGRESS_TABS.map((tab) => {
+              const isDeadline = tab.value === "beyond_deadline";
+              const isActive = progress === tab.value;
+              return (
+                <button
+                  key={tab.value}
+                  onClick={() => handleProgressChange(tab.value)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                    isActive
+                      ? isDeadline
+                        ? "bg-red-500 text-white"
+                        : "bg-amber-500 text-white"
+                      : isDeadline
+                        ? "bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-950/30 dark:text-red-400 dark:hover:bg-red-950/50"
+                        : "bg-muted text-muted-foreground hover:bg-muted/80"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
 
           <div className="p-4 space-y-4">

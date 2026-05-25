@@ -20,28 +20,34 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
             );
             await context.SaveChangesAsync();
 
-            var computer = new Resource("Computer", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/4372/4372820.png", false, false);
-            var laptop = new Resource("Laptop", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/4372/4372820.png", false, false);
-            var commonPc = new Resource("Common PC", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/4372/4372820.png", false, false);
-            var printerBlackAndWhite = new Resource("Printer Access (Black and White)", "B4FF9F", "https://images.vexels.com/media/users/3/136620/isolated/preview/0092395e0d1009ae4190b2ca7b941793-print-printer-icon.png", false, false);
-            var activeDirectory = new Resource("Active Directory", "FFD59E", "https://cdn-icons-png.flaticon.com/512/1383/1383970.png", false, false);
+            var computer = new Resource("Computer", "#B4FF9F", "https://cdn-icons-png.flaticon.com/512/4372/4372820.png", false, false);
+            var laptop = new Resource("Laptop", "#B4FF9F", "https://cdn-icons-png.flaticon.com/512/4372/4372820.png", false, false);
+            var commonPc = new Resource("Common PC", "#B4FF9F", "https://cdn-icons-png.flaticon.com/512/4372/4372820.png", false, false);
+            var printerBlackAndWhite = new Resource("Printer Access (Black and White)", "#B4FF9F", "https://images.vexels.com/media/users/3/136620/isolated/preview/0092395e0d1009ae4190b2ca7b941793-print-printer-icon.png", false, false);
+            var activeDirectory = new Resource("Active Directory", "#FFD59E", "https://cdn-icons-png.flaticon.com/512/1383/1383970.png", false, false);
 
-            var basicInternet = new Resource("Basic Internet", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/1006/1006771.png", false, false);
-            var specialInternet = new Resource("Special Internet", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/1006/1006771.png", true, true);
+            var basicInternet = new Resource("Basic Internet", "#B4FF9F", "https://cdn-icons-png.flaticon.com/512/1006/1006771.png", false, false);
+            var specialInternet = new Resource("Special Internet Access", "#B4FF9F", "https://cdn-icons-png.flaticon.com/512/1006/1006771.png", true, true);
+            var aiSpecialInternet = new Resource("AI Internet Access", "#B4FF9F", "https://cdn-icons-png.flaticon.com/512/1006/1006771.png", true, false);
+            var hbSpecialInternet = new Resource("High Bandwidth Internet Access", "#B4FF9F", "https://cdn-icons-png.flaticon.com/512/1006/1006771.png", true, false);
+            var ssSpecialInternet = new Resource("Social Media Internet Access", "#B4FF9F", "https://cdn-icons-png.flaticon.com/512/1006/1006771.png", true, false);
 
-            var microsoft365E1 = new Resource("Microsoft 365 (E1)", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/732/732221.png", false, false);
-            var microsoft365E3 = new Resource("Microsoft 365 (E3)", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/732/732221.png", true, false);
-            var microsoft365E5 = new Resource("Microsoft 365 (E5)", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/732/732221.png", true, false);
-            var microsoft365Business = new Resource("Microsoft 365 (Business Standard)", "B4FF9F", "https://cdn-icons-png.flaticon.com/512/732/732221.png", true, false);
+            var microsoft365E1 = new Resource("Microsoft 365 (E1)", "#B4FF9F", "https://cdn-icons-png.flaticon.com/512/732/732221.png", false, false);
+            var microsoft365E3 = new Resource("Microsoft 365 (E3)", "#B4FF9F", "https://cdn-icons-png.flaticon.com/512/732/732221.png", true, false);
+            var microsoft365E5 = new Resource("Microsoft 365 (E5)", "#B4FF9F", "https://cdn-icons-png.flaticon.com/512/732/732221.png", true, false);
+            var microsoft365Business = new Resource("Microsoft 365 (Business Standard)", "#B4FF9F", "https://cdn-icons-png.flaticon.com/512/732/732221.png", true, false);
 
-            var groupEmail = new Resource("Group Email", "F9FFA4", "https://static.vecteezy.com/system/resources/thumbnails/052/933/905/small/white-envelope-icon-with-transparent-background-png.png", true, true);
-            var sharedFolder = new Resource("Shared Folder", "FFD59E", "https://cdn-icons-png.flaticon.com/512/1383/1383970.png", true, true);
+            var groupEmail = new Resource("Group Email", "#F9FFA4", "https://static.vecteezy.com/system/resources/thumbnails/052/933/905/small/white-envelope-icon-with-transparent-background-png.png", true, true);
+            var sharedFolder = new Resource("Shared Folder", "#FFD59E", "https://cdn-icons-png.flaticon.com/512/1383/1383970.png", true, true);
 
             computer.AssignToGroup(hardwareResourceGroup.Id);
             laptop.AssignToGroup(hardwareResourceGroup.Id);
             commonPc.AssignToGroup(hardwareResourceGroup.Id);
 
             basicInternet.AssignToGroup(internetResourceGroup.Id);
+            aiSpecialInternet.AssignToGroup(internetResourceGroup.Id);
+            ssSpecialInternet.AssignToGroup(internetResourceGroup.Id);
+            hbSpecialInternet.AssignToGroup(internetResourceGroup.Id);
             specialInternet.AssignToGroup(internetResourceGroup.Id);
 
             microsoft365E1.AssignToGroup(microsoft365ResourceGroup.Id);
@@ -58,6 +64,9 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
 
                 basicInternet,
                 specialInternet,
+                aiSpecialInternet,
+                hbSpecialInternet,
+                ssSpecialInternet,
 
                 microsoft365E1,
                 microsoft365E3,
@@ -69,7 +78,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
             );
             await context.SaveChangesAsync();
 
-            var specialResources = new List<Resource> { specialInternet, groupEmail, sharedFolder, microsoft365E3, microsoft365E5, microsoft365Business };
+            var specialResources = new List<Resource> { aiSpecialInternet, hbSpecialInternet, ssSpecialInternet, specialInternet, groupEmail, sharedFolder, microsoft365E3, microsoft365E5, microsoft365Business };
 
             var workflowTemplates = new List<ApprovalWorkflowTemplate>();
 

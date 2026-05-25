@@ -2,10 +2,10 @@ namespace NAFServer.src.Application.DTOs.Admin
 {
     public record DashboardAverageTimeDTO(
         int SampleCount,
-        double? OverallAvgDays,
-        double? OpenToApprovalAvgDays,
-        double? ApprovalToScreeningAvgDays,
-        double? ScreeningToImplementationAvgDays,
-        double? ImplementationToAccomplishedAvgDays
+        double? OverallAvgMinutes,
+        double? OpenToApprovalAvgMinutes,
+        double? ApprovalToScreeningAvgMinutes,
+        double? ScreeningToImplementationAvgMinutes,
+        double? ImplementationToAccomplishedAvgMinutes
     );
 }

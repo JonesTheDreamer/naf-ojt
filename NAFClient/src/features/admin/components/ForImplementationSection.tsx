@@ -202,7 +202,7 @@ export function ForImplementationSection({
                     disabled={isSubmitting}
                     onClick={() => assignToMe.mutate(rr.id)}
                   >
-                    Claim
+                    Start Implementation
                   </Button>
                 }
               />

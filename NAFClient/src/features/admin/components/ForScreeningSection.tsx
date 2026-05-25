@@ -117,7 +117,7 @@ export function ForScreeningSection({
                     disabled={claim.isPending}
                     onClick={() => claim.mutate(item.currentStepId)}
                   >
-                    Claim
+                    Start Screening
                   </Button>
                 }
               />

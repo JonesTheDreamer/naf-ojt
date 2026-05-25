@@ -10,7 +10,7 @@ namespace NAFServer.src.Application.DTOs.ResourceRequestApprovalStep
         int StepOrder,
         StepAction StepAction,
         string? ApproverId,
-        string? ApproverName,
+        EmployeeApproverDTO? Approver,
         Progress Progress,
         DateTime? ApprovedAt,
         List<ResourceRequestApprovalStepHistoryDTO> Histories

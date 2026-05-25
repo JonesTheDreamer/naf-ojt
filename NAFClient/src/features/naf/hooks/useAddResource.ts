@@ -4,10 +4,7 @@ import {
   createInternetPurpose,
   createInternetResource,
 } from "@/shared/api/resourceMetadataService";
-import {
-  createResourceRequest,
-  findOrCreateGroupEmail,
-} from "../api";
+import { createResourceRequest, findOrCreateGroupEmail } from "../api";
 import { toast } from "sonner";
 
 export type InternetEntry = {
@@ -48,9 +45,13 @@ export type BasicResourceWithDate = {
 };
 
 export const INTERNET_RESOURCE_ID = 7;
-export const GROUP_EMAIL_RESOURCE_ID = 12;
-export const SHARED_FOLDER_RESOURCE_ID = 13;
-export const DEDICATED_SPECIAL_IDS = [INTERNET_RESOURCE_ID, GROUP_EMAIL_RESOURCE_ID, SHARED_FOLDER_RESOURCE_ID];
+export const GROUP_EMAIL_RESOURCE_ID = 15;
+export const SHARED_FOLDER_RESOURCE_ID = 16;
+export const DEDICATED_SPECIAL_IDS = [
+  INTERNET_RESOURCE_ID,
+  GROUP_EMAIL_RESOURCE_ID,
+  SHARED_FOLDER_RESOURCE_ID,
+];
 
 type AddResourcesParams = {
   nafId: string;
@@ -88,7 +89,9 @@ export const useAddResource = () => {
           }
         });
       } catch (e) {
-        errors.push(`Basic resources: ${e instanceof Error ? e.message : "Unknown error"}`);
+        errors.push(
+          `Basic resources: ${e instanceof Error ? e.message : "Unknown error"}`,
+        );
       }
     }
 
@@ -104,8 +107,10 @@ export const useAddResource = () => {
         });
         anySuccess = true;
       } catch (e) {
-        const axiosData = (e as { response?: { data?: string } })?.response?.data;
-        const msg = axiosData ?? (e instanceof Error ? e.message : "Unknown error");
+        const axiosData = (e as { response?: { data?: string } })?.response
+          ?.data;
+        const msg =
+          axiosData ?? (e instanceof Error ? e.message : "Unknown error");
         errors.push(`Resource ${resource.id}: ${msg}`);
       }
     }
@@ -146,8 +151,10 @@ export const useAddResource = () => {
             });
             anySuccess = true;
           } catch (e) {
-            const axiosData = (e as { response?: { data?: string } })?.response?.data;
-            const msg = axiosData ?? (e instanceof Error ? e.message : "Unknown error");
+            const axiosData = (e as { response?: { data?: string } })?.response
+              ?.data;
+            const msg =
+              axiosData ?? (e instanceof Error ? e.message : "Unknown error");
             errors.push(`Internet resource: ${msg}`);
           }
         })(),
@@ -170,8 +177,10 @@ export const useAddResource = () => {
             anySuccess = true;
           })
           .catch((e: unknown) => {
-            const axiosData = (e as { response?: { data?: string } })?.response?.data;
-            const msg = axiosData ?? (e instanceof Error ? e.message : "Unknown error");
+            const axiosData = (e as { response?: { data?: string } })?.response
+              ?.data;
+            const msg =
+              axiosData ?? (e instanceof Error ? e.message : "Unknown error");
             errors.push(`Group email: ${msg}`);
           }),
       );
@@ -190,8 +199,10 @@ export const useAddResource = () => {
             anySuccess = true;
           })
           .catch((e: unknown) => {
-            const axiosData = (e as { response?: { data?: string } })?.response?.data;
-            const msg = axiosData ?? (e instanceof Error ? e.message : "Unknown error");
+            const axiosData = (e as { response?: { data?: string } })?.response
+              ?.data;
+            const msg =
+              axiosData ?? (e instanceof Error ? e.message : "Unknown error");
             errors.push(`Shared folder: ${msg}`);
           }),
       );

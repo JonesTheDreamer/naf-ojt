@@ -11,7 +11,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
             context.Locations.AddRange(
                 new Location("Makati HO"),
                 new Location("Calaca Powerplant"),
-                new Location("Antique Powerplant")
+                new Location("Antique Mining")
             );
 
             await context.SaveChangesAsync();

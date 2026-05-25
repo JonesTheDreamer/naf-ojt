@@ -77,13 +77,19 @@ export interface Purpose extends Entity<string> {
   createdAt: string;
 }
 
+export interface EmployeeApprover {
+  name: string;
+  location: string;
+  department: string | null;
+}
+
 export interface Step extends Entity<string> {
   id: string;
   resourceRequestId: string;
   stepOrder: number;
   stepAction: number;
   approverId: string | null;
-  approverName?: string | null;
+  approver: EmployeeApprover | null;
   progress: number;
   approvedAt?: string;
   histories: History[];

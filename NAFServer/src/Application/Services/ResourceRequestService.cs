@@ -367,7 +367,22 @@ namespace NAFServer.src.Application.Services
         public async Task<ResourceRequestDTO> GetByIdAsync(Guid id)
         {
             var rr = await _resourceRequestRepository.GetByIdAsync(id);
-            return ResourceRequestMapper.ToDTO(rr);
+
+            var approverIds = rr.ResourceRequestsApprovalSteps
+                .Select(s => s.ApproverId)
+                .Where(aid => aid is not null)
+                .Distinct()
+                .ToList();
+
+            var approvers = new Dictionary<string, Employee>();
+            foreach (var approverId in approverIds)
+            {
+                var approver = await _employeeRepository.GetByIdAsync(approverId!);
+                if (approver != null)
+                    approvers[approverId!] = approver;
+            }
+
+            return ResourceRequestMapper.ToDTO(rr, approvers);
         }
 
         public async Task<ResourceRequestDTO> EditPurposeAsync(Guid requestId, EditPurposeDTO request)
