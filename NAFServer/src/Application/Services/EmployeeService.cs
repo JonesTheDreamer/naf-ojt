@@ -13,9 +13,7 @@ namespace NAFServer.src.Application.Services
             _employeeRepository = employeeRepository;
         }
 
-        public async Task<List<Employee>> SearchEmployee(string match)
-        {
-            return await _employeeRepository.SearchEmployee(match);
-        }
+        public Task<List<Employee>> SearchEmployee(string match) =>
+            _employeeRepository.SearchAsync(match);
     }
 }
