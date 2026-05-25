@@ -28,7 +28,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
                     ?? throw new KeyNotFoundException("NAF not found");
         }
 
-        public async Task<bool> EmployeeHasNAFForDepartmentAsync(string employeeId, int departmentId)
+        public async Task<bool> EmployeeHasNAFForDepartmentAsync(string employeeId, string departmentId)
         {
             return await _context.NAFs
                 .AnyAsync(n => n.EmployeeId == employeeId

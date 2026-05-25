@@ -19,7 +19,7 @@ namespace NAFServer.src.Domain.Interface.Repository
         //    string employeeId,
         //    int page = 1
         //    );
-        public Task<bool> EmployeeHasNAFForDepartmentAsync(string employeeId, int departmentId);
+        public Task<bool> EmployeeHasNAFForDepartmentAsync(string employeeId, string departmentId);
         public Task<PagedResult<NAFDTO>> GetNAFsByLocationPagedAsync(int? locationId, string status, int page);
     }
 }

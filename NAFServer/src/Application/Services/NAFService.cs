@@ -19,13 +19,11 @@ namespace NAFServer.src.Application.Services
         private readonly INAFRepository _nafRepository;
         private readonly IApprovalWorkflowTemplateRepository _approvalWorkflowTemplateRepository;
         private readonly IApprovalWorkflowStepsTemplateRepository _approvalWorkflowStepsTemplateRepository;
-        private readonly IDepartmentRepository _departmentRepository;
+        private readonly ILocationRepository _locationRepository;
         private readonly IResourceRequestService _resourceRequestService;
         private readonly IResourceRepository _resourceRepository;
         private readonly IResourceRequestHandlerRegistry _resourceRequestHandlerRegistry;
         private readonly IUserRepository _userRepository;
-        private readonly IUserLocationRepository _userLocationRepository;
-        private readonly IUserDepartmentRepository _userDepartmentRepository;
         private readonly ICurrentUserService _currentUserService;
         private readonly IConfiguration _configuration;
         private readonly INotificationService _notificationService;
@@ -38,13 +36,11 @@ namespace NAFServer.src.Application.Services
             INAFRepository nafRepository,
             IApprovalWorkflowTemplateRepository approvalWorkflowTemplateRepository,
             IApprovalWorkflowStepsTemplateRepository approvalWorkflowStepsTemplateRepository,
-            IDepartmentRepository departmentRepository,
+            ILocationRepository locationRepository,
             IResourceRequestService resourceRequestService,
             IResourceRepository resourceRepository,
             IResourceRequestHandlerRegistry resourceRequestHandlerRegistry,
             IUserRepository userRepository,
-            IUserLocationRepository userLocationRepository,
-            IUserDepartmentRepository userDepartmentRepository,
             ICurrentUserService currentUserService,
             IConfiguration configuration,
             INotificationService notificationService,
@@ -57,13 +53,11 @@ namespace NAFServer.src.Application.Services
             _nafRepository = nafRepository;
             _approvalWorkflowTemplateRepository = approvalWorkflowTemplateRepository;
             _approvalWorkflowStepsTemplateRepository = approvalWorkflowStepsTemplateRepository;
-            _departmentRepository = departmentRepository;
+            _locationRepository = locationRepository;
             _resourceRequestService = resourceRequestService;
             _resourceRepository = resourceRepository;
             _resourceRequestHandlerRegistry = resourceRequestHandlerRegistry;
             _userRepository = userRepository;
-            _userLocationRepository = userLocationRepository;
-            _userDepartmentRepository = userDepartmentRepository;
             _currentUserService = currentUserService;
             _configuration = configuration;
             _notificationService = notificationService;
@@ -81,7 +75,7 @@ namespace NAFServer.src.Application.Services
 
             // Rule 2: current user is in the same department as the NAF
             var currentDepartmentId = await _currentUserService.GetDepartmentIdAsync();
-            if (int.TryParse(currentDepartmentId, out int parsedDeptId) && naf.DepartmentId == parsedDeptId)
+            if (!string.IsNullOrEmpty(currentDepartmentId) && naf.DepartmentId == currentDepartmentId)
                 return;
 
             // Rule 3: current user is an assigned approver on any step
@@ -93,9 +87,12 @@ namespace NAFServer.src.Application.Services
 
             // Rule 4: current user is the employee's supervisor or department head
             var nafEmployee = await _employeeRepository.GetByIdAsync(naf.EmployeeId);
-            if (nafEmployee is not null &&
-                (nafEmployee.SupervisorId == currentUserId || nafEmployee.DepartmentHeadId == currentUserId))
-                return;
+            if (nafEmployee is not null)
+            {
+                if (nafEmployee.SupervisorId == currentUserId) return;
+                var deptHeadEmployee = await _employeeRepository.GetByFullNameAsync(nafEmployee.DepartmentHead ?? string.Empty);
+                if (deptHeadEmployee?.Id == currentUserId) return;
+            }
 
             // Rule 5: admin whose active location matches the NAF's location
             if (_currentUserService.Role == "ADMIN")
@@ -140,14 +137,10 @@ namespace NAFServer.src.Application.Services
         {
             //fetch from people core
             var employee = await _employeeRepository.GetByIdAsync(request.EmployeeId);
-            //fetch from users table
-            var employeeUser = await _userRepository.GetUserByEmployeeId(request.EmployeeId);
-
-            var employeeActiveDepartment = await _userDepartmentRepository.GetUserActiveDepartment(employeeUser.Id);
 
             if (employee.Status != "Active") throw new InvalidOperationException("Employee is not active");
 
-            var hasNAFForDepartment = await _nafRepository.EmployeeHasNAFForDepartmentAsync(request.EmployeeId, employeeActiveDepartment.DepartmentId);
+            var hasNAFForDepartment = await _nafRepository.EmployeeHasNAFForDepartmentAsync(request.EmployeeId, employee.DepartmentId);
 
             if (hasNAFForDepartment) throw new InvalidOperationException("Employee already has a NAF for this department");
 
@@ -181,8 +174,9 @@ namespace NAFServer.src.Application.Services
             try
             {
                 string reference = $"NAF-{DateTime.UtcNow:yyyyMMddHHmmss}-{employee.Id}-{Guid.NewGuid().ToString("N").Substring(0, 6)}";
-                var employeeActiveLocation = await _userLocationRepository.GetUserActiveLocation(employeeUser.Id);
-                var naf = new NAF(reference, request.RequestorId, request.EmployeeId, employeeActiveDepartment.DepartmentId, employeeActiveLocation.LocationId);
+                var location = await _locationRepository.GetByNameAsync(employee.Location ?? string.Empty)
+                    ?? throw new InvalidOperationException($"No Location record found matching employee location '{employee.Location}'.");
+                var naf = new NAF(reference, request.RequestorId, request.EmployeeId, employee.DepartmentId, location.Id);
                 await _context.NAFs.AddAsync(naf);
                 await _context.SaveChangesAsync();
 
@@ -206,7 +200,10 @@ namespace NAFServer.src.Application.Services
                 {
                     var adminIds = await _notificationService.GetAdminsByLocationAsync(naf.LocationId);
                     var supervisorId = await _notificationService.FindUserIdByEmployeeNumberAsync(employee.SupervisorId);
-                    var deptHeadId = await _notificationService.FindUserIdByEmployeeNumberAsync(employee.DepartmentHeadId);
+                    var deptHead = await _employeeRepository.GetByFullNameAsync(employee.DepartmentHead ?? string.Empty);
+                    var deptHeadId = deptHead is not null
+                        ? await _notificationService.FindUserIdByEmployeeNumberAsync(deptHead.Id)
+                        : (int?)null;
 
                     if (adminIds.Count > 0)
                     {
@@ -324,7 +321,7 @@ namespace NAFServer.src.Application.Services
             return NAFMapper.ToDTO(naf, employee);
         }
 
-        public Task<bool> EmployeeHasNAFForDepartmentAsync(string employeeId, int departmentId)
+        public Task<bool> EmployeeHasNAFForDepartmentAsync(string employeeId, string departmentId)
         {
             var hasNAF = _nafRepository.EmployeeHasNAFForDepartmentAsync(employeeId, departmentId);
             return hasNAF;
