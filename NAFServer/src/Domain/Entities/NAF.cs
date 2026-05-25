@@ -1,7 +1,7 @@
 ﻿using NAFServer.src.Domain.Enums;
 using NAFServer.src.Domain.Exceptions;
-namespace NAFServer.src.Domain.Entities
 
+namespace NAFServer.src.Domain.Entities
 {
     public class NAF : TimeStamp
     {
@@ -14,20 +14,19 @@ namespace NAFServer.src.Domain.Entities
         public DateTime SubmittedAt { get; set; }
         public Progress Progress { get; set; }
         public Location Location { get; set; }
-
-        public int DepartmentId { get; set; }
+        public string DepartmentId { get; set; }
         public bool IsActive { get; set; }
-        public Department Department { get; set; }
         public List<ResourceRequest> ResourceRequests { get; set; } = new();
 
         private NAF() { }
-        public NAF(string Reference, string RequestorId, string EmployeeId, int DepartmentId, int LocationId)
+
+        public NAF(string reference, string requestorId, string employeeId, string departmentId, int locationId)
         {
-            this.Reference = Reference;
-            this.RequestorId = RequestorId;
-            this.EmployeeId = EmployeeId;
-            this.DepartmentId = DepartmentId;
-            this.LocationId = LocationId;
+            Reference = reference;
+            RequestorId = requestorId;
+            EmployeeId = employeeId;
+            DepartmentId = departmentId;
+            LocationId = locationId;
             SubmittedAt = DateTime.UtcNow;
             Progress = Progress.OPEN;
             IsActive = true;
@@ -48,10 +47,8 @@ namespace NAFServer.src.Domain.Entities
             return this;
         }
 
-        public bool IsFullyApproved()
-        {
-            return ResourceRequests.All(rr => rr.Progress == Progress.ACCOMPLISHED);
-        }
+        public bool IsFullyApproved() =>
+            ResourceRequests.All(rr => rr.Progress == Progress.ACCOMPLISHED);
 
         public List<ResourceRequest> AddResource(ResourceRequest request)
         {
@@ -61,9 +58,7 @@ namespace NAFServer.src.Domain.Entities
 
         public bool CascadeApproval()
         {
-            if (Progress == Progress.ACCOMPLISHED)
-                return true;
-
+            if (Progress == Progress.ACCOMPLISHED) return true;
             if (ResourceRequests.All(r => r.Progress == Progress.ACCOMPLISHED))
             {
                 Progress = Progress.ACCOMPLISHED;
@@ -73,15 +68,7 @@ namespace NAFServer.src.Domain.Entities
             return false;
         }
 
-        public NAF DeactivateNAF()
-        {
-            IsActive = false;
-            return this;
-        }
-        public NAF ActivateNAF()
-        {
-            IsActive = true;
-            return this;
-        }
+        public NAF DeactivateNAF() { IsActive = false; return this; }
+        public NAF ActivateNAF() { IsActive = true; return this; }
     }
 }

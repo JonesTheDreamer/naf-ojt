@@ -9,8 +9,6 @@
         public DateTime DateAdded { get; set; }
         public DateTime? DateRemoved { get; set; }
         public List<UserRole> UserRoles { get; set; }
-        public List<UserLocation> UserLocations { get; set; }
-        public List<UserDepartment> UserDepartments { get; set; }
         public Employee Employee { get; set; }
         public User(string EmployeeNumber)
         {
