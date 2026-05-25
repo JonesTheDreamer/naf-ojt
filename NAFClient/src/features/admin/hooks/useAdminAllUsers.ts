@@ -5,7 +5,7 @@ import type { UserDTO } from "../types";
 export function useAdminAllUsers() {
   const locationsQuery = useQuery({
     queryKey: ["admin", "locations"],
-    queryFn: adminApi.getLocations,
+    queryFn: adminApi.getAdminLocations,
   });
 
   const locationIds = locationsQuery.data?.map((l) => l.id) ?? [];

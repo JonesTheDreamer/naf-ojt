@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, MapPin, Shield, X, Check, Plus, Building2, Briefcase, User } from "lucide-react";
+import { ArrowLeft, Shield, X, Check, Plus, Building2, Briefcase, User } from "lucide-react";
 import AdminLayout from "@/shared/components/layout/AdminLayout";
 import { Button } from "@/components/ui/button";
 import { useAdminAllUsers } from "../hooks/useAdminAllUsers";
 import { useAdminUsers } from "../hooks/useAdminUsers";
-import { useAdminLocations } from "../hooks/useAdminLocations";
 import { RoutesEnum } from "@/app/routesEnum";
 
 const ROLES = ["ADMIN", "MANAGEMENT", "REQUESTOR_APPROVER", "HR"];
@@ -83,14 +82,11 @@ export default function UserDetailPage() {
   const { userId } = useParams<{ userId: string }>();
   const navigate = useNavigate();
 
-  const { users, isLoading, locationsQuery } = useAdminAllUsers();
+  const { users, isLoading } = useAdminAllUsers();
   const { addRoleMutation, removeRoleMutation } = useAdminUsers();
-  const { assignLocationMutation, removeLocationMutation } = useAdminLocations();
 
   const user = users.find((u) => u.id === Number(userId));
 
-  const [locationEditing, setLocationEditing] = useState(false);
-  const [selectedLocationId, setSelectedLocationId] = useState(0);
   const [addRoleValue, setAddRoleValue] = useState("");
 
   const handleAddRole = async () => {
@@ -102,16 +98,6 @@ export default function UserDetailPage() {
   const handleRemoveRole = async (roleName: string) => {
     if (!user) return;
     await removeRoleMutation.mutateAsync({ userId: user.id, roleName });
-  };
-
-  const handleChangeLocation = async () => {
-    if (!user || !selectedLocationId) return;
-    if (user.locationId) {
-      await removeLocationMutation.mutateAsync({ userId: user.id, locationId: user.locationId });
-    }
-    await assignLocationMutation.mutateAsync({ userId: user.id, locationId: selectedLocationId });
-    setLocationEditing(false);
-    setSelectedLocationId(0);
   };
 
   const availableRoles = ROLES.filter((r) => !user?.roles.includes(r));
@@ -261,73 +247,6 @@ export default function UserDetailPage() {
                   <Plus className="w-3.5 h-3.5" />
                   Add
                 </Button>
-              </div>
-            )}
-          </div>
-
-          {/* Location */}
-          <div className="rounded-xl border border-gray-100 bg-white p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <MapPin className="w-4 h-4 text-amber-500" />
-              <p className="text-[10px] uppercase tracking-widest text-gray-400 font-semibold">Location</p>
-            </div>
-
-            {!locationEditing ? (
-              <div className="flex items-center justify-between">
-                {user.locationId ? (
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-200 bg-amber-50 px-3 py-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0" />
-                      <span className="text-xs font-medium text-amber-800">{user.location}</span>
-                    </span>
-                  </div>
-                ) : (
-                  <span className="text-xs text-gray-400 italic">No location assigned</span>
-                )}
-                <button
-                  onClick={() => setLocationEditing(true)}
-                  className="text-xs text-amber-600 hover:text-amber-700 font-medium transition-colors underline underline-offset-2"
-                >
-                  {user.locationId ? "Change" : "Assign"}
-                </button>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <select
-                  className="w-full border border-gray-200 rounded-lg px-3 py-1.5 text-xs bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400 transition-all"
-                  value={selectedLocationId}
-                  onChange={(e) => setSelectedLocationId(Number(e.target.value))}
-                >
-                  <option value={0}>Select location…</option>
-                  {locationsQuery.data?.map((loc) => (
-                    <option key={loc.id} value={loc.id}>{loc.name}</option>
-                  ))}
-                </select>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    disabled={
-                      !selectedLocationId ||
-                      assignLocationMutation.isPending ||
-                      removeLocationMutation.isPending
-                    }
-                    onClick={handleChangeLocation}
-                    className="bg-amber-500 hover:bg-amber-600 text-white border-0"
-                  >
-                    Confirm
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    className="text-gray-500"
-                    onClick={() => {
-                      setLocationEditing(false);
-                      setSelectedLocationId(0);
-                    }}
-                  >
-                    Cancel
-                  </Button>
-                </div>
               </div>
             )}
           </div>

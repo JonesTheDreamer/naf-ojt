@@ -10,7 +10,6 @@ import type {
   DashboardAverageTimeDTO,
   DashboardStatsDTO,
   ForImplementationItemDTO,
-  LocationDTO,
   UserDTO,
   UserRoleDetailDTO,
 } from "./types";
@@ -25,16 +24,6 @@ export const adminApi = {
 
   addRole: (userId: number, role: string) =>
     api.post(`/user-roles/${userId}/assign`, JSON.stringify(role)).then((r) => r.data),
-
-  // Location management
-  getLocations: () =>
-    api.get<LocationDTO[]>("/user-locations").then((r) => r.data),
-
-  assignLocation: (userId: number, locationId: number) =>
-    api.post(`/user-locations/${userId}/assign`, locationId).then((r) => r.data),
-
-  removeLocation: (userId: number, locationId: number) =>
-    api.delete(`/user-locations/${userId}/remove/${locationId}`).then((r) => r.data),
 
   // Role management
   getUserActiveRoles: (userId: number) =>
