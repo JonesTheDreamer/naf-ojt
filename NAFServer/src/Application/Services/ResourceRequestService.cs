@@ -20,12 +20,12 @@ namespace NAFServer.src.Application.Services
         private readonly INAFRepository _nafRepository;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IApprovalWorkflowStepsTemplateRepository _approvalWorkflowStepsTemplateRepository;
-        private readonly IDepartmentRepository _departmentRepository;
         private readonly IResourceRepository _resourceRepository;
         private readonly IApprovalWorkflowTemplateRepository _approvalWorkflowTemplateRepository;
         private readonly IResourceRequestHandlerRegistry _resourceRequestHandlerRegistry;
         private readonly IUserRepository _userRepository;
-        private readonly IUserLocationRepository _userLocationRepository;
+        private readonly IResourceRequestAllowanceRepository _allowanceRepository;
+        private readonly ILocationRepository _locationRepository;
         private readonly IImplementationService _implementationService;
         private readonly IAuditQueue _auditQueue;
         private readonly IResourceGroupRepository _resourceGroupRepository;
@@ -37,12 +37,12 @@ namespace NAFServer.src.Application.Services
             INAFRepository nafRepository,
             IEmployeeRepository employeeRepository,
             IApprovalWorkflowStepsTemplateRepository approvalWorkflowStepsTemplateRepository,
-            IDepartmentRepository departmentRepository,
             IResourceRepository resourceRepository,
             IApprovalWorkflowTemplateRepository approvalWorkflowTemplateRepository,
             IResourceRequestHandlerRegistry resourceRequestHandlerRegistry,
             IUserRepository userRepository,
-            IUserLocationRepository userLocationRepository,
+            IResourceRequestAllowanceRepository allowanceRepository,
+            ILocationRepository locationRepository,
             IImplementationService implementationService,
             IResourceGroupRepository resourceGroupRepository,
             IAuditQueue auditQueue,
@@ -55,12 +55,12 @@ namespace NAFServer.src.Application.Services
             _nafRepository = nafRepository;
             _employeeRepository = employeeRepository;
             _approvalWorkflowStepsTemplateRepository = approvalWorkflowStepsTemplateRepository;
-            _departmentRepository = departmentRepository;
             _resourceRepository = resourceRepository;
             _approvalWorkflowTemplateRepository = approvalWorkflowTemplateRepository;
             _resourceRequestHandlerRegistry = resourceRequestHandlerRegistry;
             _userRepository = userRepository;
-            _userLocationRepository = userLocationRepository;
+            _allowanceRepository = allowanceRepository;
+            _locationRepository = locationRepository;
             _implementationService = implementationService;
             _resourceGroupRepository = resourceGroupRepository;
             _auditQueue = auditQueue;
@@ -86,6 +86,9 @@ namespace NAFServer.src.Application.Services
                 }
             }
 
+            var naf = await _nafRepository.GetByIdAsync(request.nafId);
+            await ValidateDateNeededAsync(request, naf);
+
             var hasOuterTransaction = _context.Database.CurrentTransaction != null;
 
             await using var transaction = hasOuterTransaction
@@ -94,8 +97,6 @@ namespace NAFServer.src.Application.Services
 
             try
             {
-                var naf = await _nafRepository.GetByIdAsync(request.nafId);
-
                 ResourceRequestAdditionalInfo? additionalInfo = null;
 
                 // Only process additional info when required by resource
@@ -232,6 +233,9 @@ namespace NAFServer.src.Application.Services
                     }
                 }
 
+                var naf = await _nafRepository.GetByIdAsync(request.nafId);
+                await ValidateDateNeededAsync(request, naf);
+
                 var rr = new ResourceRequest(
                     request.nafId,
                     request.resourceId,
@@ -255,7 +259,6 @@ namespace NAFServer.src.Application.Services
 
                 try
                 {
-                    var naf = await _nafRepository.GetByIdAsync(request.nafId);
                     var nafEmployee = await _employeeRepository.GetByIdAsync(naf.EmployeeId);
                     var employeeName = nafEmployee != null
                         ? $"{nafEmployee.FirstName} {nafEmployee.LastName}".Trim()
@@ -313,11 +316,18 @@ namespace NAFServer.src.Application.Services
 
                     case ApproverRole.DEPARTMENT_HEAD:
                         if (string.IsNullOrEmpty(step.ApproverEntity))
-                            approverId = employee.DepartmentHeadId;
+                        {
+                            var deptHead = await _employeeRepository.GetByFullNameAsync(employee.DepartmentHead ?? string.Empty);
+                            approverId = deptHead?.Id;
+                        }
                         else
                         {
-                            var dept = await _departmentRepository.GetByCodeAsync(step.ApproverEntity);
-                            approverId = dept.DepartmentHeadId;
+                            var dept = await _employeeRepository.GetDepartmentByIdAsync(step.ApproverEntity);
+                            if (dept is not null)
+                            {
+                                var deptHead = await _employeeRepository.GetByFullNameAsync(dept.DepartmentHead);
+                                approverId = deptHead?.Id;
+                            }
                         }
                         break;
 
@@ -331,10 +341,8 @@ namespace NAFServer.src.Application.Services
                         break;
 
                     case ApproverRole.TECHNICAL_HEAD:
-                        var user = await _userRepository.GetUserByEmployeeId(employee.Id);
-                        var activeLocation = await _userLocationRepository.GetUserActiveLocation(user.Id);
-                        var techHead = await _userRepository.GetNetworkAdminOfLocation(activeLocation.LocationId);
-                        approverId = techHead.EmployeeNumber;
+                        var techHead = await _userRepository.GetNetworkAdminOfLocation(request.NAF.LocationId);
+                        approverId = techHead?.EmployeeNumber;
                         break;
 
                     case ApproverRole.RESOURCE_OWNER:
@@ -619,6 +627,30 @@ namespace NAFServer.src.Application.Services
 
             await _context.SaveChangesAsync();
 
+        }
+
+        private async Task ValidateDateNeededAsync(CreateResourceRequestDTO request, NAF naf)
+        {
+            var location = await _locationRepository.GetByIdAsync(naf.LocationId);
+            if (location is null) return;
+
+            if (!location.AllowWeekendDateNeeded)
+            {
+                var dow = request.dateNeeded.DayOfWeek;
+                if (dow == DayOfWeek.Saturday || dow == DayOfWeek.Sunday)
+                    throw new ArgumentException($"DateNeeded cannot fall on a weekend for location '{location.Name}'.");
+            }
+
+            var allowance = await _allowanceRepository.GetByResourceAndLocationAsync(request.resourceId, naf.LocationId);
+            if (allowance is not null)
+            {
+                var today = DateOnly.FromDateTime(DateTime.UtcNow);
+                var dateNeeded = DateOnly.FromDateTime(request.dateNeeded);
+                var minDate = today.AddDays(allowance.AllowanceDays);
+                if (dateNeeded < minDate)
+                    throw new ArgumentException(
+                        $"DateNeeded must be at least {allowance.AllowanceDays} day(s) from today for this resource at location '{location.Name}'. Earliest allowed: {minDate:yyyy-MM-dd}.");
+            }
         }
 
     }
