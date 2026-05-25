@@ -9,18 +9,18 @@
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IEmployeeRepository _employeeRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IUserLocationRepository _userLocationRepository;
+        private readonly ILocationRepository _locationRepository;
 
         public CurrentUserService(
             IHttpContextAccessor httpContextAccessor,
             IEmployeeRepository employeeRepository,
             IUserRepository userRepository,
-            IUserLocationRepository userLocationRepository)
+            ILocationRepository locationRepository)
         {
             _httpContextAccessor = httpContextAccessor;
             _employeeRepository = employeeRepository;
             _userRepository = userRepository;
-            _userLocationRepository = userLocationRepository;
+            _locationRepository = locationRepository;
         }
 
         public string EmployeeId
@@ -57,13 +57,10 @@
 
         public async Task<int> GetLocationIdAsync()
         {
-            var user = await _userRepository.GetUserByEmployeeId(EmployeeId);
-            if (user == null)
-                throw new KeyNotFoundException($"User for employee '{EmployeeId}' not found.");
-            var location = await _userLocationRepository.GetUserActiveLocation(user.Id);
-            if (location == null)
-                throw new KeyNotFoundException($"No active location found for user '{user.Id}'.");
-            return location.LocationId;
+            var employee = await _employeeRepository.GetByIdAsync(EmployeeId);
+            if (employee?.Location is null) return 0;
+            var location = await _locationRepository.GetByNameAsync(employee.Location);
+            return location?.Id ?? 0;
         }
     }
 }
