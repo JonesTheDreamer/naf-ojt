@@ -7,7 +7,11 @@
 
 ## Overview
 
-Restructure the NAF system's employee and department data layer so that all employee and department information is sourced exclusively from Microsoft SQL Server views (`vw_Employees`, `vw_Departments`). All view data is eagerly loaded into `IMemoryCache` on startup and refreshed on a background timer. The `UserLocation`, `UserDepartment`, `Location`, and `Department` app-DB concepts are removed entirely. NAF location becomes a string field derived from the creating employee's `Location` at creation time.
+Restructure the NAF system's employee and department data layer so that all employee and department information is sourced exclusively from Microsoft SQL Server views (`vw_Employees`, `vw_Departments`). All view data is eagerly loaded into `IMemoryCache` on startup and refreshed on a background timer. The `UserLocation`, `UserDepartment`, and `Department` app-DB concepts are removed entirely.
+
+`Location` is **kept** but repurposed: it no longer tracks user-to-location assignment; instead it serves as a configuration entity controlling NAF date rules per location. A new `ResourceRequestAllowance` entity defines the minimum days required between today and `DateNeeded` for a given resource × location combination. Each `Location` also carries an `AllowWeekendDateNeeded` flag that controls whether weekend dates are valid for `DateNeeded`.
+
+NAF retains `LocationId` as a FK to `Location`, populated at creation by matching the creating employee's `Location` string (from the view) to `Location.Name` in the app DB.
 
 ---
 
@@ -88,10 +92,37 @@ New keyless EF Core entity mapped to `vw_Departments`.
 | `DepartmentDesc` | `string` | `DepartmentDesc` |
 | `DepartmentHead` | `string` | `DepartmentHead` (full name) |
 
-### `NAF` (updated)
+### `Location` (updated — repurposed)
 
-- Remove `LocationId` (int, FK to `Location`)
-- Add `Location` (string?) — set at creation time from `employee.Location`
+Stays as an app-DB entity. Loses all user-assignment associations. Gains `AllowWeekendDateNeeded`.
+
+| Property | Type | Notes |
+|---|---|---|
+| `Id` | `int` | PK |
+| `Name` | `string` | Must match normalized location strings from `vw_Employees` (e.g. `"MAKATI"`, `"ANTIQUE"`, `"CALACA"`) |
+| `IsActive` | `bool` | |
+| `AllowWeekendDateNeeded` | `bool` | If `false`, `DateNeeded` on Saturday or Sunday is rejected |
+
+Navigation properties removed: `Users`, `NAFs` (NAF still references Location via `LocationId` FK — not a nav property that needs removal, just the old collection on Location).
+
+### `ResourceRequestAllowance` (new)
+
+Defines the minimum lead days for a resource × location combination.
+
+| Property | Type | Notes |
+|---|---|---|
+| `Id` | `int` | PK |
+| `ResourceId` | `int` | FK to `Resource` |
+| `LocationId` | `int` | FK to `Location` |
+| `AllowanceDays` | `int` | Minimum days from today to `DateNeeded` (inclusive) |
+
+Unique constraint on `(ResourceId, LocationId)` — one allowance record per resource per location.
+
+Navigation properties: `Resource`, `Location`.
+
+### `NAF` (unchanged structure)
+
+`LocationId` (int, FK to `Location`) is **kept**. At NAF creation time, `LocationId` is resolved by matching `employee.Location` (string from view) against `Location.Name` in the app DB. If no match is found, NAF creation fails with a validation error.
 
 ### `User` (updated)
 
@@ -128,13 +159,24 @@ New keyless EF Core entity mapped to `vw_Departments`.
 
 ---
 
+## ResourceRequest DateNeeded Validation
+
+When a resource request is created, the server validates `DateNeeded` against the allowance rules for the NAF's location and the requested resource:
+
+1. Look up `ResourceRequestAllowance` where `ResourceId == request.ResourceId AND LocationId == naf.LocationId`.
+2. If a record exists: `DateNeeded` must be `>= today + AllowanceDays` (calendar days). If not, return `400` with a descriptive message.
+3. Look up the `Location` record for `naf.LocationId`.
+4. If `!location.AllowWeekendDateNeeded` and `DateNeeded` falls on Saturday or Sunday: return `400`.
+5. If no `ResourceRequestAllowance` exists for the resource × location combination, no minimum-days constraint is applied (only the weekend rule from `Location` still applies).
+
+---
+
 ## What Gets Removed
 
 ### Entities (+ all associated repos, services, controllers, mappers, DTOs)
 
 | Entity | Files removed |
 |---|---|
-| `Location` | Entity, `LocationRepository`, `LocationService`, `LocationMapper`, `LocationDTO` |
 | `UserLocation` | Entity, `UserLocationRepository`, `UserLocationService`, `UserLocationController`, `UserLocationMapper`, `UserLocationDTO` |
 | `Department` (app table) | Entity, `DepartmentRepository`, `DepartmentService`, `DepartmentsController`, `DepartmentMapper`, `DepartmentDTO`, `DepartmentDetailDTO`, `CreateDepartmentDTO` |
 | `UserDepartment` | Entity, `UserDepartmentRepository`, `UserDepartmentService`, `UserDepartmentController`, `UserDepartmentMapper`, `UserDepartmentDTO` |
@@ -142,26 +184,30 @@ New keyless EF Core entity mapped to `vw_Departments`.
 
 ### DB Tables Dropped (via migration)
 
-- `Locations`
 - `Departments`
 - `UserLocations`
 - `UserDepartments`
 - `DepartmentEmployees`
 
-### NAF Table Migration
+### DB Tables Added (via migration)
 
-- Drop column `LocationId` (int) + FK constraint
-- Add column `Location` (nvarchar, nullable)
+- `ResourceRequestAllowances` — with FK constraints to `Resources` and `Locations`, unique index on `(ResourceId, LocationId)`
+
+### Location Table Migration
+
+- Add column `AllowWeekendDateNeeded` (bit, not null, default `1`)
 
 ---
 
 ## AppDbContext Changes
 
 - Add `DbSet<Employee> Employees` configured as `HasNoKey().ToView("vw_Employees")`
-- Add `DbSet<DepartmentView> Departments` configured as `HasNoKey().ToView("vw_Departments")`
-- Remove `DbSet`s: `Locations`, `UserLocations`, `UserDepartments`, `DepartmentEmployees`, and the existing app `Departments`
-- Remove `NAF → Location` relationship configuration
-- Add `NAF.Location` string column configuration
+- Add `DbSet<DepartmentView> DepartmentViews` configured as `HasNoKey().ToView("vw_Departments")`
+- Add `DbSet<ResourceRequestAllowance> ResourceRequestAllowances`
+- Remove `DbSet`s: `UserLocations`, `UserDepartments`, `DepartmentEmployees`, and the existing app `Departments`
+- Remove `NAF → Location` collection navigation if present on `Location`
+- Keep `NAF → Location` FK relationship (`NAF.LocationId`)
+- Configure `ResourceRequestAllowance` unique index on `(ResourceId, LocationId)`
 
 ---
 
@@ -171,9 +217,12 @@ New keyless EF Core entity mapped to `vw_Departments`.
 |---|---|
 | `EmployeeRepository` | Fully rewritten — all methods read from `"employees:all"` cache |
 | `IEmployeeRepository` | Add `GetByFullNameAsync`, `GetSubordinatesAsync`, `GetByDepartmentAsync`. Remove per-key caching methods. |
-| `NAFService` | On NAF creation: `naf.Location = employee.Location` (no LocationId lookup) |
+| `NAFService` | On NAF creation: resolve `employee.Location` string to `Location.Name` to get `LocationId`. Fail if no matching Location found. |
+| `ResourceRequestService` | On resource request creation: run `DateNeeded` validation against `ResourceRequestAllowance` + `Location.AllowWeekendDateNeeded`. |
 | `DashboardService` | Update any department/location queries to use employee cache |
 | `EmployeeCacheHostedService` | New — startup loader + 6-hour background refresh |
+| `ResourceRequestAllowanceService` | New — CRUD for allowance records |
+| `LocationService` | Updated — remove user-assignment methods, add `AllowWeekendDateNeeded` management |
 
 ---
 
@@ -182,6 +231,12 @@ New keyless EF Core entity mapped to `vw_Departments`.
 | Endpoint | Change |
 |---|---|
 | `POST api/admin/cache/refresh` | New — triggers immediate employee + department cache reload |
+| `GET api/admin/locations` | Kept — returns locations with `AllowWeekendDateNeeded` |
+| `PUT api/admin/locations/{id}` | Updated — allows editing `AllowWeekendDateNeeded` |
+| `GET api/admin/resource-allowances` | New — list all allowance records |
+| `POST api/admin/resource-allowances` | New — create allowance (resource × location × days) |
+| `PUT api/admin/resource-allowances/{id}` | New — update allowance days |
+| `DELETE api/admin/resource-allowances/{id}` | New — remove allowance |
 | `GET api/admin/departments/**` | Removed |
 | `GET/POST/DELETE api/user-locations/**` | Removed |
 | `GET/POST/DELETE api/user-departments/**` | Removed |
@@ -195,27 +250,34 @@ New keyless EF Core entity mapped to `vw_Departments`.
 
 | File | Change |
 |---|---|
-| `types/api/naf.ts` | Replace `locationId: number` with `location: string` |
+| `types/api/naf.ts` | `locationId` stays — no change needed |
 | `types/api/employee.ts` | Replace `departmentHeadId` with `departmentHead: string` (full name). Remove `hiredDate`, `regularizedDate`, `separatedDate`. |
+| `types/api/location.ts` | Add `allowWeekendDateNeeded: boolean` |
+| `types/api/resourceRequestAllowance.ts` | New — `{ id, resourceId, locationId, allowanceDays }` |
 
 ### Removed Features
 
 - Department management pages, hooks, and API service calls (`api/admin/departments/**`)
-- Location management pages, hooks, and API service calls (`api/user-locations/**`, `api/user-departments/**`)
-- Location picker from NAF creation flow — location is set automatically server-side
+- User-location / user-department assignment pages and API calls (`api/user-locations/**`, `api/user-departments/**`)
+- Location picker from NAF creation flow — `LocationId` is resolved automatically server-side from the employee's location
 
 ### Modified Features
 
 | Feature | Change |
 |---|---|
-| NAF list/detail views | Display `location` as plain string (no ID resolution needed) |
 | NAF creation dialog | Remove location selection step |
 | Admin home/dashboard | Remove department/location management cards |
 | Employee display | Show `departmentHead` as full name string directly |
+| Resource request form | Date picker disables dates that fail allowance rules: dates before `today + allowanceDays`, and weekends if `!location.AllowWeekendDateNeeded` |
 
 ### New Features
 
-- Admin cache refresh button → calls `POST api/admin/cache/refresh`
+| Feature | Notes |
+|---|---|
+| Admin cache refresh button | Calls `POST api/admin/cache/refresh` |
+| Admin location edit | Toggle `AllowWeekendDateNeeded` per location |
+| Admin resource allowance management | CRUD for `ResourceRequestAllowance` — pick resource, pick location, set minimum days |
+| Date picker constraint in resource request form | Fetches allowance for the NAF's location + resource on form open; disables invalid dates client-side before submission |
 
 ---
 
@@ -223,6 +285,8 @@ New keyless EF Core entity mapped to `vw_Departments`.
 
 - `DepartmentHead` full names are unique enough across the employee dataset — no collision handling needed
 - `vw_Employees` and `vw_Departments` exist in the SQL Server database before the app starts; the app does not create or manage them
-- Existing NAF records with `LocationId` will have their `Location` field set to `NULL` after migration — acceptable as historical data
+- `Location.Name` values in the app DB must be kept in sync with the normalized location strings produced by `vw_Employees` (e.g. `"MAKATI"`, `"ANTIQUE"`, `"CALACA"`) — this is a seeding/admin responsibility
+- If no `ResourceRequestAllowance` exists for a resource × location pair, only the weekend rule applies
+- Existing NAF records retain their `LocationId` — no data migration needed
 - Employee data volume: 5,000–10,000 rows — fits comfortably in memory (~3 MB)
 - Cache is process-local (`IMemoryCache`) — sufficient for single-instance deployment
