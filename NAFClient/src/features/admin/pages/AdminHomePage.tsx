@@ -154,8 +154,6 @@ export default function AdminHomePage() {
   const stats = statsQuery.data;
   const avgTime = avgTimeQuery.data;
 
-  console.log(avgTime);
-
   const selectValue =
     locationId === null ? ALL_SITES_VALUE : String(locationId);
 

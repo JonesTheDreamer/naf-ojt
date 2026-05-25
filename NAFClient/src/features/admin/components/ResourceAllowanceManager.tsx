@@ -22,6 +22,9 @@ export function ResourceAllowanceManager() {
   const deleteMutation = useDeleteAllowance();
   const toggleWeekendMutation = useToggleLocationWeekend();
 
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editDays, setEditDays] = useState(0);
+
   const [form, setForm] = useState<CreateResourceRequestAllowanceDTO>({
     resourceId: 0,
     locationId: 0,
@@ -84,39 +87,58 @@ export function ResourceAllowanceManager() {
                       <td className="p-2 text-sm">{a.resourceName}</td>
                       <td className="p-2 text-sm">{a.locationName}</td>
                       <td className="p-2 text-sm font-medium tabular-nums">
-                        {a.allowanceDays}
+                        {editingId === a.id ? (
+                          <input
+                            type="number"
+                            className="border border-border rounded px-2 py-1 w-20 text-sm bg-background focus:outline-none focus:ring-1 focus:ring-amber-400 focus:border-amber-400"
+                            value={editDays}
+                            onChange={(e) => setEditDays(+e.target.value)}
+                          />
+                        ) : (
+                          a.allowanceDays
+                        )}
                       </td>
                       <td className="p-2">
                         <div className="flex gap-2 justify-end">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            disabled={updateMutation.isPending}
-                            onClick={() => {
-                              const days = parseInt(
-                                prompt(
-                                  "New allowance days:",
-                                  String(a.allowanceDays),
-                                ) ?? "",
-                                10,
-                              );
-                              if (!isNaN(days))
-                                updateMutation.mutate({
-                                  id: a.id,
-                                  dto: { allowanceDays: days },
-                                });
-                            }}
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            disabled={deleteMutation.isPending}
-                            onClick={() => deleteMutation.mutate(a.id)}
-                          >
-                            Delete
-                          </Button>
+                          {editingId === a.id ? (
+                            <>
+                              <Button
+                                size="sm"
+                                disabled={updateMutation.isPending}
+                                onClick={() => {
+                                  updateMutation.mutate({ id: a.id, dto: { allowanceDays: editDays } });
+                                  setEditingId(null);
+                                }}
+                              >
+                                Save
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => setEditingId(null)}
+                              >
+                                Cancel
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => { setEditingId(a.id); setEditDays(a.allowanceDays); }}
+                              >
+                                Edit
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                disabled={deleteMutation.isPending}
+                                onClick={() => deleteMutation.mutate(a.id)}
+                              >
+                                Delete
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>
