@@ -6,12 +6,16 @@ import {
   Users,
   Clock,
   ChevronRight,
+  RefreshCw,
+  Settings,
 } from "lucide-react";
 import AdminLayout from "@/shared/components/layout/AdminLayout";
 import { useAuth } from "@/features/auth/AuthContext";
 import { useAdminLocations } from "../hooks/useAdminLocations";
 import { useAdminDashboardStats } from "../hooks/useAdminDashboardStats";
 import { useAdminDashboardAverageTime } from "../hooks/useAdminDashboardAverageTime";
+import { useRefreshCache } from "../hooks/useResourceAllowance";
+import { ResourceAllowanceManager } from "../components/ResourceAllowanceManager";
 import { Progress } from "@/shared/types/enum/progress";
 import {
   Select,
@@ -20,6 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 
 const ALL_SITES_VALUE = "__all__";
 
@@ -144,6 +149,7 @@ export default function AdminHomePage() {
   const { locationsQuery } = useAdminLocations();
   const { query: statsQuery } = useAdminDashboardStats(locationId);
   const { query: avgTimeQuery } = useAdminDashboardAverageTime(locationId);
+  const refreshCache = useRefreshCache();
 
   const stats = statsQuery.data;
   const avgTime = avgTimeQuery.data;
@@ -220,22 +226,36 @@ export default function AdminHomePage() {
               <span className="font-medium text-foreground">{user?.name}</span>
             </p>
           </div>
-          <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <MapPin className="w-3.5 h-3.5 shrink-0" />
-            <span className="shrink-0 text-xs">Site:</span>
-            <Select value={selectValue} onValueChange={handleLocationChange}>
-              <SelectTrigger className="w-44 h-8 text-xs">
-                <SelectValue placeholder="Select site" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={ALL_SITES_VALUE}>All Sites</SelectItem>
-                {locationsQuery.data?.map((loc) => (
-                  <SelectItem key={loc.id} value={String(loc.id)}>
-                    {loc.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 text-xs gap-1.5"
+              disabled={refreshCache.isPending}
+              onClick={() => refreshCache.mutate()}
+            >
+              <RefreshCw
+                className={`w-3.5 h-3.5 ${refreshCache.isPending ? "animate-spin" : ""}`}
+              />
+              {refreshCache.isPending ? "Refreshing…" : "Refresh Employee Cache"}
+            </Button>
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <MapPin className="w-3.5 h-3.5 shrink-0" />
+              <span className="shrink-0 text-xs">Site:</span>
+              <Select value={selectValue} onValueChange={handleLocationChange}>
+                <SelectTrigger className="w-44 h-8 text-xs">
+                  <SelectValue placeholder="Select site" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value={ALL_SITES_VALUE}>All Sites</SelectItem>
+                  {locationsQuery.data?.map((loc) => (
+                    <SelectItem key={loc.id} value={String(loc.id)}>
+                      {loc.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </div>
 
@@ -387,6 +407,22 @@ export default function AdminHomePage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+
+        {/* Admin Settings */}
+        <div className="rounded-xl border border-border bg-card overflow-hidden">
+          <div className="h-0.5 w-full bg-gradient-to-r from-amber-500 to-amber-400" />
+          <div className="flex items-center gap-2 px-6 pt-5 pb-1 text-muted-foreground">
+            <div className="p-1.5 rounded-lg bg-muted">
+              <Settings className="w-3.5 h-3.5" />
+            </div>
+            <span className="text-xs font-semibold uppercase tracking-wider">
+              Admin Settings
+            </span>
+          </div>
+          <div className="px-6 pb-6 pt-4">
+            <ResourceAllowanceManager />
           </div>
         </div>
 
