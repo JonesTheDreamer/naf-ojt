@@ -208,7 +208,7 @@ namespace NAFServer.src.Application.Services
             }
             catch
             {
-                await transaction.RollbackAsync();
+                await transaction?.RollbackAsync();
                 throw;
             }
         }
