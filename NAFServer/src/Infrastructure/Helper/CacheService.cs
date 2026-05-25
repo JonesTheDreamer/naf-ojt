@@ -32,7 +32,16 @@ namespace NAFServer.src.Infrastructure.Helper
         }
         public void Set<T>(string key, T value, TimeSpan? expiration = null)
         {
-            _cache.Set(key, value, expiration ?? TimeSpan.FromMinutes(10));
+            if (expiration.HasValue)
+                _cache.Set(key, value, expiration.Value);
+            else
+                _cache.Set(key, value);
+        }
+
+        public T? Get<T>(string key)
+        {
+            _cache.TryGetValue(key, out T? value);
+            return value;
         }
 
         public void Remove(string key)

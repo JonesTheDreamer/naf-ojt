@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using NAFServer.src.Domain.Entities;
 using NAFServer.src.Domain.Interface.Repository;
 using NAFServer.src.Infrastructure.Helper;
@@ -7,60 +6,59 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
 {
     public class EmployeeRepository : IEmployeeRepository
     {
-        private readonly AppDbContext _context;
         private readonly CacheService _cache;
-        private static readonly TimeSpan EmployeeTtl = TimeSpan.FromHours(4);
+        private const string EmployeeKey = "employees:all";
+        private const string DepartmentKey = "departments:all";
 
-        public EmployeeRepository(AppDbContext context, CacheService cache)
+        public EmployeeRepository(CacheService cache)
         {
-            _context = context;
             _cache = cache;
         }
 
-        public Task<Employee?> GetByIdAsync(string employeeNumber) =>
-            _cache.GetOrSetAsync(
-                $"employee:{employeeNumber}",
-                () => _context.Employees.FindAsync(employeeNumber).AsTask(),
-                new() { AbsoluteExpirationRelativeToNow = EmployeeTtl });
+        private List<Employee> All() =>
+            _cache.Get<List<Employee>>(EmployeeKey) ?? new List<Employee>();
 
-        public Task<List<Employee>> GetEmployeeSubordinates(string employeeNumber) =>
-            _cache.GetOrSetAsync(
-                $"employee-subordinates:{employeeNumber}",
-                () => _context.Employees
-                    .Where(e => e.SupervisorId == employeeNumber || e.DepartmentHeadId == employeeNumber)
-                    .AsNoTracking()
-                    .ToListAsync(),
-                new() { AbsoluteExpirationRelativeToNow = EmployeeTtl });
+        private List<DepartmentView> AllDepts() =>
+            _cache.Get<List<DepartmentView>>(DepartmentKey) ?? new List<DepartmentView>();
 
-        public async Task<List<Employee>> SearchEmployee(string match)
+        public Task<Employee?> GetByIdAsync(string employeeId) =>
+            Task.FromResult(All().FirstOrDefault(e => e.Id == employeeId));
+
+        public Task<Employee?> GetByFullNameAsync(string fullName) =>
+            Task.FromResult(All().FirstOrDefault(e => e.FullName == fullName));
+
+        public Task<List<Employee>> GetSubordinatesAsync(string employeeId)
         {
-            return await _context.Employees
-                .Where(e =>
-                    e.Status == "Active" && (
-                        e.Id.Contains(match) ||
-                        e.LastName.Contains(match) ||
-                        e.FirstName.Contains(match) ||
-                        (e.MiddleName != null && e.MiddleName.Contains(match))
-                    ))
-                .OrderBy(e => e.Id)
-                .AsNoTracking()
-                .ToListAsync();
+            var target = All().FirstOrDefault(e => e.Id == employeeId);
+            if (target is null) return Task.FromResult(new List<Employee>());
+
+            var result = All()
+                .Where(e => e.SupervisorId == employeeId || e.DepartmentHead == target.FullName)
+                .ToList();
+            return Task.FromResult(result);
         }
 
-        // FUTURE: When transitioning from stored procedures to a local DB view,
-        // replace the SP-based methods above with EF queries against the view.
-        // Example for fetching employees by department:
-        //
-        // public async Task<List<Employee>> GetByDepartmentAsync(string departmentCode)
-        // {
-        //     return await _context.Employees
-        //         .FromSqlRaw(
-        //             "SELECT * FROM vw_DepartmentEmployees WHERE DepartmentCode = {0}",
-        //             departmentCode)
-        //         .ToListAsync();
-        // }
-        //
-        // Also update GetByIdAsync and SearchEmployee to query the Employees table
-        // (or view) directly instead of calling stored procedures.
+        public Task<List<Employee>> SearchAsync(string match)
+        {
+            var result = All()
+                .Where(e => e.Status == "Active" && (
+                    e.Id.Contains(match, StringComparison.OrdinalIgnoreCase) ||
+                    e.LastName.Contains(match, StringComparison.OrdinalIgnoreCase) ||
+                    e.FirstName.Contains(match, StringComparison.OrdinalIgnoreCase) ||
+                    (e.MiddleName != null && e.MiddleName.Contains(match, StringComparison.OrdinalIgnoreCase))
+                ))
+                .OrderBy(e => e.Id)
+                .ToList();
+            return Task.FromResult(result);
+        }
+
+        public Task<List<Employee>> GetByDepartmentAsync(string departmentId)
+        {
+            var result = All().Where(e => e.DepartmentId == departmentId).ToList();
+            return Task.FromResult(result);
+        }
+
+        public Task<DepartmentView?> GetDepartmentByIdAsync(string departmentId) =>
+            Task.FromResult(AllDepts().FirstOrDefault(d => d.Id == departmentId));
     }
 }

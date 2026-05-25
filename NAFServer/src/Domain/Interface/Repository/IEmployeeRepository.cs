@@ -4,9 +4,11 @@ namespace NAFServer.src.Domain.Interface.Repository
 {
     public interface IEmployeeRepository
     {
-        Task<Employee?> GetByIdAsync(string employeeNumber);
-        Task<List<Employee>> GetEmployeeSubordinates(string employeeNumber);
-        Task<List<Employee>> SearchEmployee(string match);
-        //public Task<List<Employee>> GetEmployees(List<string> employeeNumbers);
+        Task<Employee?> GetByIdAsync(string employeeId);
+        Task<Employee?> GetByFullNameAsync(string fullName);
+        Task<List<Employee>> GetSubordinatesAsync(string employeeId);
+        Task<List<Employee>> SearchAsync(string match);
+        Task<List<Employee>> GetByDepartmentAsync(string departmentId);
+        Task<DepartmentView?> GetDepartmentByIdAsync(string departmentId);
     }
 }
