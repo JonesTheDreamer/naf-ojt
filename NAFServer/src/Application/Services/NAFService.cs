@@ -115,6 +115,8 @@ namespace NAFServer.src.Application.Services
             var user = await _userRepository.GetUserByEmployeeId(naf.EmployeeId)
                 ?? throw new KeyNotFoundException($"User for employee '{naf.EmployeeId}' not found.");
 
+            var nafEmployee = await _employeeRepository.GetByIdAsync(naf.EmployeeId);
+
             var approverIds = naf.ResourceRequests
                 .SelectMany(rr => rr.ResourceRequestsApprovalSteps)
                 .Select(s => s.ApproverId)
@@ -130,7 +132,7 @@ namespace NAFServer.src.Application.Services
                     approvers[approverId!] = approver;
             }
 
-            return NAFMapper.ToDTO(naf, user.Employee, approvers);
+            return NAFMapper.ToDTO(naf, nafEmployee, approvers);
         }
 
         public async Task<NAFDTO> CreateAsync(CreateNAFRequestDTO request)

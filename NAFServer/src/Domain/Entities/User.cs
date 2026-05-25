@@ -9,7 +9,6 @@
         public DateTime DateAdded { get; set; }
         public DateTime? DateRemoved { get; set; }
         public List<UserRole> UserRoles { get; set; }
-        public Employee Employee { get; set; }
         public User(string EmployeeNumber)
         {
             this.EmployeeNumber = EmployeeNumber;

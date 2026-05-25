@@ -22,14 +22,12 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
         public async Task<List<User>> GetAllUsersInLocationAsync(int locationId)
         {
             return await _context.Users
-                .Include(u => u.Employee)
                 .ToListAsync();
         }
 
         public async Task<User> GetUserById(int userId)
         {
             return await _context.Users
-                .Include(u => u.Employee)
                 .FirstOrDefaultAsync(u => u.Id == userId)
                 ?? throw new KeyNotFoundException("User not found");
         }
@@ -37,7 +35,6 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
         public async Task<User> GetUserByEmployeeId(string employeeId)
         {
             return await _context.Users
-                .Include(u => u.Employee)
                 .Include(u => u.UserRoles
                     .Where(ur => ur.IsActive))
                     .ThenInclude(ur => ur.Role)
@@ -55,7 +52,6 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
         public async Task<User> GetNetworkAdminOfLocation(int locationId)
         {
             return await _context.Users
-                .Include(u => u.Employee)
                 .Where(u => u.UserRoles.Any(r => r.Role.Name == Roles.ADMIN && r.DateRemoved == null))
                 .FirstAsync();
         }
@@ -63,7 +59,6 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
         public async Task<User> ResolveUserByEmployeeId(string employeeNumber)
         {
             return await _context.Users
-                .Include(u => u.Employee)
                 .FirstOrDefaultAsync(u => u.EmployeeNumber == employeeNumber)
                 ?? throw new KeyNotFoundException("User not found");
         }
@@ -74,7 +69,6 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
                 return null;
 
             return await _context.Users
-                .Include(u => u.Employee)
                 .FirstOrDefaultAsync(u =>
                     u.UserRoles.Any(r => r.Role.Name == role && r.DateRemoved == null));
         }
