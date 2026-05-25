@@ -50,9 +50,7 @@
         public async Task<string> GetDepartmentIdAsync()
         {
             var employee = await _employeeRepository.GetByIdAsync(EmployeeId);
-            if (employee == null)
-                throw new KeyNotFoundException($"Employee '{EmployeeId}' not found.");
-            return employee.DepartmentId;
+            return employee?.DepartmentId ?? string.Empty;
         }
 
         public async Task<int> GetLocationIdAsync()
