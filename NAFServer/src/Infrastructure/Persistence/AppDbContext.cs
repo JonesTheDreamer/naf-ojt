@@ -27,16 +27,14 @@ namespace NAFServer.src.Infrastructure.Persistence
         public DbSet<GroupEmailRequestInfo> GroupEmailRequestInfos { get; set; }
         public DbSet<ResourceRequestImplementation> Implementations { get; set; }
         public DbSet<Employee> Employees { get; set; }
-        public DbSet<Department> Departments { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<UserRole> UserRoles { get; set; }
-        public DbSet<UserLocation> UserLocations { get; set; }
-        public DbSet<UserDepartment> UserDepartments { get; set; }
-        public DbSet<DepartmentEmployee> DepartmentEmployees { get; set; }
         public DbSet<ResourceRequestHistory> ResourceRequestHistories { get; set; }
         public DbSet<ResourceGroup> ResourceGroups { get; set; }
         public DbSet<Location> Locations { get; set; }
+        public DbSet<DepartmentView> DepartmentViews { get; set; }
+        public DbSet<ResourceRequestAllowance> ResourceRequestAllowances { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<AuditTrail> AuditTrails { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -79,10 +77,6 @@ namespace NAFServer.src.Infrastructure.Persistence
                         property.SetValueConverter(nullableUtcConverter);
                 }
             }
-
-            // Keyless entities
-            //modelBuilder.Entity<Employee>().HasNoKey();
-            //modelBuilder.Entity<Department>().HasNoKey(); temporarily
 
             modelBuilder.Entity<ResourceRequestAdditionalInfo>()
                 .HasDiscriminator<string>("AdditionalInfoType")
@@ -144,12 +138,6 @@ namespace NAFServer.src.Infrastructure.Persistence
                 .HasForeignKey(n => n.LocationId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-            modelBuilder.Entity<Department>()
-                .HasOne(d => d.DepartmentHead)
-                .WithMany()
-                .HasForeignKey(d => d.DepartmentHeadId)
-                .OnDelete(DeleteBehavior.NoAction);
-
             modelBuilder.Entity<NAF>()
                 .Property(n => n.Progress)
                 .HasConversion<string>();
@@ -178,38 +166,10 @@ namespace NAFServer.src.Infrastructure.Persistence
                 .Property(r => r.Name)
                 .HasConversion<string>();
 
-            //modelBuilder.Entity<Employee>(entity =>
-            //{
-            //    entity.HasKey(e => e.Id);
-            //    entity.ToView("vw_EmployeeLinkPeopleCore");
-            //});
-
-            modelBuilder.Entity<User>()
-                .HasOne(u => u.Employee)
-                .WithMany()
-                .HasForeignKey(u => u.EmployeeNumber)
-                .HasPrincipalKey(e => e.Id);
-
             modelBuilder.Entity<User>()
                 .HasMany(u => u.UserRoles)
                 .WithOne(ur => ur.User)
                 .HasForeignKey(ur => ur.UserId);
-
-            modelBuilder.Entity<User>()
-                .HasMany(u => u.UserDepartments)
-                .WithOne(ud => ud.User)
-                .HasForeignKey(ud => ud.UserId);
-
-            modelBuilder.Entity<DepartmentEmployee>()
-                .HasOne(de => de.Department)
-                .WithMany()
-                .HasForeignKey(de => de.DepartmentId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<User>()
-                .HasMany(u => u.UserLocations)
-                .WithOne(ul => ul.User)
-                .HasForeignKey(ul => ul.UserId);
 
             modelBuilder.Entity<Notification>()
                 .HasOne(n => n.User)
@@ -220,6 +180,42 @@ namespace NAFServer.src.Infrastructure.Persistence
             modelBuilder.Entity<SharedFolder>()
                 .Property(sf => sf.IsActive)
                 .HasDefaultValue(true);
+
+            // Employee view (keyless)
+            modelBuilder.Entity<Employee>()
+                .HasNoKey()
+                .ToView("vw_Employees");
+
+            modelBuilder.Entity<Employee>()
+                .Property(e => e.Id).HasColumnName("EmployeeNumber");
+
+            modelBuilder.Entity<Employee>()
+                .Property(e => e.DepartmentId).HasColumnName("DepartmentCode");
+
+            // DepartmentView (keyless)
+            modelBuilder.Entity<DepartmentView>()
+                .HasNoKey()
+                .ToView("vw_Departments");
+
+            modelBuilder.Entity<DepartmentView>()
+                .Property(d => d.Id).HasColumnName("DepartmentCode");
+
+            // ResourceRequestAllowance
+            modelBuilder.Entity<ResourceRequestAllowance>()
+                .HasOne(a => a.Resource)
+                .WithMany()
+                .HasForeignKey(a => a.ResourceId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ResourceRequestAllowance>()
+                .HasOne(a => a.Location)
+                .WithMany()
+                .HasForeignKey(a => a.LocationId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ResourceRequestAllowance>()
+                .HasIndex(a => new { a.ResourceId, a.LocationId })
+                .IsUnique();
         }
 
         public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
