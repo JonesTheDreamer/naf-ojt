@@ -29,6 +29,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
 
         public Task<ResourceRequestAllowance?> GetByResourceAndLocationAsync(int resourceId, int locationId) =>
             _context.ResourceRequestAllowances
+                .AsNoTracking()
                 .FirstOrDefaultAsync(a => a.ResourceId == resourceId && a.LocationId == locationId);
 
         public async Task<ResourceRequestAllowance> CreateAsync(int resourceId, int locationId, int allowanceDays)
@@ -36,7 +37,10 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
             var allowance = new ResourceRequestAllowance(resourceId, locationId, allowanceDays);
             _context.ResourceRequestAllowances.Add(allowance);
             await _context.SaveChangesAsync();
-            return allowance;
+            return await _context.ResourceRequestAllowances
+                .Include(a => a.Resource)
+                .Include(a => a.Location)
+                .FirstAsync(a => a.Id == allowance.Id);
         }
 
         public async Task<ResourceRequestAllowance> UpdateAsync(int id, int allowanceDays)
