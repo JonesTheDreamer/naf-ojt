@@ -5,13 +5,14 @@
         public int Id { get; set; }
         public string Name { get; set; }
         public bool IsActive { get; set; }
-        public List<User> Users { get; set; }
-        public List<NAF> NAFs { get; set; }
+        public bool AllowWeekendDateNeeded { get; set; }
+        public List<NAF> NAFs { get; set; } = new();
 
         public Location(string name)
         {
             Name = name;
             IsActive = true;
+            AllowWeekendDateNeeded = true;
         }
 
         public Location SetToInactive()
