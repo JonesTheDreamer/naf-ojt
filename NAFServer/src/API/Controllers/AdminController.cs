@@ -92,8 +92,10 @@ namespace NAFServer.src.API.Controllers
         }
 
         [HttpPost("cache/refresh")]
-        public async Task<IActionResult> RefreshCache([FromServices] EmployeeCacheHostedService cacheService)
+        public async Task<IActionResult> RefreshCache([FromServices] IEnumerable<IHostedService> hostedServices)
         {
+            var cacheService = hostedServices.OfType<EmployeeCacheHostedService>().FirstOrDefault();
+            if (cacheService is null) return StatusCode(503, "Cache service unavailable.");
             await cacheService.RefreshAsync();
             return NoContent();
         }
