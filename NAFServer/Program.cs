@@ -124,6 +124,8 @@ builder.Services.AddHostedService<AuditWorker>();
 builder.Services.AddSignalR();
 builder.Services.AddScoped<INotificationRepository, NotificationRepository>();
 builder.Services.AddScoped<INotificationService, NotificationService>();
+builder.Services.AddScoped<IResourceRequestAllowanceRepository, ResourceRequestAllowanceRepository>();
+builder.Services.AddScoped<IResourceRequestAllowanceService, ResourceRequestAllowanceService>();
 
 var app = builder.Build();
 
