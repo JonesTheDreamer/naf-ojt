@@ -10,11 +10,17 @@ export class ApiError extends Error {
   }
 
   static fromAxios(error: AxiosError): ApiError {
-    const data = error.response?.data as Record<string, string> | undefined;
+    const data = error.response?.data as Record<string, unknown> | undefined;
+    const serverMessage =
+      typeof data?.error === "string"
+        ? data.error
+        : typeof data?.message === "string"
+          ? data.message
+          : undefined;
     const message =
-      data?.error ??
-      data?.message ??
+      serverMessage ??
       error.response?.statusText ??
+      error.message ??
       "Something went wrong.";
     const status = error.response?.status ?? 0;
     return new ApiError(message, status);
