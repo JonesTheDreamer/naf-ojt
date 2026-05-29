@@ -91,9 +91,10 @@ export const useNAF = ({ employeeId, nafId }: UseNAFParams) => {
 
   const deactivate = useMutation({
     mutationFn: (id: string) => deactivateNAF(id),
-    onSuccess: () => {
+    onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
       queryClient.invalidateQueries({ queryKey: ["employeeNAF"] });
+      queryClient.invalidateQueries({ queryKey: ["naf", id] });
       toast.success("NAF deactivated");
     },
   });
@@ -106,6 +107,7 @@ export const useNAF = ({ employeeId, nafId }: UseNAFParams) => {
     createError: createNAFMutation.isError,
     deactivateNAFAsync: deactivate.mutateAsync,
     deactivateNAFError: deactivate.isError,
+    isDeactivating: deactivate.isPending,
     isLoading: nafQuery.isLoading || employeeNAFs.isLoading,
     isError: nafQuery.isError || employeeNAFs.isLoading,
   };

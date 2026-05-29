@@ -48,7 +48,13 @@
       "PowerShell(grep *)",
       "Skill(superpowers:writing-plans)",
       "Skill(superpowers:subagent-driven-development)",
-      "Skill(superpowers:verification-before-completion)"
+      "Skill(superpowers:verification-before-completion)",
+      "Bash(Remove-Item \"C:\\\\Users\\\\rgheradura\\\\Desktop\\\\naf-ojt\\\\NAFClient\\\\src\\\\features\\\\admin\\\\departments\\\\components\\\\AddDepartmentDialog.tsx\")",
+      "Bash(Remove-Item \"C:\\\\Users\\\\rgheradura\\\\Desktop\\\\naf-ojt\\\\NAFClient\\\\src\\\\features\\\\admin\\\\departments\\\\components\\\\ChangeDepartmentHeadDialog.tsx\")",
+      "Bash(Remove-Item \"C:\\\\Users\\\\rgheradura\\\\Desktop\\\\naf-ojt\\\\NAFClient\\\\src\\\\features\\\\admin\\\\departments\\\\components\\\\AddDepartmentEmployeeDialog.tsx\")",
+      "Bash(dotnet run *)",
+      "Bash(curl -s http://localhost:5186/api/admin/departments)",
+      "Bash(kill %1)"
     ]
   }
 }

@@ -26,7 +26,7 @@ interface NAFTableContainerProps {
 
   // Search
   fetchEmployeeResults: (query: string) => Promise<Employee[]>;
-  onEmployeeSelect: (employee: Employee | null) => void;
+  onEmployeeSelect: (employee: Employee) => void;
 
   // Row interaction
   onRowClick?: (naf: NAF) => void;
@@ -53,10 +53,7 @@ export function NAFTableContainer({
           <SearchBar<Employee>
             placeholder="Enter NAF Reference Number / Employee Name"
             fetchResults={fetchEmployeeResults}
-            onSelect={(emp: Employee) => {
-              onEmployeeSelect(emp);
-              onPageChange(1);
-            }}
+            onSelect={(emp: Employee) => onEmployeeSelect(emp)}
             getKey={(emp: Employee) => emp.id}
             getValue={(emp: Employee) =>
               `${emp.lastName}, ${emp.firstName} ${emp.middleName ?? ""}`

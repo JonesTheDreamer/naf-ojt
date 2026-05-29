@@ -112,9 +112,6 @@ namespace NAFServer.src.Application.Services
 
             await AuthorizeNAFAccessAsync(naf);
 
-            var user = await _userRepository.GetUserByEmployeeId(naf.EmployeeId)
-                ?? throw new KeyNotFoundException($"User for employee '{naf.EmployeeId}' not found.");
-
             var nafEmployee = await _employeeRepository.GetByIdAsync(naf.EmployeeId);
 
             var approverIds = naf.ResourceRequests

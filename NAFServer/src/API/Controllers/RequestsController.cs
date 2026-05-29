@@ -37,9 +37,9 @@ namespace NAFServer.src.API.Controllers
         }
 
         [HttpPost("change-resource/{requestId:guid}")]
-        public async Task<IActionResult> ChangeResource(Guid requestId, [FromBody] int newResource)
+        public async Task<IActionResult> ChangeResource(Guid requestId, [FromBody] ChangeResourceDTO dto)
         {
-            var rr = await _resourceRequestService.ChangeResourceAsync(requestId, newResource);
+            var rr = await _resourceRequestService.ChangeResourceAsync(requestId, dto);
             return Ok(new
             {
                 success = true,

@@ -132,10 +132,10 @@ function RequestItemWrapper({
 
   const handleChangeResource = async (
     _requestId: string,
-    newResourceId: number,
+    payload: { resourceId: number; purpose?: string; dateNeeded?: string | null },
   ) => {
     try {
-      await changeResourceAsync(newResourceId);
+      await changeResourceAsync(payload);
     } catch (error) {
       console.error("Failed to change resource:", error);
     }

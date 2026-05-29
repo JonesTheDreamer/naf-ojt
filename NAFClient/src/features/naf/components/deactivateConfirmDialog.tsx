@@ -15,6 +15,7 @@ interface DeactivateConfirmDialogProps {
   resourceName: string;
   onConfirm: () => void;
   isSubmitting?: boolean;
+  description?: string;
 }
 
 export function DeactivateConfirmDialog({
@@ -23,6 +24,7 @@ export function DeactivateConfirmDialog({
   resourceName,
   onConfirm,
   isSubmitting,
+  description,
 }: DeactivateConfirmDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -32,9 +34,13 @@ export function DeactivateConfirmDialog({
             Deactivate Resource Access
           </DialogTitle>
           <DialogDescription>
-            Are you sure you want to deactivate{" "}
-            <span className="font-semibold text-foreground">{resourceName}</span>{" "}
-            access? This will mark it as no longer needed.
+            {description ?? (
+              <>
+                Are you sure you want to deactivate{" "}
+                <span className="font-semibold text-foreground">{resourceName}</span>{" "}
+                access? This will mark it as no longer needed.
+              </>
+            )}
           </DialogDescription>
         </DialogHeader>
 

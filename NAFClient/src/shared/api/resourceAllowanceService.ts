@@ -21,6 +21,11 @@ export const resourceAllowanceService = {
   delete: (id: number) =>
     api.delete(`/admin/resource-allowances/${id}`),
 
+  getByResourceId: (resourceId: number) =>
+    api
+      .get<ResourceRequestAllowance[]>("/admin/resource-allowances")
+      .then((r) => r.data.filter((a) => a.resourceId === resourceId)),
+
   getForResourceAndLocation: (resourceId: number, locationId: number) =>
     api
       .get<ResourceRequestAllowance[]>("/admin/resource-allowances")

@@ -116,7 +116,7 @@ namespace NAFServer.Migrations
 
                     b.ToTable((string)null);
 
-                    b.ToView("vw_Departments", (string)null);
+                    b.ToView("vw_DepartmentDetails", (string)null);
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.Employee", b =>
@@ -172,7 +172,7 @@ namespace NAFServer.Migrations
 
                     b.ToTable((string)null);
 
-                    b.ToView("vw_Employees", (string)null);
+                    b.ToView("vw_EmployeeDetails", (string)null);
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.GroupEmail", b =>

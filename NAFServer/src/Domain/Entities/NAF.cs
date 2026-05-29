@@ -68,7 +68,13 @@ namespace NAFServer.src.Domain.Entities
             return false;
         }
 
-        public NAF DeactivateNAF() { IsActive = false; return this; }
+        public NAF DeactivateNAF()
+        {
+            IsActive = false;
+            foreach (var rr in ResourceRequests.Where(r => r.IsActive))
+                rr.DeactivateResourceRequest();
+            return this;
+        }
         public NAF ActivateNAF() { IsActive = true; return this; }
     }
 }

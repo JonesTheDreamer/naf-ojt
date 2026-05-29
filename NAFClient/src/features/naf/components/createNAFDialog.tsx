@@ -36,7 +36,7 @@ const NO_HARDWARE_AUTO_ADD = ["Active Directory"];
 
 function EmployeeCard({ employee }: { employee: Employee }) {
   const initials =
-    `${employee.firstName[0] ?? ""}${employee.lastName[0] ?? ""}`.toUpperCase();
+    `${employee.firstName?.[0] ?? ""}${employee.lastName?.[0] ?? ""}`.toUpperCase();
   return (
     <div className="rounded-xl border border-amber-100 bg-white p-4 shadow-sm">
       <div className="flex items-start gap-3">
@@ -98,7 +98,9 @@ interface CreateNAFDialogProps {
   initialEmployee?: Employee;
 }
 
-export function CreateNAFDialog({ initialEmployee }: CreateNAFDialogProps = {}) {
+export function CreateNAFDialog({
+  initialEmployee,
+}: CreateNAFDialogProps = {}) {
   const { user } = useAuth();
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(
     initialEmployee ?? null,

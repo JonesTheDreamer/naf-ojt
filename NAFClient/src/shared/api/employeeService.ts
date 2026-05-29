@@ -9,3 +9,16 @@ export const searchEmployees = async (match: string): Promise<Employee[]> => {
     return [];
   }
 };
+
+export const searchDepartmentEmployees = async (
+  employeeId: string,
+  match: string,
+): Promise<Employee[]> => {
+  try {
+    return (await api.get(`/employees/${employeeId}/department/search/${match}`))
+      .data;
+  } catch (error) {
+    console.log(error);
+    return [];
+  }
+};

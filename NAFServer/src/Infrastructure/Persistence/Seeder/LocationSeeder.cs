@@ -1,5 +1,4 @@
 using NAFServer.src.Domain.Entities;
-using NAFServer.src.Infrastructure.Persistence;
 
 namespace NAFServer.src.Infrastructure.Persistence.Seeder
 {
@@ -10,8 +9,8 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
             var locations = new[]
             {
                 new { Name = "MAKATI",  AllowWeekend = false },
-                new { Name = "ANTIQUE", AllowWeekend = false },
-                new { Name = "CALACA",  AllowWeekend = false },
+                new { Name = "ANTIQUE", AllowWeekend = true },
+                new { Name = "CALACA",  AllowWeekend = true },
             };
 
             foreach (var loc in locations)

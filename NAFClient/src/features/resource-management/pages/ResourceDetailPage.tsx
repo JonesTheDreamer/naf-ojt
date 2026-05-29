@@ -6,6 +6,7 @@ import { useAdminResourceDetail, useDeactivateResource } from "../hooks/useResou
 import { WorkflowTemplateVersions } from "../components/WorkflowTemplateVersions";
 import { AddWorkflowTemplateDialog } from "../components/AddWorkflowTemplateDialog";
 import { EmployeesByLocation } from "../components/EmployeesByLocation";
+import { ResourceAllowanceSection } from "../components/ResourceAllowanceSection";
 
 export default function ResourceDetailPage() {
   const { resourceId } = useParams<{ resourceId: string }>();
@@ -155,27 +156,30 @@ export default function ResourceDetailPage() {
 
         {/* Two-column body */}
         <div className="max-w-5xl mx-auto px-6 py-6">
-          <div className={`gap-6 ${resource.isSpecial ? "grid lg:grid-cols-[1fr_1.2fr]" : ""}`}>
-            {/* Left column: Workflow Templates (special only) */}
-            {resource.isSpecial && (
-              <section className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Workflow Templates</h2>
+          <div className="grid lg:grid-cols-[1fr_1.2fr] gap-6">
+            {/* Left column: Workflow Templates (special only) + Request Lead Time */}
+            <div className="space-y-6">
+              {resource.isSpecial && (
+                <section className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">Workflow Templates</h2>
+                    </div>
+                    <button
+                      onClick={() => setTemplateDialogOpen(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold hover:bg-muted transition-colors"
+                    >
+                      <GitBranch className="h-3.5 w-3.5" />
+                      New Version
+                    </button>
                   </div>
-                  <button
-                    onClick={() => setTemplateDialogOpen(true)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold hover:bg-muted transition-colors"
-                  >
-                    <GitBranch className="h-3.5 w-3.5" />
-                    New Version
-                  </button>
-                </div>
-                <WorkflowTemplateVersions versions={resource.workflowVersions} />
-              </section>
-            )}
+                  <WorkflowTemplateVersions versions={resource.workflowVersions} />
+                </section>
+              )}
+              <ResourceAllowanceSection resourceId={id} />
+            </div>
 
-            {/* Right column: Active Employees */}
+            {/* Right column: Active Requests */}
             <section className="space-y-3">
               <h2 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
                 Active Requests

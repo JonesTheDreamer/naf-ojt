@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ProgressStatus } from "@/shared/types/api/naf";
 import RequestorLayout from "@/shared/components/layout/RequestorLayout";
@@ -5,6 +6,7 @@ import { useNAF } from "../hooks/useNAF";
 import { useAuth } from "@/features/auth/AuthContext";
 import { NAFDetailHeader } from "../components/NAFDetailHeader";
 import { ResourceRequestList } from "../components/ResourceRequestList";
+import { DeactivateConfirmDialog } from "../components/deactivateConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { RoutesEnum } from "@/app/routesEnum";
 import { ChevronLeft } from "lucide-react";
@@ -74,18 +76,21 @@ export default function NAFDetailPage() {
   const { nafId } = useParams<{ nafId: string }>();
   const { user } = useAuth();
   const currentUserId = user?.employeeId ?? "";
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const {
     nafQuery: naf,
     isLoading,
     isError,
     deactivateNAFAsync,
+    isDeactivating,
   } = useNAF({ nafId });
 
   const handleDeactivateNAF = async () => {
     if (!nafId) return;
     try {
       await deactivateNAFAsync(nafId);
+      setConfirmOpen(false);
     } catch (error) {
       console.error("Failed to deactivate NAF:", error);
     }
@@ -158,7 +163,15 @@ export default function NAFDetailPage() {
             {/* ── Employee + NAF detail ─────────────────────────────── */}
             <NAFDetailHeader
               naf={naf.data}
-              onDeactivate={handleDeactivateNAF}
+              onDeactivate={() => setConfirmOpen(true)}
+            />
+            <DeactivateConfirmDialog
+              open={confirmOpen}
+              onOpenChange={setConfirmOpen}
+              resourceName={naf.data.reference}
+              description={`Deactivating ${naf.data.reference} will also deactivate all active resource requests under this NAF. This cannot be undone without manually reactivating each request.`}
+              onConfirm={handleDeactivateNAF}
+              isSubmitting={isDeactivating}
             />
 
             {/* ── Resource requests ─────────────────────────────────── */}

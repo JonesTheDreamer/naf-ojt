@@ -15,5 +15,8 @@ namespace NAFServer.src.Application.Services
 
         public Task<List<Employee>> SearchEmployee(string match) =>
             _employeeRepository.SearchAsync(match);
+
+        public Task<List<Employee>> SearchInDepartment(string employeeId, string match) =>
+            _employeeRepository.SearchInDepartmentAsync(employeeId, match);
     }
 }

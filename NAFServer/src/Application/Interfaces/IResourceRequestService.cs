@@ -10,7 +10,7 @@ namespace NAFServer.src.Application.Interfaces
         public Task<ResourceRequestDTO> GetByIdAsync(Guid id);
         public Task<List<ResourceRequestApprovalStep>> FetchApproversAsync(ResourceRequest request);
         public Task<ResourceRequestDTO> EditPurposeAsync(Guid requestId, EditPurposeDTO request);
-        public Task<ResourceRequestDTO> ChangeResourceAsync(Guid requestId, int newResource);
+        public Task<ResourceRequestDTO> ChangeResourceAsync(Guid requestId, ChangeResourceDTO dto);
         public Task<ResourceRequestDTO> DeactivateAsync(Guid requestId);
         public Task DeleteAsync(Guid id);
         public Task CancelAsync(Guid id);

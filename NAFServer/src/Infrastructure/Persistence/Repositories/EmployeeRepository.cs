@@ -21,7 +21,7 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
         private Task<List<Employee>> GetAllAsync() =>
             _cache.GetOrSetAsync(EmployeeKey, () => _context.Employees.AsNoTracking().ToListAsync());
 
-        private Task<List<DepartmentView>> GetAllDeptsAsync() =>
+        private Task<List<Department>> GetAllDeptsAsync() =>
             _cache.GetOrSetAsync(DepartmentKey, () => _context.DepartmentViews.AsNoTracking().ToListAsync());
 
         public async Task<Employee?> GetByIdAsync(string employeeId)
@@ -68,21 +68,42 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
                 .ToList();
         }
 
+        public async Task<List<Employee>> SearchInDepartmentAsync(string employeeId, string match)
+        {
+            var all = await GetAllAsync();
+            var target = all.FirstOrDefault(e => e.Id == employeeId);
+            if (target is null) return [];
+
+            return all
+                .Where(e => e.Status == "Active" &&
+                            e.DepartmentId == target.DepartmentId &&
+                           (
+                                e.Id.Contains(match, StringComparison.OrdinalIgnoreCase) ||
+                                e.LastName.Contains(match, StringComparison.OrdinalIgnoreCase) ||
+                                e.FirstName.Contains(match, StringComparison.OrdinalIgnoreCase) ||
+                                (e.MiddleName != null && e.MiddleName.Contains(match, StringComparison.OrdinalIgnoreCase))
+                            ))
+                .OrderBy(e => e.LastName)
+                .ThenBy(e => e.FirstName)
+                .ToList();
+        }
+
         public async Task<List<Employee>> GetByDepartmentAsync(string departmentId)
         {
             var all = await GetAllAsync();
             return all.Where(e => e.DepartmentId == departmentId).ToList();
         }
 
-        public async Task<DepartmentView?> GetDepartmentByIdAsync(string departmentId)
+        public async Task<Department?> GetDepartmentByIdAsync(string departmentId)
         {
             var all = await GetAllDeptsAsync();
             return all.FirstOrDefault(d => d.Id == departmentId);
         }
 
-        public async Task<List<DepartmentView>> GetAllDepartmentsAsync()
+        public async Task<List<Department>> GetAllDepartmentsAsync()
         {
-            return await GetAllDeptsAsync();
+            var all = await GetAllDeptsAsync();
+            return all;
         }
     }
 }

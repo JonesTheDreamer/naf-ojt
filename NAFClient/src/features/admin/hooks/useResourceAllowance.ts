@@ -12,6 +12,13 @@ export const useResourceAllowances = () =>
     queryFn: resourceAllowanceService.getAll,
   });
 
+export const useResourceAllowancesByResource = (resourceId: number) =>
+  useQuery({
+    queryKey: ["resource-allowances", resourceId],
+    queryFn: () => resourceAllowanceService.getByResourceId(resourceId),
+    enabled: resourceId > 0,
+  });
+
 export const useCreateAllowance = () => {
   const qc = useQueryClient();
   return useMutation({

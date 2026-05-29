@@ -12,8 +12,8 @@ using NAFServer.src.Infrastructure.Persistence;
 namespace NAFServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260525044014_ViewRestructure_DropDeptUserLocUserDept_AddAllowance")]
-    partial class ViewRestructure_DropDeptUserLocUserDept_AddAllowance
+    [Migration("20260525082220_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -119,7 +119,7 @@ namespace NAFServer.Migrations
 
                     b.ToTable((string)null);
 
-                    b.ToView("vw_Departments", (string)null);
+                    b.ToView("vw_DepartmentDetails", (string)null);
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.Employee", b =>
@@ -175,7 +175,7 @@ namespace NAFServer.Migrations
 
                     b.ToTable((string)null);
 
-                    b.ToView("vw_Employees", (string)null);
+                    b.ToView("vw_EmployeeDetails", (string)null);
                 });
 
             modelBuilder.Entity("NAFServer.src.Domain.Entities.GroupEmail", b =>

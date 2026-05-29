@@ -1,4 +1,3 @@
-using Microsoft.EntityFrameworkCore;
 using NAFServer.src.Domain.Entities;
 using NAFServer.src.Domain.Enums;
 
@@ -20,50 +19,24 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
 
             await context.SaveChangesAsync();
 
-            var employees = await context.Employees.ToListAsync();
-            var roleMap = await context.Roles.ToDictionaryAsync(r => r.Name, r => r.Id);
+            var user = new User("9081429");
 
-            var users = new List<User>();
+            context.Users.Add(user);
 
-            foreach (var emp in employees)
-            {
-                var user = new User(emp.Id);
-                users.Add(user);
-            }
-
-            await context.Users.AddRangeAsync(users);
             await context.SaveChangesAsync();
 
-            var userRoles = new List<UserRole>();
+            context.UserRoles.AddRange(
+                [
+                    new UserRole(user.Id, 1),
+                    new UserRole(user.Id, 2),
+                    new UserRole(user.Id, 3),
+                    new UserRole(user.Id, 3),
+                ]
+            );
 
-            foreach (var emp in employees)
-            {
-                var user = users.First(x => x.EmployeeNumber == emp.Id);
-
-                var roleEnum = DetermineRole(emp.Position);
-                var roleId = roleMap[roleEnum];
-
-                userRoles.Add(new UserRole(user.Id, roleId));
-
-                if (emp.Position == "Network Administrator")
-                {
-                    userRoles.Add(new UserRole(user.Id, roleMap[Roles.REQUESTOR_APPROVER]));
-                }
-            }
-
-            await context.UserRoles.AddRangeAsync(userRoles);
             await context.SaveChangesAsync();
         }
 
-        private static Roles DetermineRole(string? position)
-        {
-            if (position == "IT Director" || position == "Network Administrator")
-                return Roles.ADMIN;
 
-            if (position == "HR Director" || position == "Talent Acquisition Manager" || position == "HR Operations Manager")
-                return Roles.HR;
-
-            return Roles.REQUESTOR_APPROVER;
-        }
     }
 }

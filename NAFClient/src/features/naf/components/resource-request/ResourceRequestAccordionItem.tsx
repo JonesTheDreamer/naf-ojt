@@ -71,7 +71,7 @@ interface ResourceRequestAccordionItemProps {
     purpose: PurposeProps,
   ) => void;
   onCancel?: (requestId: string) => void;
-  onChangeResource?: (requestId: string, newResourceId: number) => void;
+  onChangeResource?: (requestId: string, payload: { resourceId: number; purpose?: string; dateNeeded?: string | null }) => void;
   onApprove?: (requestId: string, remarks: string) => void;
   onReject?: (requestId: string, reasonForRejection: string) => void;
   onClaim?: (stepId: string) => void;
@@ -389,8 +389,8 @@ export function ResourceRequestAccordionItem({
         onOpenChange={setChangeResourceDialogOpen}
         currentResourceName={request.resource.name}
         availableResources={groupResources}
-        onConfirm={(newResourceId) => {
-          onChangeResource?.(request.id, newResourceId);
+        onConfirm={(payload) => {
+          onChangeResource?.(request.id, payload);
           setChangeResourceDialogOpen(false);
         }}
         isSubmitting={isSubmitting}

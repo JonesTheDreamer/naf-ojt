@@ -33,7 +33,7 @@ namespace NAFServer.src.Infrastructure.Persistence
         public DbSet<ResourceRequestHistory> ResourceRequestHistories { get; set; }
         public DbSet<ResourceGroup> ResourceGroups { get; set; }
         public DbSet<Location> Locations { get; set; }
-        public DbSet<DepartmentView> DepartmentViews { get; set; }
+        public DbSet<Department> DepartmentViews { get; set; }
         public DbSet<ResourceRequestAllowance> ResourceRequestAllowances { get; set; }
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<AuditTrail> AuditTrails { get; set; }
@@ -184,7 +184,7 @@ namespace NAFServer.src.Infrastructure.Persistence
             // Employee view (keyless)
             modelBuilder.Entity<Employee>()
                 .HasNoKey()
-                .ToView("vw_Employees");
+                .ToView("vw_EmployeeDetails");
 
             modelBuilder.Entity<Employee>()
                 .Property(e => e.Id).HasColumnName("EmployeeNumber");
@@ -193,12 +193,12 @@ namespace NAFServer.src.Infrastructure.Persistence
                 .Property(e => e.DepartmentId).HasColumnName("DepartmentCode");
 
             // DepartmentView (keyless)
-            modelBuilder.Entity<DepartmentView>()
+            modelBuilder.Entity<Department>()
                 .HasNoKey()
-                .ToView("vw_Departments");
+                .ToView("vw_DepartmentDetails");
 
-            modelBuilder.Entity<DepartmentView>()
-                .Property(d => d.Id).HasColumnName("DepartmentCode");
+            modelBuilder.Entity<Department>()
+                .Property(d => d.Id).HasColumnName("DepartmentId");
 
             // ResourceRequestAllowance
             modelBuilder.Entity<ResourceRequestAllowance>()

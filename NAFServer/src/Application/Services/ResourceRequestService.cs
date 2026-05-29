@@ -456,10 +456,10 @@ namespace NAFServer.src.Application.Services
             return ResourceRequestMapper.ToDTO(rr);
         }
 
-        public async Task<ResourceRequestDTO> ChangeResourceAsync(Guid requestId, int newResource)
+        public async Task<ResourceRequestDTO> ChangeResourceAsync(Guid requestId, ChangeResourceDTO changeDto)
         {
             var rr = await _resourceRequestRepository.GetByIdAsync(requestId);
-            var resource = await _resourceRepository.GetResourceByIdAsync(newResource);
+            var resource = await _resourceRepository.GetResourceByIdAsync(changeDto.ResourceId);
 
             if (!resource.IsActive)
             {
@@ -480,13 +480,19 @@ namespace NAFServer.src.Application.Services
 
             try
             {
+                var purpose = resource.IsSpecial && !string.IsNullOrWhiteSpace(changeDto.Purpose)
+                    ? changeDto.Purpose
+                    : $"Change from {rr.Resource.Name} to {resource.Name}";
+
+                var dateNeeded = changeDto.DateNeeded ?? rr.DateNeeded;
+
                 var dto = new CreateResourceRequestDTO
                 (
                     rr.NAFId,
-                    newResource,
-                    $"Change from {rr.Resource.Name} to {resource.Name}",
+                    changeDto.ResourceId,
+                    purpose,
                     null,
-                    rr.DateNeeded
+                    dateNeeded
                 );
 
                 if (rr.Progress == Progress.ACCOMPLISHED)

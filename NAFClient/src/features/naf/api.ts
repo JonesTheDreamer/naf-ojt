@@ -78,9 +78,9 @@ export const editResourceRequestPurpose = async (
 
 export const changeResource = async (
   resourceRequestId: string,
-  resourceId: number,
+  payload: { resourceId: number; purpose?: string; dateNeeded?: string | null },
 ): Promise<ResourceRequest> => {
-  return (await api.post(`/Requests/change-resource/${resourceRequestId}`, resourceId)).data;
+  return (await api.post(`/Requests/change-resource/${resourceRequestId}`, payload)).data;
 };
 
 export const deleteResourceRequest = async (resourceRequest: string): Promise<void> => {
