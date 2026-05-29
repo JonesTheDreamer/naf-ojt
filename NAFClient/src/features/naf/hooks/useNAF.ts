@@ -9,7 +9,6 @@ import {
   deactivateNAF,
 } from "../api";
 import { toast } from "sonner";
-
 import type { NAF } from "@/shared/types/api/naf";
 import type { PagedResult } from "@/shared/types/common/pagedResult";
 
@@ -60,12 +59,10 @@ export const useNAF = ({ employeeId, nafId }: UseNAFParams) => {
       const queries = queryClient.getQueriesData<PagedResult<NAF>>({
         queryKey: ["nafs"],
       });
-
       for (const [, data] of queries) {
         const found = data?.data.find((n) => n.id === nafId);
         if (found) return found;
       }
-
       return undefined;
     },
   });
@@ -90,9 +87,6 @@ export const useNAF = ({ employeeId, nafId }: UseNAFParams) => {
       queryClient.invalidateQueries({ queryKey: ["hr", "nafs"] });
       toast.success("NAF created successfully");
     },
-    onError: () => {
-      toast.error("Failed to create NAF");
-    },
   });
 
   const deactivate = useMutation({
@@ -101,9 +95,6 @@ export const useNAF = ({ employeeId, nafId }: UseNAFParams) => {
       queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
       queryClient.invalidateQueries({ queryKey: ["employeeNAF"] });
       toast.success("NAF deactivated");
-    },
-    onError: () => {
-      toast.error("Failed to deactivate NAF");
     },
   });
 

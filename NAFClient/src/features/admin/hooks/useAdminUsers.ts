@@ -12,14 +12,12 @@ export function useAdminUsers() {
     mutationFn: ({ employeeId, role, locationId }: { employeeId: string; role: string; locationId: number }) =>
       adminApi.createUser(employeeId, { role, locationId }),
     onSuccess: () => { invalidateUsers(); toast.success("User added"); },
-    onError: () => toast.error("Failed to add user"),
   });
 
   const addRoleMutation = useMutation({
     mutationFn: ({ userId, role }: { userId: number; role: string }) =>
       adminApi.addRole(userId, role),
     onSuccess: () => { invalidateUsers(); toast.success("Role assigned"); },
-    onError: () => toast.error("Failed to assign role"),
   });
 
   const removeRoleMutation = useMutation({
@@ -30,7 +28,6 @@ export function useAdminUsers() {
       return adminApi.removeRole(userId, target.roleId);
     },
     onSuccess: () => { invalidateUsers(); toast.success("Role removed"); },
-    onError: () => toast.error("Failed to remove role"),
   });
 
   return { createUserMutation, addRoleMutation, removeRoleMutation };

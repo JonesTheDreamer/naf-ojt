@@ -24,7 +24,6 @@ export const useResourceRequest = (
     onSuccess: (updatedRequest) => {
       queryClient.setQueryData<NAF | undefined>(["naf", NAFId], (oldNAF) => {
         if (!oldNAF) return oldNAF;
-
         return {
           ...oldNAF,
           resourceRequests: oldNAF.resourceRequests.map((req) =>
@@ -34,7 +33,6 @@ export const useResourceRequest = (
       });
       toast.success("Purpose updated");
     },
-    onError: () => toast.error("Failed to update purpose"),
   });
 
   const removeResourceRequest = useMutation({
@@ -45,30 +43,26 @@ export const useResourceRequest = (
       queryClient.invalidateQueries({ queryKey: ["approverNAFs"] });
       toast.success("Resource removed");
     },
-    onError: () => toast.error("Failed to remove resource"),
   });
 
   const changeResourceRequest = useMutation({
-    mutationFn: (resourceId: number) =>
-      changeResource(resourceRequestId, resourceId),
+    mutationFn: (payload: { resourceId: number; purpose?: string; dateNeeded?: string | null }) =>
+      changeResource(resourceRequestId, payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["naf", NAFId] });
       toast.success("Resource request changed!");
     },
-    onError: () => toast.error("Failed to remove resource"),
   });
 
   const approveRequest = useMutation({
     mutationFn: ({ stepId, comment }: { stepId: string; comment?: string }) =>
       approveResourceRequest(stepId, comment),
-
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["naf", NAFId] });
       queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
       queryClient.invalidateQueries({ queryKey: ["approverNAFs"] });
       toast.success("Request approved");
     },
-    onError: () => toast.error("Failed to approve request"),
   });
 
   const rejectRequest = useMutation({
@@ -79,14 +73,12 @@ export const useResourceRequest = (
       stepId: string;
       reasonForRejection: string;
     }) => rejectResourceRequest(stepId, reasonForRejection),
-
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["naf", NAFId] });
       queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
       queryClient.invalidateQueries({ queryKey: ["approverNAFs"] });
       toast.success("Request rejected");
     },
-    onError: () => toast.error("Failed to reject request"),
   });
 
   const cancelRequest = useMutation({
@@ -96,7 +88,6 @@ export const useResourceRequest = (
       queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
       toast.success("Request cancelled");
     },
-    onError: () => toast.error("Failed to cancel request"),
   });
 
   const deactivateRequest = useMutation({
@@ -113,7 +104,6 @@ export const useResourceRequest = (
       });
       toast.success("Resource deactivated");
     },
-    onError: () => toast.error("Failed to deactivate resource"),
   });
 
   const createRequest = useMutation({
@@ -128,7 +118,6 @@ export const useResourceRequest = (
       queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
       toast.success("New resource request created");
     },
-    onError: () => toast.error("Failed to create resource request"),
   });
 
   return {

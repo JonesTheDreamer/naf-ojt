@@ -18,7 +18,6 @@ export function useMyTasks() {
       queryClient.invalidateQueries({ queryKey: ["tech", "for-implementations"] });
       toast.success("Marked as delayed");
     },
-    onError: () => toast.error("Failed to update status"),
   });
 
   const setToAccomplishedMutation = useMutation({
@@ -29,7 +28,6 @@ export function useMyTasks() {
       queryClient.invalidateQueries({ queryKey: ["tech", "for-implementations"] });
       toast.success("Marked as accomplished");
     },
-    onError: () => toast.error("Failed to update status"),
   });
 
   return { myTasksQuery, setToDelayedMutation, setToAccomplishedMutation };
