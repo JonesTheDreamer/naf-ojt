@@ -14,14 +14,6 @@ import {
 } from "@/features/naf/api";
 import { useAuth } from "@/features/auth";
 
-function extractErrorMessage(error: unknown, fallback: string): string {
-  const data = (error as { response?: { data?: unknown } })?.response?.data;
-  if (typeof data === "string") return data;
-  if (data && typeof data === "object" && "error" in data)
-    return String((data as { error: unknown }).error);
-  return fallback;
-}
-
 interface AdminResourceRequestListProps {
   naf: NAF;
 }
@@ -42,9 +34,6 @@ export function AdminResourceRequestList({
       queryClient.invalidateQueries({ queryKey: nafQueryKey });
       toast.success("Screening step claimed");
     },
-    onError: (error: unknown) => {
-      toast.error(extractErrorMessage(error, "Failed to claim step"));
-    },
   });
 
   const approveRequest = useMutation({
@@ -53,9 +42,6 @@ export function AdminResourceRequestList({
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: nafQueryKey });
       toast.success("Request approved");
-    },
-    onError: (error: unknown) => {
-      toast.error(extractErrorMessage(error, "Failed to approve request"));
     },
   });
 
@@ -71,9 +57,6 @@ export function AdminResourceRequestList({
       queryClient.invalidateQueries({ queryKey: nafQueryKey });
       toast.success("Request rejected");
     },
-    onError: (error: unknown) => {
-      toast.error(extractErrorMessage(error, "Failed to reject request"));
-    },
   });
 
   const acceptImplementation = useMutation({
@@ -83,7 +66,6 @@ export function AdminResourceRequestList({
       queryClient.invalidateQueries({ queryKey: nafQueryKey });
       toast.success("Task accepted");
     },
-    onError: () => toast.error("Failed to accept task"),
   });
 
   const setToInProgress = useMutation({
@@ -93,7 +75,6 @@ export function AdminResourceRequestList({
       queryClient.invalidateQueries({ queryKey: nafQueryKey });
       toast.success("Set to In Progress");
     },
-    onError: () => toast.error("Failed to update status"),
   });
 
   const setToDelayed = useMutation({
@@ -108,7 +89,6 @@ export function AdminResourceRequestList({
       queryClient.invalidateQueries({ queryKey: nafQueryKey });
       toast.success("Marked as Delayed");
     },
-    onError: () => toast.error("Failed to update status"),
   });
 
   const setToAccomplished = useMutation({
@@ -118,7 +98,6 @@ export function AdminResourceRequestList({
       queryClient.invalidateQueries({ queryKey: nafQueryKey });
       toast.success("Marked as Accomplished");
     },
-    onError: () => toast.error("Failed to update status"),
   });
 
   const isImplSubmitting =

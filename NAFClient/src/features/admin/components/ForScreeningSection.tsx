@@ -47,7 +47,6 @@ export function ForScreeningSection({
       });
       toast.success("Screening step claimed");
     },
-    onError: () => toast.error("Failed to claim step"),
   });
 
   const tabs: { key: Tab; label: string; count: number }[] = [

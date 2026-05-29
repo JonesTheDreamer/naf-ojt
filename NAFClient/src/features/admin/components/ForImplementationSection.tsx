@@ -91,7 +91,6 @@ export function ForImplementationSection({
       invalidate();
       toast.success("Task claimed");
     },
-    onError: () => toast.error("Failed to claim task"),
   });
 
   const setToInProgress = useMutation({
@@ -101,7 +100,6 @@ export function ForImplementationSection({
       qc.invalidateQueries({ queryKey: ["admin", "my-implementation-tasks"] });
       toast.success("Set to In Progress");
     },
-    onError: () => toast.error("Failed to update status"),
   });
 
   const setToDelayed = useMutation({
@@ -116,7 +114,6 @@ export function ForImplementationSection({
       qc.invalidateQueries({ queryKey: ["admin", "my-implementation-tasks"] });
       toast.success("Marked as Delayed");
     },
-    onError: () => toast.error("Failed to update status"),
   });
 
   const setToAccomplished = useMutation({
@@ -126,7 +123,6 @@ export function ForImplementationSection({
       invalidate();
       toast.success("Marked as Accomplished");
     },
-    onError: () => toast.error("Failed to update status"),
   });
 
   const isSubmitting =
