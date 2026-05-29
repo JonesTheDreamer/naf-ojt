@@ -24,6 +24,14 @@ namespace NAFServer.src.API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("{departmentId}")]
+        public async Task<IActionResult> GetById(string departmentId)
+        {
+            var department = await _employeeRepository.GetDepartmentByIdAsync(departmentId);
+            if (department is null) return NotFound();
+            return Ok(new DepartmentViewDTO(department.Id, department.DepartmentDesc, department.DepartmentHead));
+        }
+
         [HttpGet("{departmentId}/employees")]
         public async Task<IActionResult> GetEmployees(string departmentId)
         {
