@@ -294,8 +294,8 @@ namespace NAFServer.src.Application.Services
 
             foreach (var step in steps)
             {
-                // FOR_SCREENING steps are unclaimed — any admin can claim them later
-                if (step.StepAction == StepAction.FOR_SCREENING)
+                // FOR_SCREENING and FOR_SOC_REVIEW steps are unclaimed — claimed later by role holders
+                if (step.StepAction == StepAction.FOR_SCREENING || step.StepAction == StepAction.FOR_SOC_REVIEW)
                 {
                     approvers.Add(new ResourceRequestApprovalStep(
                         request.Id,
