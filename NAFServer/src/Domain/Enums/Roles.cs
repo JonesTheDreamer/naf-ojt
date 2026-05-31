@@ -5,6 +5,7 @@
         REQUESTOR_APPROVER,
         MANAGEMENT,
         ADMIN,
-        HR
+        HR,
+        SOC,
     }
 }

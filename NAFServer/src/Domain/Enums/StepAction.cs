@@ -4,5 +4,6 @@
     {
         APPROVER,
         FOR_SCREENING,
+        FOR_SOC_REVIEW,
     }
 }
