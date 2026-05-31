@@ -113,6 +113,10 @@ export const claimScreeningStep = async (stepId: string): Promise<void> => {
   await api.post(`/ApprovalSteps/${stepId}/claim`);
 };
 
+export const claimSocStep = async (stepId: string): Promise<void> => {
+  await api.post(`/ApprovalSteps/${stepId}/claim-soc`);
+};
+
 export const findOrCreateGroupEmail = async (
   email: string,
 ): Promise<{ id: number; email: string }> =>

@@ -322,6 +322,7 @@ export function ImplementationBlock({
 const STEP_ACTION_LABEL: Record<StepAction, string> = {
   [StepAction.APPROVER]: "Approval",
   [StepAction.FOR_SCREENING]: "Screening",
+  [StepAction.FOR_SOC_REVIEW]: "SOC Review",
 };
 
 interface ApprovalStepsBlockProps {
