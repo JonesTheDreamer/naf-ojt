@@ -436,6 +436,44 @@ namespace NAFServer.src.Application.Services
             };
         }
 
+        public async Task<List<ForSocReviewItemDTO>> GetForSocReviewAsync()
+        {
+            var requests = await _context.ResourceRequests
+                .Include(rr => rr.NAF)
+                .Include(rr => rr.Resource)
+                .Include(rr => rr.ResourceRequestsApprovalSteps)
+                .Where(rr => rr.ResourceRequestsApprovalSteps.Any(
+                    s => s.StepOrder == rr.CurrentStep && s.StepAction == StepAction.FOR_SOC_REVIEW))
+                .AsNoTracking()
+                .ToListAsync();
+
+            var result = new List<ForSocReviewItemDTO>();
+            foreach (var rr in requests)
+            {
+                var employee = await _employeeRepository.GetByIdAsync(rr.NAF.EmployeeId);
+                var employeeName = employee != null
+                    ? $"{employee.FirstName} {employee.LastName}".Trim()
+                    : rr.NAF.EmployeeId;
+
+                var currentStep = rr.ResourceRequestsApprovalSteps
+                    .FirstOrDefault(s => s.StepOrder == rr.CurrentStep);
+
+                if (currentStep == null) continue;
+
+                result.Add(new ForSocReviewItemDTO(
+                    rr.Id,
+                    rr.NAFId,
+                    rr.NAF.Reference,
+                    employeeName,
+                    rr.Resource.Name,
+                    rr.DateNeeded == default(DateTime) ? null : rr.DateNeeded,
+                    currentStep.Id,
+                    currentStep.ApproverId
+                ));
+            }
+            return result;
+        }
+
         public async Task<List<AdminForScreeningItemDTO>> GetForScreeningAsync(int locationId)
         {
             var requests = await _context.ResourceRequests

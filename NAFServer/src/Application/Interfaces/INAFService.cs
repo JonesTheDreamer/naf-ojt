@@ -7,6 +7,7 @@ namespace NAFServer.src.Application.Interfaces
     public interface INAFService
     {
         Task<List<AdminForScreeningItemDTO>> GetForScreeningAsync(int locationId);
+        Task<List<ForSocReviewItemDTO>> GetForSocReviewAsync();
         public Task<NAFDTO> GetNAFByIdAsync(Guid id);
         public Task<NAFDTO> CreateAsync(CreateNAFRequestDTO request);
         public Task<PagedResult<NAFDTO>> GetNAFsUnderEmployeeAsync(string employeeId, int page);
