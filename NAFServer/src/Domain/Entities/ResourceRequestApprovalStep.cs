@@ -58,8 +58,8 @@ namespace NAFServer.src.Domain.Entities
 
         public void ClaimStep(string adminEmployeeId)
         {
-            if (StepAction != StepAction.FOR_SCREENING)
-                throw new DomainException("Only FOR_SCREENING steps can be claimed");
+            if (StepAction != StepAction.FOR_SCREENING && StepAction != StepAction.FOR_SOC_REVIEW)
+                throw new DomainException("Only FOR_SCREENING or FOR_SOC_REVIEW steps can be claimed");
             if (ApproverId is not null)
                 throw new DomainException("Step has already been claimed");
             ApproverId = adminEmployeeId;
