@@ -329,6 +329,7 @@ interface ApprovalStepsBlockProps {
   request: ResourceRequest;
   currentStepOrder?: number;
   onClaim?: (stepId: string) => void;
+  onClaimSoc?: (stepId: string) => void;
   isClaiming?: boolean;
 }
 
@@ -336,6 +337,7 @@ export function ApprovalStepsBlock({
   request,
   currentStepOrder,
   onClaim,
+  onClaimSoc,
   isClaiming,
 }: ApprovalStepsBlockProps) {
   if (!request.steps || request.steps.length === 0) return null;
@@ -369,6 +371,13 @@ export function ApprovalStepsBlock({
               step.stepOrder === currentStepOrder &&
               isPending;
 
+            const isUnclaimedSocReview =
+              currentStepOrder !== undefined &&
+              step.stepAction === StepAction.FOR_SOC_REVIEW &&
+              step.approverId === null &&
+              step.stepOrder === currentStepOrder &&
+              isPending;
+
             return (
               <div key={step.id} className="flex items-center gap-3 relative">
                 {/* Step node */}
@@ -378,8 +387,10 @@ export function ApprovalStepsBlock({
                     isApproved && "border-emerald-400 text-emerald-600",
                     isRejected && "border-red-400 text-red-500",
                     isUnclaimedScreening && "border-amber-400 text-amber-600",
+                    isUnclaimedSocReview && "border-blue-400 text-blue-600",
                     isPending &&
                       !isUnclaimedScreening &&
+                      !isUnclaimedSocReview &&
                       "border-border text-muted-foreground",
                   )}
                 >
@@ -399,8 +410,10 @@ export function ApprovalStepsBlock({
                     isApproved && "bg-emerald-50/60 border-emerald-100",
                     isRejected && "bg-red-50/60 border-red-100",
                     isUnclaimedScreening && "bg-amber-50/60 border-amber-200",
+                    isUnclaimedSocReview && "bg-blue-50/60 border-blue-200",
                     isPending &&
                       !isUnclaimedScreening &&
+                      !isUnclaimedSocReview &&
                       "bg-muted/20 border-border",
                   )}
                 >
@@ -410,7 +423,9 @@ export function ApprovalStepsBlock({
                         "text-sm font-semibold truncate",
                         isUnclaimedScreening
                           ? "text-amber-700"
-                          : "text-foreground",
+                          : isUnclaimedSocReview
+                            ? "text-blue-700"
+                            : "text-foreground",
                       )}
                     >
                       {step.approver?.name ?? step.approverId ?? "—"}
@@ -423,7 +438,7 @@ export function ApprovalStepsBlock({
                       </p>
                     )}
                     <p className="text-[10px] text-muted-foreground">
-                      {isUnclaimedScreening
+                      {isUnclaimedScreening || isUnclaimedSocReview
                         ? `${actionLabel} · Awaiting claim`
                         : actionLabel}
                     </p>
@@ -438,6 +453,15 @@ export function ApprovalStepsBlock({
                       >
                         <UserCheck className="h-3 w-3" />
                         {isClaiming ? "Claiming…" : "Claim"}
+                      </button>
+                    ) : isUnclaimedSocReview && onClaimSoc ? (
+                      <button
+                        onClick={() => onClaimSoc(step.id)}
+                        disabled={isClaiming}
+                        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-500 hover:bg-blue-600 text-white text-[11px] font-bold transition-colors disabled:opacity-50"
+                      >
+                        <UserCheck className="h-3 w-3" />
+                        {isClaiming ? "Claiming…" : "Claim (SOC)"}
                       </button>
                     ) : (
                       <div className="flex items-center gap-1">

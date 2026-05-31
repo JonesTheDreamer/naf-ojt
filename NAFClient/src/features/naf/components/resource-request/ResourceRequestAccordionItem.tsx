@@ -75,6 +75,7 @@ interface ResourceRequestAccordionItemProps {
   onApprove?: (requestId: string, remarks: string) => void;
   onReject?: (requestId: string, reasonForRejection: string) => void;
   onClaim?: (stepId: string) => void;
+  onClaimSoc?: (stepId: string) => void;
   isClaiming?: boolean;
   onAccept?: (resourceRequestId: string) => void;
   onSetToInProgress?: (implementationId: string) => void;
@@ -101,6 +102,7 @@ export function ResourceRequestAccordionItem({
   onApprove,
   onReject,
   onClaim,
+  onClaimSoc,
   isClaiming,
   onAccept,
   onSetToInProgress,
@@ -254,6 +256,7 @@ export function ResourceRequestAccordionItem({
                       request={request}
                       currentStepOrder={request.currentStep}
                       onClaim={onClaim}
+                      onClaimSoc={onClaimSoc}
                       isClaiming={isClaiming}
                     />
                   )}
