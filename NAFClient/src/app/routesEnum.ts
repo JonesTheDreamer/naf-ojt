@@ -19,4 +19,7 @@ export enum RoutesEnum {
 
   HR = "/hr",
   HR_CREATE = "/hr/create",
+
+  SOC = "/soc",
+  SOC_NAF_DETAIL = "/soc/NAF/:nafId",
 }

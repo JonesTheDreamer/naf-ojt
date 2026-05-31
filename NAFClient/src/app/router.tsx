@@ -50,6 +50,10 @@ const HRNAFHistoryPage = lazy(
 const HRCreateNAFPage = lazy(
   () => import("@/features/hr/pages/HRCreateNAFPage"),
 );
+const SocQueuePage = lazy(() => import("@/features/soc/pages/SocQueuePage"));
+const SocNAFDetailPage = lazy(
+  () => import("@/features/soc/pages/SocNAFDetailPage"),
+);
 
 export function AppRouter() {
   return (
@@ -196,6 +200,24 @@ export function AppRouter() {
           element={
             <ProtectedRoute requiredRole="HR">
               <HRCreateNAFPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* SOC routes */}
+        <Route
+          path={RoutesEnum.SOC}
+          element={
+            <ProtectedRoute requiredRole="SOC">
+              <SocQueuePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path={RoutesEnum.SOC_NAF_DETAIL}
+          element={
+            <ProtectedRoute requiredRole="SOC">
+              <SocNAFDetailPage />
             </ProtectedRoute>
           }
         />

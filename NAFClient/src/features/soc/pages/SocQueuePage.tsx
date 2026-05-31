@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
+import { RoutesEnum } from "@/app/routesEnum";
 import { toast } from "sonner";
 import { ShieldCheck, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -162,7 +163,7 @@ export default function SocQueuePage() {
                       <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => navigate(`/soc/NAF/${item.nafId}`)}
+                        onClick={() => navigate(RoutesEnum.SOC_NAF_DETAIL.replace(":nafId", item.nafId))}
                       >
                         View NAF
                       </Button>
