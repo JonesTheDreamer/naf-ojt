@@ -14,7 +14,8 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
                 new Role(Roles.ADMIN),
                 new Role(Roles.REQUESTOR_APPROVER),
                 new Role(Roles.HR),
-                new Role(Roles.MANAGEMENT)
+                new Role(Roles.MANAGEMENT),
+                new Role(Roles.SOC)
             );
 
             await context.SaveChangesAsync();

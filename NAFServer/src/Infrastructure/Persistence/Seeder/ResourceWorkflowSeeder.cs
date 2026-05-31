@@ -90,18 +90,34 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
             context.ApprovalWorkflowTemplates.AddRange(workflowTemplates);
             await context.SaveChangesAsync();
 
+            var internetResources = new List<Resource>
+            {
+                aiSpecialInternet, hbSpecialInternet, ssSpecialInternet, specialInternet
+            };
+
             var workflowStepsTemplates = new List<ApprovalWorkflowStepsTemplate>();
             foreach (var t in workflowTemplates)
             {
                 // Step 1: employee's own department head
                 workflowStepsTemplates.Add(new ApprovalWorkflowStepsTemplate(t.Id, 1, StepAction.APPROVER, ApproverRole.DEPARTMENT_HEAD, null));
 
-                if (t.Resource.Name == "Shared Folder")
+                if (internetResources.Any(r => r.Id == t.ResourceId))
+                {
+                    // Step 2: SOC review (claim-based, any SOC user)
+                    workflowStepsTemplates.Add(new ApprovalWorkflowStepsTemplate(t.Id, 2, StepAction.FOR_SOC_REVIEW, ApproverRole.ROLE_BASED, nameof(Roles.SOC)));
+                    // Step 3: admin screening
+                    workflowStepsTemplates.Add(new ApprovalWorkflowStepsTemplate(t.Id, 3, StepAction.FOR_SCREENING, ApproverRole.TECHNICAL_HEAD, null));
+                }
+                else if (t.Resource.Name == "Shared Folder")
+                {
                     // Step 2: owner of the specific shared folder being requested
                     workflowStepsTemplates.Add(new ApprovalWorkflowStepsTemplate(t.Id, 2, StepAction.APPROVER, ApproverRole.RESOURCE_OWNER, null));
+                }
                 else
+                {
                     // Step 2: unclaimed screening by any technical admin at the employee's location
                     workflowStepsTemplates.Add(new ApprovalWorkflowStepsTemplate(t.Id, 2, StepAction.FOR_SCREENING, ApproverRole.TECHNICAL_HEAD, null));
+                }
             }
 
             context.ApprovalWorkflowStepsTemplates.AddRange(workflowStepsTemplates);
