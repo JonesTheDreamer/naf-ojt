@@ -5,7 +5,7 @@ import { RoutesEnum } from "@/app/routesEnum";
 import { toast } from "sonner";
 import { ShieldCheck, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import AdminLayout from "@/shared/components/layout/AdminLayout";
+import SocLayout from "../components/SocLayout";
 import { claimSocStep } from "@/features/naf/api";
 import { useForSocReview } from "../hooks/useForSocReview";
 import { useAuth } from "@/features/auth";
@@ -64,7 +64,7 @@ export default function SocQueuePage() {
       : "No SOC review tasks assigned to you.";
 
   return (
-    <AdminLayout>
+    <SocLayout>
       <div className="space-y-6">
         <div>
           <h1 className="text-2xl font-bold text-blue-600">SOC Review Queue</h1>
@@ -174,6 +174,6 @@ export default function SocQueuePage() {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </SocLayout>
   );
 }

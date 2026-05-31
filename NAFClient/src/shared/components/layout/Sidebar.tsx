@@ -23,11 +23,17 @@ interface SidebarProps {
 const ROLE_HOME: Record<string, string> = {
   ADMIN: "/admin",
   REQUESTOR_APPROVER: "/NAF",
+  HR: "/hr",
+  MANAGEMENT: "/NAF",
+  SOC: "/soc",
 };
 
 const ROLE_LABELS: Record<string, string> = {
   ADMIN: "Admin",
   REQUESTOR_APPROVER: "Requestor",
+  HR: "HR",
+  MANAGEMENT: "Management",
+  SOC: "SOC",
 };
 
 export default function Sidebar({

@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ChevronLeft } from "lucide-react";
-import AdminLayout from "@/shared/components/layout/AdminLayout";
+import SocLayout from "../components/SocLayout";
 import { useNAF } from "@/features/naf/hooks/useNAF";
 import { NAFDetailHeader } from "@/features/naf/components/NAFDetailHeader";
 import { SocResourceRequestList } from "../components/SocResourceRequestList";
@@ -13,7 +13,7 @@ export default function SocNAFDetailPage() {
   const naf = nafQuery.data;
 
   return (
-    <AdminLayout>
+    <SocLayout>
       <div className="max-w-4xl mx-auto w-full space-y-5 pb-16 px-4 sm:px-6">
         <Button
           variant="ghost"
@@ -52,6 +52,6 @@ export default function SocNAFDetailPage() {
           </>
         )}
       </div>
-    </AdminLayout>
+    </SocLayout>
   );
 }
