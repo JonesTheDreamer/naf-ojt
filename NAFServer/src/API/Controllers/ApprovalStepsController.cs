@@ -77,5 +77,20 @@ namespace NAFServer.src.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        [HttpPost("{id}/claim-soc")]
+        [Authorize(Roles = nameof(Roles.SOC))]
+        public async Task<IActionResult> ClaimSoc(Guid id)
+        {
+            try
+            {
+                await _resourceRequestApprovalStepService.ClaimStepAsync(id, _currentUserService.EmployeeId);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
     }
 }
