@@ -31,7 +31,8 @@ namespace NAFServer.src.Infrastructure.Persistence.Seeder
                     new UserRole(user.Id, 1),
                     new UserRole(user.Id, 2),
                     new UserRole(user.Id, 3),
-                    new UserRole(user.Id, 3),
+                    new UserRole(user.Id, 4),
+                    new UserRole(user.Id, 5),
                 ]
             );
 
