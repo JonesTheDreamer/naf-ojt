@@ -102,8 +102,16 @@ namespace NAFServer.src.Infrastructure.Persistence.Repositories
 
         public async Task<List<Department>> GetAllDepartmentsAsync()
         {
-            var all = await GetAllDeptsAsync();
-            return all;
+            try
+            {
+                var all = await GetAllDeptsAsync();
+                return all;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+
         }
     }
 }

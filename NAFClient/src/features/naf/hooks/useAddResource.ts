@@ -85,7 +85,7 @@ export const useAddResource = () => {
           if (r.success) {
             anySuccess = true;
           } else {
-            errors.push(`Resource ${r.resourceId}: ${r.error ?? "Failed"}`);
+            errors.push(`${r.error ?? "Failed"}`);
           }
         });
       } catch (e) {
@@ -111,7 +111,7 @@ export const useAddResource = () => {
           ?.data;
         const msg =
           axiosData ?? (e instanceof Error ? e.message : "Unknown error");
-        errors.push(`Resource ${resource.id}: ${msg}`);
+        errors.push(`${msg}`);
       }
     }
 

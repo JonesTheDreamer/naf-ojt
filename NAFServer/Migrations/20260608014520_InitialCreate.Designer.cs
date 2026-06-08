@@ -12,7 +12,7 @@ using NAFServer.src.Infrastructure.Persistence;
 namespace NAFServer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260525082220_InitialCreate")]
+    [Migration("20260608014520_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -103,19 +103,17 @@ namespace NAFServer.Migrations
                     b.ToTable("AuditTrails");
                 });
 
-            modelBuilder.Entity("NAFServer.src.Domain.Entities.DepartmentView", b =>
+            modelBuilder.Entity("NAFServer.src.Domain.Entities.Department", b =>
                 {
                     b.Property<string>("DepartmentDesc")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DepartmentHead")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(max)")
-                        .HasColumnName("DepartmentCode");
+                        .HasColumnName("DepartmentId");
 
                     b.ToTable((string)null);
 
@@ -125,28 +123,22 @@ namespace NAFServer.Migrations
             modelBuilder.Entity("NAFServer.src.Domain.Entities.Employee", b =>
                 {
                     b.Property<string>("Company")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DepartmentDesc")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DepartmentHead")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("DepartmentId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)")
                         .HasColumnName("DepartmentCode");
 
                     b.Property<string>("FirstName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("FullName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Id")
@@ -154,7 +146,6 @@ namespace NAFServer.Migrations
                         .HasColumnName("EmployeeNumber");
 
                     b.Property<string>("LastName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Location")
@@ -167,7 +158,6 @@ namespace NAFServer.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Status")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SupervisorId")

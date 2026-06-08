@@ -112,6 +112,8 @@ export function AdditionalInfoBlock({
 }: {
   info: NonNullable<ResourceRequest["additionalInfo"]>;
 }) {
+  console.log(info);
+
   if (info.type === 0) {
     return (
       <div className="space-y-1">
@@ -119,7 +121,7 @@ export function AdditionalInfoBlock({
           Internet Resource
         </p>
         <p className="text-sm font-medium bg-sky-50 border border-sky-100 rounded-lg px-3 py-1.5 text-sky-800">
-          {info.resource}
+          {info.resource} - {info.url}
         </p>
       </div>
     );
@@ -430,13 +432,14 @@ export function ApprovalStepsBlock({
                     >
                       {step.approver?.name ?? step.approverId ?? "—"}
                     </p>
-                    {step.approver && (step.approver.location || step.approver.department) && (
-                      <p className="text-[10px] text-muted-foreground truncate">
-                        {[step.approver.location, step.approver.department]
-                          .filter(Boolean)
-                          .join(" · ")}
-                      </p>
-                    )}
+                    {step.approver &&
+                      (step.approver.location || step.approver.department) && (
+                        <p className="text-[10px] text-muted-foreground truncate">
+                          {[step.approver.location, step.approver.department]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </p>
+                      )}
                     <p className="text-[10px] text-muted-foreground">
                       {isUnclaimedScreening || isUnclaimedSocReview
                         ? `${actionLabel} · Awaiting claim`

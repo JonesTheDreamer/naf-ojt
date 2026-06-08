@@ -197,8 +197,8 @@ namespace NAFServer.src.Infrastructure.Persistence
                 .HasNoKey()
                 .ToView("vw_DepartmentDetails");
 
-            modelBuilder.Entity<Department>()
-                .Property(d => d.Id).HasColumnName("DepartmentId");
+            //modelBuilder.Entity<Department>()
+            //    .Property(d => d.Id).HasColumnName("DepartmentId");
 
             // ResourceRequestAllowance
             modelBuilder.Entity<ResourceRequestAllowance>()

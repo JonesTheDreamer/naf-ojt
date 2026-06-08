@@ -69,6 +69,7 @@ export function AddResourceDialog({
   const { getAllResource, resourceGroups } = useResource();
   const { internetPurposes, internetResources, groupEmails, sharedFolders } =
     useResourceMetadata();
+
   const { submit } = useAddResource();
 
   const existingResourceIds = naf.resourceRequests
@@ -82,7 +83,6 @@ export function AddResourceDialog({
     )
     .map((rr) => (rr.additionalInfo as InternetRequestInfo).internetResourceId);
 
-  // For canOwnMany=false groups, block all sibling resources when one is already on the NAF
   const blockedByGroup = new Set<number>();
   for (const group of resourceGroups.data ?? []) {
     if (group.canOwnMany) continue;
@@ -252,250 +252,250 @@ export function AddResourceDialog({
       }}
     >
       <DialogContent className="w-full max-w-xl p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh]">
-          {/* Header */}
-          <div className="bg-white border-b px-5 pt-5 pb-0">
-            <div className="mb-4 pr-8">
-              <h2 className="text-slate-900 font-bold text-lg leading-tight">
-                Add Resources
-              </h2>
-              <p className="text-slate-400 text-xs mt-0.5 font-mono">
-                {naf.reference}
-              </p>
-            </div>
+        {/* Header */}
+        <div className="bg-white border-b px-5 pt-5 pb-0">
+          <div className="mb-4 pr-8">
+            <h2 className="text-slate-900 font-bold text-lg leading-tight">
+              Add Resources
+            </h2>
+            <p className="text-slate-400 text-xs mt-0.5 font-mono">
+              {naf.reference}
+            </p>
+          </div>
 
-            {/* Tab bar */}
-            <div className="flex flex-wrap gap-1">
-              {visibleTabs.map((id) => {
-                const { label, icon: Icon, color } = TAB_META[id];
-                const count = counts[id];
-                const isActive = activeTab === id;
-                return (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => setActiveTab(id)}
-                    className={`relative flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-semibold rounded-t-lg transition-all
+          {/* Tab bar */}
+          <div className="flex flex-wrap gap-1">
+            {visibleTabs.map((id) => {
+              const { label, icon: Icon, color } = TAB_META[id];
+              const count = counts[id];
+              const isActive = activeTab === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setActiveTab(id)}
+                  className={`relative flex items-center gap-1.5 px-3.5 py-2.5 text-xs font-semibold rounded-t-lg transition-all
                     ${
                       isActive
                         ? "bg-slate-50 text-slate-900 border border-b-0 border-slate-200 shadow-sm"
                         : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
                     }`}
-                  >
-                    <Icon className={`h-3.5 w-3.5 ${isActive ? color : ""}`} />
-                    {label}
-                    {count > 0 && (
-                      <span className="inline-flex items-center justify-center min-w-[1.1rem] h-4 px-1 rounded-full text-[10px] font-bold bg-amber-500 text-white">
-                        {count}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
+                >
+                  <Icon className={`h-3.5 w-3.5 ${isActive ? color : ""}`} />
+                  {label}
+                  {count > 0 && (
+                    <span className="inline-flex items-center justify-center min-w-[1.1rem] h-4 px-1 rounded-full text-[10px] font-bold bg-amber-500 text-white">
+                      {count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Tab content */}
+        <form
+          onSubmit={handleSubmit}
+          className="flex flex-col flex-1 overflow-hidden bg-slate-50/60"
+        >
+          <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+            {activeTab === "basic" && (
+              <BasicResourceSection
+                availableBasic={availableBasic}
+                basicResources={basicResources}
+                onChange={setBasicResources}
+                locationId={naf.locationId ?? undefined}
+              />
+            )}
+
+            {activeTab === "special" && (
+              <BasicResourceSection
+                availableBasic={availableSpecial}
+                basicResources={specialResources}
+                onChange={setSpecialResources}
+                requiresPurpose
+                locationId={naf.locationId ?? undefined}
+              />
+            )}
+
+            {activeTab === "internet" && (
+              <div className="space-y-3">
+                {internetEntries.length === 0 ? (
+                  <EmptyTabState
+                    icon={Globe}
+                    label="No internet access entries yet"
+                    action="Add Entry"
+                    onAdd={addInternetEntry}
+                  />
+                ) : (
+                  <>
+                    {internetEntries.map((entry, i) => (
+                      <InternetEntryCard
+                        key={entry._id}
+                        entry={entry}
+                        index={i + 1}
+                        allInternetResources={internetResources.data ?? []}
+                        allInternetPurposes={internetPurposes.data ?? []}
+                        usedInternetResourceIds={[
+                          ...usedInternetResourceIds,
+                          ...internetEntries
+                            .filter(
+                              (e) =>
+                                e._id !== entry._id &&
+                                e.internetResourceId !== null,
+                            )
+                            .map((e) => e.internetResourceId!),
+                        ]}
+                        onChange={(patch) =>
+                          patchInternetEntry(entry._id, patch)
+                        }
+                        onRemove={() =>
+                          setInternetEntries((prev) =>
+                            prev.filter((e) => e._id !== entry._id),
+                          )
+                        }
+                      />
+                    ))}
+                    <AddEntryButton
+                      onClick={addInternetEntry}
+                      label="Add another entry"
+                    />
+                  </>
+                )}
+              </div>
+            )}
+
+            {activeTab === "email" && (
+              <div className="space-y-3">
+                {groupEmailEntries.length === 0 ? (
+                  <EmptyTabState
+                    icon={Mail}
+                    label="No group email entries yet"
+                    action="Add Entry"
+                    onAdd={addGroupEmailEntry}
+                  />
+                ) : (
+                  <>
+                    {groupEmailEntries.map((entry, i) => (
+                      <GroupEmailEntryCard
+                        key={entry._id}
+                        entry={entry}
+                        index={i + 1}
+                        allGroupEmails={groupEmails.data ?? []}
+                        onChange={(patch) =>
+                          patchGroupEmailEntry(entry._id, patch)
+                        }
+                        onRemove={() =>
+                          setGroupEmailEntries((prev) =>
+                            prev.filter((e) => e._id !== entry._id),
+                          )
+                        }
+                      />
+                    ))}
+                    <AddEntryButton
+                      onClick={addGroupEmailEntry}
+                      label="Add another entry"
+                    />
+                  </>
+                )}
+              </div>
+            )}
+
+            {activeTab === "folder" && (
+              <div className="space-y-3">
+                {sharedFolderEntries.length === 0 ? (
+                  <EmptyTabState
+                    icon={FolderOpen}
+                    label="No shared folder entries yet"
+                    action="Add Entry"
+                    onAdd={addSharedFolderEntry}
+                  />
+                ) : (
+                  <>
+                    {sharedFolderEntries.map((entry, i) => (
+                      <SharedFolderEntryCard
+                        key={entry._id}
+                        entry={entry}
+                        index={i + 1}
+                        allSharedFolders={sharedFolders.data ?? []}
+                        onChange={(patch) =>
+                          patchSharedFolderEntry(entry._id, patch)
+                        }
+                        onRemove={() =>
+                          setSharedFolderEntries((prev) =>
+                            prev.filter((e) => e._id !== entry._id),
+                          )
+                        }
+                      />
+                    ))}
+                    <AddEntryButton
+                      onClick={addSharedFolderEntry}
+                      label="Add another entry"
+                    />
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
-          {/* Tab content */}
-          <form
-            onSubmit={handleSubmit}
-            className="flex flex-col flex-1 overflow-hidden bg-slate-50/60"
-          >
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
-              {activeTab === "basic" && (
-                <BasicResourceSection
-                  availableBasic={availableBasic}
-                  basicResources={basicResources}
-                  onChange={setBasicResources}
-                  locationId={naf.locationId ?? undefined}
-                />
-              )}
+          {/* Footer */}
+          <div className="border-t bg-white px-5 py-3 space-y-3">
+            {submitErrors.length > 0 && (
+              <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 space-y-0.5">
+                {submitErrors.map((err, i) => (
+                  <p key={i} className="text-xs text-red-600">
+                    • {err}
+                  </p>
+                ))}
+              </div>
+            )}
 
-              {activeTab === "special" && (
-                <BasicResourceSection
-                  availableBasic={availableSpecial}
-                  basicResources={specialResources}
-                  onChange={setSpecialResources}
-                  requiresPurpose
-                  locationId={naf.locationId ?? undefined}
-                />
-              )}
-
-              {activeTab === "internet" && (
-                <div className="space-y-3">
-                  {internetEntries.length === 0 ? (
-                    <EmptyTabState
-                      icon={Globe}
-                      label="No internet access entries yet"
-                      action="Add Entry"
-                      onAdd={addInternetEntry}
-                    />
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2">
+                {totalSelected > 0 && (
+                  <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
+                    <span>
+                      <span className="font-semibold text-slate-700">
+                        {totalSelected}
+                      </span>{" "}
+                      resource{totalSelected !== 1 ? "s" : ""} selected
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    reset();
+                    onOpenChange(false);
+                  }}
+                  className="px-4 py-2 rounded-lg border text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!canSubmit}
+                  className="px-5 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold shadow-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2">
+                      <span className="h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                      Adding...
+                    </span>
                   ) : (
-                    <>
-                      {internetEntries.map((entry, i) => (
-                        <InternetEntryCard
-                          key={entry._id}
-                          entry={entry}
-                          index={i + 1}
-                          allInternetResources={internetResources.data ?? []}
-                          allInternetPurposes={internetPurposes.data ?? []}
-                          usedInternetResourceIds={[
-                            ...usedInternetResourceIds,
-                            ...internetEntries
-                              .filter(
-                                (e) =>
-                                  e._id !== entry._id &&
-                                  e.internetResourceId !== null,
-                              )
-                              .map((e) => e.internetResourceId!),
-                          ]}
-                          onChange={(patch) =>
-                            patchInternetEntry(entry._id, patch)
-                          }
-                          onRemove={() =>
-                            setInternetEntries((prev) =>
-                              prev.filter((e) => e._id !== entry._id),
-                            )
-                          }
-                        />
-                      ))}
-                      <AddEntryButton
-                        onClick={addInternetEntry}
-                        label="Add another entry"
-                      />
-                    </>
+                    "Add Resources"
                   )}
-                </div>
-              )}
-
-              {activeTab === "email" && (
-                <div className="space-y-3">
-                  {groupEmailEntries.length === 0 ? (
-                    <EmptyTabState
-                      icon={Mail}
-                      label="No group email entries yet"
-                      action="Add Entry"
-                      onAdd={addGroupEmailEntry}
-                    />
-                  ) : (
-                    <>
-                      {groupEmailEntries.map((entry, i) => (
-                        <GroupEmailEntryCard
-                          key={entry._id}
-                          entry={entry}
-                          index={i + 1}
-                          allGroupEmails={groupEmails.data ?? []}
-                          onChange={(patch) =>
-                            patchGroupEmailEntry(entry._id, patch)
-                          }
-                          onRemove={() =>
-                            setGroupEmailEntries((prev) =>
-                              prev.filter((e) => e._id !== entry._id),
-                            )
-                          }
-                        />
-                      ))}
-                      <AddEntryButton
-                        onClick={addGroupEmailEntry}
-                        label="Add another entry"
-                      />
-                    </>
-                  )}
-                </div>
-              )}
-
-              {activeTab === "folder" && (
-                <div className="space-y-3">
-                  {sharedFolderEntries.length === 0 ? (
-                    <EmptyTabState
-                      icon={FolderOpen}
-                      label="No shared folder entries yet"
-                      action="Add Entry"
-                      onAdd={addSharedFolderEntry}
-                    />
-                  ) : (
-                    <>
-                      {sharedFolderEntries.map((entry, i) => (
-                        <SharedFolderEntryCard
-                          key={entry._id}
-                          entry={entry}
-                          index={i + 1}
-                          allSharedFolders={sharedFolders.data ?? []}
-                          onChange={(patch) =>
-                            patchSharedFolderEntry(entry._id, patch)
-                          }
-                          onRemove={() =>
-                            setSharedFolderEntries((prev) =>
-                              prev.filter((e) => e._id !== entry._id),
-                            )
-                          }
-                        />
-                      ))}
-                      <AddEntryButton
-                        onClick={addSharedFolderEntry}
-                        label="Add another entry"
-                      />
-                    </>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Footer */}
-            <div className="border-t bg-white px-5 py-3 space-y-3">
-              {submitErrors.length > 0 && (
-                <div className="rounded-lg bg-red-50 border border-red-200 px-3 py-2 space-y-0.5">
-                  {submitErrors.map((err, i) => (
-                    <p key={i} className="text-xs text-red-600">
-                      • {err}
-                    </p>
-                  ))}
-                </div>
-              )}
-
-              <div className="flex items-center justify-between gap-3">
-                <div className="flex items-center gap-2">
-                  {totalSelected > 0 && (
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500" />
-                      <span>
-                        <span className="font-semibold text-slate-700">
-                          {totalSelected}
-                        </span>{" "}
-                        resource{totalSelected !== 1 ? "s" : ""} selected
-                      </span>
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      reset();
-                      onOpenChange(false);
-                    }}
-                    className="px-4 py-2 rounded-lg border text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={!canSubmit}
-                    className="px-5 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold shadow-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-                  >
-                    {isSubmitting ? (
-                      <span className="flex items-center gap-2">
-                        <span className="h-3.5 w-3.5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
-                        Adding...
-                      </span>
-                    ) : (
-                      "Add Resources"
-                    )}
-                  </button>
-                </div>
+                </button>
               </div>
             </div>
-          </form>
-        </DialogContent>
-      </Dialog>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 }
 

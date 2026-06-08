@@ -29,6 +29,8 @@ export default function AdminResourceRequestsPage() {
   const locationId = user?.locationId ?? null;
   const employeeId = user?.employeeId ?? "";
 
+  console.log(locationId, employeeId);
+
   const [progress, setProgress] = useState<string>("all");
   const [page, setPage] = useState(1);
 

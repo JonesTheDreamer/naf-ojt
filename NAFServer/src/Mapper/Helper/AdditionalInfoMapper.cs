@@ -14,7 +14,8 @@ namespace NAFServer.src.Mapper.Helper
                     new InternetInfoDTO(
                         internet.InternetResourceId,
                         internet.InternetResource.Purpose.Name,
-                        internet.InternetResource.Name
+                        internet.InternetResource.Name,
+                        internet.InternetResource.Url
                     ),
 
                 SharedFolderRequestInfo folder =>

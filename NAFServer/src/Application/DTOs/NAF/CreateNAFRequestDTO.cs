@@ -6,5 +6,6 @@ namespace NAFServer.src.Application.DTOs.NAF
         string RequestorId,
         int HardwareId,
         DateTime DateNeeded
+    //List<int> resourcesToAdd
     );
 }

@@ -1,5 +1,4 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using NAFServer.src.Application.DTOs.ResourceRequest;
 using NAFServer.src.Application.Handlers.Interface;
 using NAFServer.src.Application.Interfaces;
@@ -644,7 +643,7 @@ namespace NAFServer.src.Application.Services
             {
                 var dow = request.dateNeeded.DayOfWeek;
                 if (dow == DayOfWeek.Saturday || dow == DayOfWeek.Sunday)
-                    throw new ArgumentException($"DateNeeded cannot fall on a weekend for location '{location.Name}'.");
+                    throw new ArgumentException($"Date needed cannot be on a weekend for location '{location.Name}'.");
             }
 
             var allowance = await _allowanceRepository.GetByResourceAndLocationAsync(request.resourceId, naf.LocationId);
@@ -655,7 +654,7 @@ namespace NAFServer.src.Application.Services
                 var minDate = today.AddDays(allowance.AllowanceDays);
                 if (dateNeeded < minDate)
                     throw new ArgumentException(
-                        $"DateNeeded must be at least {allowance.AllowanceDays} day(s) from today for this resource at location '{location.Name}'. Earliest allowed: {minDate:yyyy-MM-dd}.");
+                        $"Date needed must be at least {allowance.AllowanceDays} day(s) from today for this resource at location '{location.Name}'. Earliest allowed: {minDate:yyyy-MM-dd}.");
             }
         }
 

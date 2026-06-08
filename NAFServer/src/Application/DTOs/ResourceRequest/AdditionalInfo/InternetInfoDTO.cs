@@ -3,7 +3,8 @@
     public record InternetInfoDTO(
         int InternetResourceId,
         string Purpose,
-        string Resource
+        string Resource,
+        string url
     ) : AdditionalInfoDTO
     {
         public override AdditionalInfoType Type => AdditionalInfoType.Internet;

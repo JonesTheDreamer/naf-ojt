@@ -45,6 +45,7 @@ export default function Sidebar({
   const location = useLocation();
   const navigate = useNavigate();
   const { user, selectRole } = useAuth();
+  console.log(user);
 
   const handleRoleSwitch = async (role: string) => {
     if (role === user?.activeRole) return;

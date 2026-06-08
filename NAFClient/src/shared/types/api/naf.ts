@@ -61,6 +61,7 @@ export interface Resource extends Entity<number> {
   iconUrl: string;
   isActive: boolean;
   isSpecial: boolean;
+  resourceGroupId?: number;
 }
 
 export interface ResourceGroup extends Entity<number> {
@@ -132,6 +133,7 @@ export interface InternetRequestInfo extends BaseAdditionalInfo {
   internetResourceId: number;
   purpose: string;
   resource: string;
+  url: string;
 }
 
 export interface SharedFolderInfo extends BaseAdditionalInfo {

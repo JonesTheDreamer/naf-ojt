@@ -151,6 +151,8 @@ export default function AdminHomePage() {
   const { query: avgTimeQuery } = useAdminDashboardAverageTime(locationId);
   const refreshCache = useRefreshCache();
 
+  console.log(avgTimeQuery.data);
+
   const stats = statsQuery.data;
   const avgTime = avgTimeQuery.data;
 
@@ -235,7 +237,9 @@ export default function AdminHomePage() {
               <RefreshCw
                 className={`w-3.5 h-3.5 ${refreshCache.isPending ? "animate-spin" : ""}`}
               />
-              {refreshCache.isPending ? "Refreshing…" : "Refresh Employee Cache"}
+              {refreshCache.isPending
+                ? "Refreshing…"
+                : "Refresh Employee Cache"}
             </Button>
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
               <MapPin className="w-3.5 h-3.5 shrink-0" />

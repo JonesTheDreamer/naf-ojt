@@ -7,18 +7,59 @@ import type { DepartmentViewDTO } from "../types";
 import { RoutesEnum } from "@/app/routesEnum";
 
 const ACCENTS = [
-  { border: "border-l-amber-500",   text: "text-amber-600",   bg: "bg-amber-50",   avatar: "bg-amber-100 text-amber-700"   },
-  { border: "border-l-sky-500",     text: "text-sky-600",     bg: "bg-sky-50",     avatar: "bg-sky-100 text-sky-700"       },
-  { border: "border-l-emerald-500", text: "text-emerald-600", bg: "bg-emerald-50", avatar: "bg-emerald-100 text-emerald-700"},
-  { border: "border-l-violet-500",  text: "text-violet-600",  bg: "bg-violet-50",  avatar: "bg-violet-100 text-violet-700" },
-  { border: "border-l-rose-500",    text: "text-rose-600",    bg: "bg-rose-50",    avatar: "bg-rose-100 text-rose-700"     },
-  { border: "border-l-cyan-600",    text: "text-cyan-700",    bg: "bg-cyan-50",    avatar: "bg-cyan-100 text-cyan-700"     },
-  { border: "border-l-orange-500",  text: "text-orange-600",  bg: "bg-orange-50",  avatar: "bg-orange-100 text-orange-700" },
-  { border: "border-l-teal-500",    text: "text-teal-600",    bg: "bg-teal-50",    avatar: "bg-teal-100 text-teal-700"     },
+  {
+    border: "border-l-amber-500",
+    text: "text-amber-600",
+    bg: "bg-amber-50",
+    avatar: "bg-amber-100 text-amber-700",
+  },
+  {
+    border: "border-l-sky-500",
+    text: "text-sky-600",
+    bg: "bg-sky-50",
+    avatar: "bg-sky-100 text-sky-700",
+  },
+  {
+    border: "border-l-emerald-500",
+    text: "text-emerald-600",
+    bg: "bg-emerald-50",
+    avatar: "bg-emerald-100 text-emerald-700",
+  },
+  {
+    border: "border-l-violet-500",
+    text: "text-violet-600",
+    bg: "bg-violet-50",
+    avatar: "bg-violet-100 text-violet-700",
+  },
+  {
+    border: "border-l-rose-500",
+    text: "text-rose-600",
+    bg: "bg-rose-50",
+    avatar: "bg-rose-100 text-rose-700",
+  },
+  {
+    border: "border-l-cyan-600",
+    text: "text-cyan-700",
+    bg: "bg-cyan-50",
+    avatar: "bg-cyan-100 text-cyan-700",
+  },
+  {
+    border: "border-l-orange-500",
+    text: "text-orange-600",
+    bg: "bg-orange-50",
+    avatar: "bg-orange-100 text-orange-700",
+  },
+  {
+    border: "border-l-teal-500",
+    text: "text-teal-600",
+    bg: "bg-teal-50",
+    avatar: "bg-teal-100 text-teal-700",
+  },
 ];
 
 function accentFor(id: string) {
   let h = 0;
+
   for (let i = 0; i < id.length; i++) h = id.charCodeAt(i) + ((h << 5) - h);
   return ACCENTS[Math.abs(h) % ACCENTS.length];
 }
@@ -58,7 +99,9 @@ function DepartmentCard({
 
         {/* Code chip */}
         <div className="flex items-center justify-between mb-2 relative">
-          <span className={`font-mono text-[11px] font-bold tracking-widest ${accent.text} ${accent.bg} px-1.5 py-0.5 rounded`}>
+          <span
+            className={`font-mono text-[11px] font-bold tracking-widest ${accent.text} ${accent.bg} px-1.5 py-0.5 rounded`}
+          >
             {dept.id}
           </span>
           <ArrowRight
@@ -75,7 +118,9 @@ function DepartmentCard({
         <div className="mt-3 pt-3 border-t border-border/60 flex items-center gap-2">
           {dept.departmentHead ? (
             <>
-              <div className={`h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${accent.avatar}`}>
+              <div
+                className={`h-5 w-5 rounded-full flex items-center justify-center text-[9px] font-bold shrink-0 ${accent.avatar}`}
+              >
                 {headInitial}
               </div>
               <span className="text-xs text-muted-foreground truncate">
@@ -83,7 +128,9 @@ function DepartmentCard({
               </span>
             </>
           ) : (
-            <span className="text-xs text-muted-foreground/40 italic">No head assigned</span>
+            <span className="text-xs text-muted-foreground/40 italic">
+              No head assigned
+            </span>
           )}
         </div>
       </div>
@@ -137,7 +184,10 @@ export default function DepartmentListPage() {
             </div>
             {!isLoading && (
               <p className="text-xs text-muted-foreground pl-7">
-                <span className="font-semibold text-foreground">{departments.length}</span> department{departments.length !== 1 ? "s" : ""} registered
+                <span className="font-semibold text-foreground">
+                  {departments.length}
+                </span>{" "}
+                department{departments.length !== 1 ? "s" : ""} registered
               </p>
             )}
           </div>
@@ -167,7 +217,13 @@ export default function DepartmentListPage() {
             <Building2 className="h-8 w-8 text-muted-foreground/30 mb-3" />
             <p className="text-sm text-muted-foreground">
               {search ? (
-                <>No departments match <span className="font-medium text-foreground">"{search}"</span>.</>
+                <>
+                  No departments match{" "}
+                  <span className="font-medium text-foreground">
+                    "{search}"
+                  </span>
+                  .
+                </>
               ) : (
                 "No departments found."
               )}
@@ -182,7 +238,10 @@ export default function DepartmentListPage() {
                 index={i}
                 onClick={() =>
                   navigate(
-                    RoutesEnum.ADMIN_DEPARTMENT_DETAIL.replace(":departmentId", dept.id),
+                    RoutesEnum.ADMIN_DEPARTMENT_DETAIL.replace(
+                      ":departmentId",
+                      dept.id,
+                    ),
                   )
                 }
               />

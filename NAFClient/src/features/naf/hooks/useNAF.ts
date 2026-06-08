@@ -80,6 +80,7 @@ export const useNAF = ({ employeeId, nafId }: UseNAFParams) => {
       requestorId: string;
       hardwareId: number;
       dateNeeded?: string | null;
+      // selectedIds: number[];
     }) => createNAF(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["subordinateNAFs"] });
